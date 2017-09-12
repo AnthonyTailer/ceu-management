@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'API_REST',
     'rest_framework',
+    'rest_framework_jwt',
     'corsheaders',
 ]
 
@@ -125,7 +126,7 @@ JWT_AUTH = {
     'JWT_ALLOW_REFRESH': False,
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 
-    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_AUTH_HEADER_PREFIX': 'Basic',
 }
 
 ROOT_URLCONF = 'Backend.urls'

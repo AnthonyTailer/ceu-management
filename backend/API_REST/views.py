@@ -11,5 +11,5 @@ class UserViewSet(viewsets.ModelViewSet):
     This viewset automatically provides `list` and `detail` actions.
     """
     queryset = User.objects.all()
-    permission_classes = (IsAuthenticated, )
+    #permission_classes = (IsAuthenticated, )
     serializer_class = UserSerializer
