@@ -1,8 +1,8 @@
-# ceu-vue-front
+# CEU II Management - Federal University of Santa Maria - rio grande do Sul state
 
 > System Administration for Student's Houses
 
-## Build Setup
+## Build Vue JS Setup
 
 ``` bash
 # install dependencies
