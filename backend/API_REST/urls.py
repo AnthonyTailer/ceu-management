@@ -26,7 +26,7 @@ user_register = UserRegister.as_view({
 })
 
 urlpatterns = [
-    url(r'^login/', obtain_jwt_token),
+    url(r'^login', obtain_jwt_token),
     url(r'^users', user_list, name='user-list'),
     url(r'^register', UserViewSet),
     url(r'^token-refresh/', refresh_jwt_token),

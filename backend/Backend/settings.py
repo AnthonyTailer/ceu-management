@@ -25,6 +25,7 @@ SECRET_KEY = 'uaigj__l3%0drs$e9r6tj+)n^d2q=$s((j84@=d)4btn7o2i+8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+APPEND_SLASH=False
 
 ALLOWED_HOSTS = []
 AUTH_USER_MODEL = 'API_REST.User'
@@ -40,12 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'API_REST',
+    'corsheaders',
     'rest_framework',
     'rest_framework_jwt',
-    'corsheaders',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
+
 
 CORS_ORIGIN_WHITELIST = (
     'localhost:8080',
@@ -102,8 +104,9 @@ REST_FRAMEWORK = {
 }
 
 JWT_AUTH = {
-'JWT_SECRET_KEY': SECRET_KEY,
-'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_SECRET_KEY': SECRET_KEY,
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_AUTH_COOKIE': 'cookie',
 }
 
 ROOT_URLCONF = 'Backend.urls'
@@ -179,7 +182,7 @@ STATIC_URL = '/static/'
 '''
 curl -X POST -d "email=leo@teste.com&password=123456789" http://localhost:8000/api/login
 
-curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imxlb0B0ZXN0ZS5jb20iLCJ1c2VyX2lkIjoxLCJlbWFpbCI6Imxlb0B0ZXN0ZS5jb20iLCJleHAiOjE1MDUyNDc1OTB9.04VfmERidzlhEYJyasUQj6domB-Hmg7VBXVS2OhDUB8" http://localhost:8000/api/users
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imxlb0B0ZXN0ZS5jb20iLCJ1c2VyX2lkIjoxLCJlbWFpbCI6Imxlb0B0ZXN0ZS5jb20iLCJleHAiOjE1MDUyNDk3NzN9.WFhRN1AgZeZPa31W3aBaaYS_tU4Ed8Ub2qOa6uDOep0" http://localhost:8000/api/users
 
 
 '''
