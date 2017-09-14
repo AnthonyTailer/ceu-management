@@ -1,6 +1,6 @@
 <template>
   <v-app light toolbar>
-    <side-menu></side-menu>
+    <side-bar></side-bar>
     <top-menu></top-menu>
     <main>
       <v-container>
@@ -38,13 +38,9 @@
 </template>
 
 <script>
+  import TopMenu from './TopMenu.vue'
+  import SideBar from './SideBar.vue'
   export default {
-    name: 'alunos',
-    mounted () {
-      this.$http.get('http://127.0.0.1:8000/api/users').then(response => {
-        console.log(response)
-      })
-    },
     data () {
       return {
         tmp: '',
@@ -58,6 +54,10 @@
         ],
         items: []
       }
+    },
+    components: {
+      TopMenu,
+      SideBar
     }
   }
 </script>

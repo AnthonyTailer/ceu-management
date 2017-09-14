@@ -7,7 +7,7 @@
               <p class="headline mb-0">Casa do Estudante Universitário</p>
           </v-card-title>
           <v-card-text>
-            <form>
+            <form v-on:submit.prevent="submit()">
               <v-text-field
                 name="input-email"
                 v-model="user.email"
@@ -30,6 +30,7 @@
                 :append-icon-cb="() => (passShow = !passShow)"
                 :type="passShow ? 'text' : 'password'"
                 counter
+                @keyup.enter="submit"
                 required
               ></v-text-field>
               <v-card-actions>
@@ -81,21 +82,13 @@
             console.log('validation failed.')
           } else {
             this.loading = true
-            this.$auth.login({
-              body: {password: this.user.password, email: this.user.email},
-              success: function (response) {
-                console.log('Usuário logado com sucesso.')
-                console.log(response)
-                this.loading = false
-              },
-              error: function (e) {
-                console.log('Usuário e/ou senha inválidos.', e)
-                this.loading = false
-                this.alert = true
-                this.msg = e.body
-              },
-              rememberMe: true,
-              redirect: '/alunos'
+
+            this.$http.post('api/login',
+              { password: this.user.password, email: this.user.email }
+            ).then(response => {
+              console.log(response)
+              this.$auth.setToken(response.body.token)
+              this.$router.push('/dash')
             })
           }
           // success stuff.

@@ -18,7 +18,7 @@
     name: 'dash',
     data () {
       return {
-        msg: 'DashBoard'
+        msg: 'Rodou Bonito...'
       }
     },
     components: {

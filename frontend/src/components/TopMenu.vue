@@ -18,7 +18,7 @@
   module.exports = {
     data () {
       return {
-        props: ['drawer']
+        drawer: true
       }
     }
   }
