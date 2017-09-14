@@ -25,10 +25,10 @@ SECRET_KEY = 'uaigj__l3%0drs$e9r6tj+)n^d2q=$s((j84@=d)4btn7o2i+8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-APPEND_SLASH=False
 
 ALLOWED_HOSTS = []
-AUTH_USER_MODEL = 'API_REST.User'
+AUTH_USER_MODEL = 'API_REST.Student'
+#WSGIPassAuthorization On
 
 
 # Application definition
@@ -84,9 +84,9 @@ CORS_EXPOSE_HEADERS = ['authorization']
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -103,10 +103,14 @@ REST_FRAMEWORK = {
     ),
 }
 
+
 JWT_AUTH = {
     'JWT_SECRET_KEY': SECRET_KEY,
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     'JWT_AUTH_COOKIE': 'cookie',
+    #'JWT_RESPONSE_PAYLOAD_HANDLER':
+    #'rest_framework_jwt.utils.jwt_response_payload_handler',
+    #'API_REST.views.jwt_response_payload_handler',
 }
 
 ROOT_URLCONF = 'Backend.urls'

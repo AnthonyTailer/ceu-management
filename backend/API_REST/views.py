@@ -1,24 +1,37 @@
 # -*- coding: utf-8 -*-
-from API_REST.models import User
-from API_REST.serializers import UserSerializer
+from API_REST.models import Student, Course
+from API_REST.serializers import StudentSerializer, CourseSerializer
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class StudentViewSet(viewsets.ModelViewSet):
 	"""
 	This viewset automatically provides `list` and `detail` actions.
 	"""
 	permission_classes = (IsAuthenticated, )
-	queryset = User.objects.all()
-	serializer_class = UserSerializer
+	queryset = Student.objects.all()
+	serializer_class = StudentSerializer
 
-class UserRegister(viewsets.ModelViewSet):
+class StudentRegister(viewsets.ModelViewSet):
 	"""
-	List all snippets, or create a new snippet.
+	Used to register a new student.
 	"""
 
 	permission_classes = (AllowAny,)
-	queryset = User.objects.all()
-	serializer_class = UserSerializer
+	queryset = Student.objects.all()
+	serializer_class = StudentSerializer
+
+
+class CourseViewSet(viewsets.ModelViewSet):
+	permission_classes = (AllowAny,)
+	queryset = Course.objects.all()
+	serializer_class = CourseSerializer
+
+
+def jwt_response_payload_handler(token, student=None, request=None):
+    return {
+        'token': token,
+        'student': StudentSerializer(student, context={'request': request}).data
+    }
