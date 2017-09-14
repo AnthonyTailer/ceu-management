@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_jwt',
+    'django_seed'
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -108,9 +109,9 @@ JWT_AUTH = {
     'JWT_SECRET_KEY': SECRET_KEY,
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     'JWT_AUTH_COOKIE': 'cookie',
-    #'JWT_RESPONSE_PAYLOAD_HANDLER':
+    'JWT_RESPONSE_PAYLOAD_HANDLER':
     #'rest_framework_jwt.utils.jwt_response_payload_handler',
-    #'API_REST.views.jwt_response_payload_handler',
+    'API_REST.views.jwt_response_payload_handler',
 }
 
 ROOT_URLCONF = 'Backend.urls'

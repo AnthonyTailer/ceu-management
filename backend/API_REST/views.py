@@ -30,6 +30,9 @@ class CourseViewSet(viewsets.ModelViewSet):
 	serializer_class = CourseSerializer
 
 
+	
+
+
 def jwt_response_payload_handler(token, student=None, request=None):
     return {
         'token': token,
