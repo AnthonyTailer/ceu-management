@@ -9,13 +9,13 @@
           <v-card-text>
             <form v-on:submit.prevent="submit()">
               <v-text-field
-                name="input-email"
-                v-model="user.email"
-                label="E-mail"
+                name="input-registration"
+                v-model="user.registration"
+                label="Matrícula"
                 class="input-group--focused"
-                :error-messages="errors.collect('email')"
-                v-validate="'required|email'"
-                data-vv-name="email"
+                :error-messages="errors.collect('matricula')"
+                v-validate="'required|digits:9'"
+                data-vv-name="matricula"
                 required
               ></v-text-field>
               <v-text-field
@@ -69,7 +69,7 @@
         loading: false,
         passShow: false,
         user: {
-          email: null,
+          registration: null,
           password: null
         }
       }
@@ -84,7 +84,7 @@
             this.loading = true
 
             this.$http.post('api/login',
-              { password: this.user.password, email: this.user.email }
+              { password: this.user.password, registration: this.user.registration }
             ).then(response => {
               console.log(response)
               this.$auth.setToken(response.body.token)
@@ -98,7 +98,7 @@
       },
       clear () {
         this.pass = ''
-        this.email = ''
+        this.registration = ''
         this.$validator.reset()
       }
     }
