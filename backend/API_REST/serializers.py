@@ -5,12 +5,18 @@ from django.contrib.auth import update_session_auth_hash
 from rest_framework import serializers
 
 
+class CourseSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Course
+        fields = ('courseName', 'duration', '_type')
+
 class StudentSerializer(serializers.ModelSerializer):
-    confirm_password= serializers.CharField(write_only=True)
-    
+    confirm_password = serializers.CharField(write_only=True)
+
     class Meta:
         model = Student
-        fields = ('fullName', 'registration', 'id_course', 'email', 'rg', 'cpf', 'phone1', 'password', 'confirm_password')
+        fields = ('fullName', 'registration','id_course','age','email', 'rg', 'cpf', 'phone1', 'password', 'confirm_password')
 
 
 
@@ -21,8 +27,9 @@ class StudentSerializer(serializers.ModelSerializer):
             phone1=validated_data['phone1'],
             rg=validated_data['rg'],
             cpf=validated_data['cpf'],
-            fullName=validated_data['fullName']
-
+            fullName=validated_data['fullName'],
+            age=validated_data['age'],
+            id_course=validated_data['id_course'],
         )
         student.set_password(validated_data['password'])
         student.save()
@@ -41,9 +48,3 @@ class StudentSerializer(serializers.ModelSerializer):
                 )
         return data
 
-
-class CourseSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Course
-        fields = ('courseName', 'duration', '_type')
