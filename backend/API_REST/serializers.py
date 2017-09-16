@@ -18,8 +18,6 @@ class StudentSerializer(serializers.ModelSerializer):
         model = Student
         fields = ('fullName', 'registration','id_course','age','email', 'rg', 'cpf', 'phone1', 'password', 'confirm_password')
 
-
-
     def create(self, validated_data):
         student = Student(
             email=validated_data['email'],
@@ -48,3 +46,9 @@ class StudentSerializer(serializers.ModelSerializer):
                 )
         return data
 
+'''class AdminSerializer(serializer_class.ModelSerializer):
+    confirm_password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Student
+        fields = ('fullName', 'registration','id_course','age','email', 'rg', 'cpf', 'phone1', 'password', 'confirm_password')'''
