@@ -3,14 +3,14 @@ from API_REST.models import Student, Course
 from API_REST.serializers import StudentSerializer, CourseSerializer
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 
 
 class StudentViewSet(viewsets.ModelViewSet):
 	"""
 	This viewset automatically provides `list` and `detail` actions.
 	"""
-	permission_classes = (AllowAny, )
+	permission_classes = (IsAdminUser, )
 	queryset = Student.objects.all()
 	serializer_class = StudentSerializer
 

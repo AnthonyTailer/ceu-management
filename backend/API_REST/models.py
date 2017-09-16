@@ -65,14 +65,14 @@ class UserManager(BaseUserManager):
 
 class Student(AbstractBaseUser, PermissionsMixin):
 	
-	fullName = models.CharField(_('Nome Completo'), max_length=255, unique=False, help_text=_('Entre com seu nome.'), blank=True)
-	email = models.EmailField(_('endereço de email'), max_length=255, unique=True, blank=True)
-	cpf = models.CharField(_('cpf'), max_length=15, unique=True, blank=True)
-	rg = models.CharField(_('rg'), max_length=10, unique=True, blank=True)
-	registration = models.CharField(_('matricula'), max_length=9, unique=True, blank=True)
-	phone1 = models.CharField(_('telefone 1'), max_length=13, unique=True, blank=True)
-	phone2 = models.CharField(_('telefone 2'), max_length=13, blank=True)
-	age = models.IntegerField(_('idade'), blank=True)
+	fullName = models.CharField(_('Nome Completo'), max_length=255, unique=False, help_text=_('Entre com seu nome.'), null=True)
+	email = models.EmailField(_('endereço de email'), max_length=255, unique=True, null=True)
+	cpf = models.CharField(_('cpf'), max_length=15, unique=True, null=True)
+	rg = models.CharField(_('rg'), max_length=10, unique=True, null=True)
+	registration = models.CharField(_('matricula'), max_length=9, unique=True, null=True)
+	phone1 = models.CharField(_('telefone 1'), max_length=13, unique=True, null=True)
+	phone2 = models.CharField(_('telefone 2'), max_length=13, blank=True, null=True)
+	age = models.IntegerField(_('idade'), null=True)
 	is_staff = models.BooleanField(_('staff status'), default=False, help_text=_('Designates whether the user can log into this admin site.'))
 	is_active = models.BooleanField(_('active'), default=True, help_text=_('Designates whether this user should be treated as active. Unselect this instead of deleting accounts.'))
 	is_bse_active = models.BooleanField(_('bse_active'), default=False)
@@ -85,7 +85,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
 
 	gender = models.CharField(_('genero'), max_length=1, choices=GENDER)
 
-	id_course = models.ForeignKey(to=Course, to_field="id" ,related_name='course' ,on_delete=models.CASCADE, null=True, blank=True)
+	id_course = models.ForeignKey(to=Course, to_field="id" ,related_name='course' ,on_delete=models.CASCADE, null=True)
 
 	USERNAME_FIELD = 'registration'
 	REQUIRED_FIELDS = ['email']

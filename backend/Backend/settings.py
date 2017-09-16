@@ -186,7 +186,7 @@ STATIC_URL = '/static/'
 '''
 curl -X POST -d "email=leo@teste.com&password=123456789" http://localhost:8000/api/login
 
-curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imxlb0B0ZXN0ZS5jb20iLCJ1c2VyX2lkIjoxLCJlbWFpbCI6Imxlb0B0ZXN0ZS5jb20iLCJleHAiOjE1MDUyNDk3NzN9.WFhRN1AgZeZPa31W3aBaaYS_tU4Ed8Ub2qOa6uDOep0" http://localhost:8000/api/users
+curl -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6IjIwMTQyMDM3NiIsImV4cCI6MTUwNTYwMTU3MywiZW1haWwiOiJsZW9AdGVzdGUuY29tIiwicmVnaXN0cmF0aW9uIjoiMjAxNDIwMzc2In0.LVHS4FFE87xAWmP62mw5XYBZc0YZaiivgWpmuTf4xiA" http://localhost:8000/api/students/
 
 
 '''
