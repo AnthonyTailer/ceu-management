@@ -12,7 +12,11 @@ from rest_framework import renderers
 
 student_list = StudentViewSet.as_view({
     'get': 'list',
-    'get': 'retrive'
+})
+
+student_detail = StudentViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
 })
 
 student_register = StudentRegister.as_view({
@@ -30,7 +34,8 @@ urlpatterns = [
     url(r'^token-refresh/', refresh_jwt_token),
     url(r'^token-verify/', verify_jwt_token),
 
-    url(r'^users', student_list, name='user-list'),
+    url(r'^students', student_list, name='user-list'),
+    url(r'^student/(?P<pk>[0-9]+)/$', student_detail, name='student_detail'),
     url(r'^register', student_register, name='student-register'),
 
     url(r'^course', course_list, name='course-list'),

@@ -41,13 +41,13 @@ class Course(models.Model):
 
 class UserManager(BaseUserManager):
 	
-	def _create_user(self, fullName, email, cpf, rg, age,id_course,registration, phone1, phone2, password, is_staff, is_superuser, **extra_fields):
+	def _create_user(self,registration,password, email, is_staff, is_superuser,**extra_fields):
 		now = timezone.now()
 		if not registration:
 			#raise ValueError(_(‘The given username must be set’))
 			print("erro")
 		email = self.normalize_email(email)
-		user = self.model(fullName=fullName, email=email,cpf=cpf, rg=rg, age=age,id_course=id_course,registration=registration, phone1=phone1, phone2=phone2, is_staff=is_staff, is_active=True, is_superuser=is_superuser, last_login=now, date_joined=now, **extra_fields)
+		user = self.model(registration=registration, is_active=True, is_superuser=is_superuser, is_staff=is_staff,last_login=now, date_joined=now, **extra_fields)
 		user.set_password(password)
 		user.save(using=self._db)
 		return user
@@ -56,9 +56,8 @@ class UserManager(BaseUserManager):
 		print(fullName)
 		return self._create_user(fullName, email, phone1,age, id_course,phone1, rg, cpf, password, False, False, **extra_fields)
 	
-	def create_superuser(self, fullName, email, cpf, rg, age,registration, phone1, phone2, password, **extra_fields):
-
-		user=self._create_user(fullName, email, cpf, rg, age,registration, phone1, phone2, password, True, True, **extra_fields)
+	def create_superuser(self, registration, password, email, **extra_fields):
+		user=self._create_user(registration, password, email, True, True, **extra_fields)
 		user.is_active=True
 		user.save(using=self._db)
 		return user
@@ -66,14 +65,14 @@ class UserManager(BaseUserManager):
 
 class Student(AbstractBaseUser, PermissionsMixin):
 	
-	fullName = models.CharField(_('Nome Completo'), max_length=255, unique=False, help_text=_('Entre com seu nome.'))
-	email = models.EmailField(_('endereço de email'), max_length=255, unique=True)
-	cpf = models.CharField(_('cpf'), max_length=15, unique=True)
-	rg = models.CharField(_('rg'), max_length=10, unique=True)
-	registration = models.CharField(_('matricula'), max_length=9, unique=True)
-	phone1 = models.CharField(_('telefone 1'), max_length=13, unique=True)
+	fullName = models.CharField(_('Nome Completo'), max_length=255, unique=False, help_text=_('Entre com seu nome.'), blank=True)
+	email = models.EmailField(_('endereço de email'), max_length=255, unique=True, blank=True)
+	cpf = models.CharField(_('cpf'), max_length=15, unique=True, blank=True)
+	rg = models.CharField(_('rg'), max_length=10, unique=True, blank=True)
+	registration = models.CharField(_('matricula'), max_length=9, unique=True, blank=True)
+	phone1 = models.CharField(_('telefone 1'), max_length=13, unique=True, blank=True)
 	phone2 = models.CharField(_('telefone 2'), max_length=13, blank=True)
-	age = models.IntegerField(_('idade'))
+	age = models.IntegerField(_('idade'), blank=True)
 	is_staff = models.BooleanField(_('staff status'), default=False, help_text=_('Designates whether the user can log into this admin site.'))
 	is_active = models.BooleanField(_('active'), default=True, help_text=_('Designates whether this user should be treated as active. Unselect this instead of deleting accounts.'))
 	is_bse_active = models.BooleanField(_('bse_active'), default=False)
@@ -86,27 +85,24 @@ class Student(AbstractBaseUser, PermissionsMixin):
 
 	gender = models.CharField(_('genero'), max_length=1, choices=GENDER)
 
-	id_course = models.ForeignKey(to=Course, to_field="id" ,related_name='course' ,on_delete=models.CASCADE)
+	id_course = models.ForeignKey(to=Course, to_field="id" ,related_name='course' ,on_delete=models.CASCADE, null=True, blank=True)
 
 	USERNAME_FIELD = 'registration'
-	REQUIRED_FIELDS = ['fullName', 'email', 'cpf', 'rg', 'phone1', 'phone2', 'age']
+	REQUIRED_FIELDS = ['email']
 
 	objects = UserManager()
 
 	class Meta:
 		verbose_name = _('student')
 		verbose_name_plural = _('students')
-	
-	def __unicode__(self):
-		return '%d: %s' % (self.order, self.id_course)
 
 
-	'''def get_full_name(self):
-		full_name = '%s %s' % (self.first_name, self.last_name)
+	def get_full_name(self):
+		full_name = self.fullName
 		return full_name.strip()
 
 	def get_short_name(self):
-		return self.first_name
+		return self.fullName
 
 	def email_user(self, subject, message, from_email=None):
-		send_mail(subject, message, from_email, [self.email])'''
+		send_mail(subject, message, from_email, [self.email])

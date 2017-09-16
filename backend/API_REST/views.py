@@ -10,7 +10,7 @@ class StudentViewSet(viewsets.ModelViewSet):
 	"""
 	This viewset automatically provides `list` and `detail` actions.
 	"""
-	permission_classes = (IsAuthenticated, )
+	permission_classes = (AllowAny, )
 	queryset = Student.objects.all()
 	serializer_class = StudentSerializer
 
