@@ -1,6 +1,6 @@
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token, verify_jwt_token
 
-from API_REST.views import StudentViewSet, StudentRegister, CourseViewSet
+from API_REST.views import *
 from API_REST import views
 
 from django.conf.urls import url, include
@@ -29,6 +29,17 @@ course_list = CourseViewSet.as_view({
     'get': 'list'
 })
 
+blocks = BlockViewSet.as_view({
+    'post': 'create',
+    'get' : 'list',
+})
+
+aptos = AptoViewSet.as_view({
+    'post': 'create',
+    'get' : 'list',
+})
+
+
 urlpatterns = [
     url(r'^login', obtain_jwt_token),
     url(r'^token-refresh/', refresh_jwt_token),
@@ -39,6 +50,9 @@ urlpatterns = [
     url(r'^register/', student_register, name='student-register'),
 
     url(r'^course', course_list, name='course-list'),
+
+    url(r'^blocks', blocks, name='blocks'),
+    url(r'^aptos', aptos, name='aptos'),
     
     # url(r'^users/new/$', user_create),
     # url(r'^users/(?P<pk>[0-9]+)/$', user_detail, name='user-detail'),

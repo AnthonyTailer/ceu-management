@@ -30,6 +30,8 @@ ALLOWED_HOSTS = []
 AUTH_USER_MODEL = 'API_REST.Student'
 #WSGIPassAuthorization On
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_FILE_PATH = '/home/lsteil/Desktop/email.txt' # change this to a proper location
 
 # Application definition
 
@@ -111,6 +113,7 @@ JWT_AUTH = {
     'JWT_RESPONSE_PAYLOAD_HANDLER':
     #'rest_framework_jwt.utils.jwt_response_payload_handler',
     'API_REST.views.jwt_response_payload_handler',
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=10),
 }
 
 ROOT_URLCONF = 'Backend.urls'
@@ -186,7 +189,7 @@ STATIC_URL = '/static/'
 '''
 curl -X POST -d "email=leo@teste.com&password=123456789" http://localhost:8000/api/login
 
-curl -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6IjIwMTQyMDM3NiIsImV4cCI6MTUwNTYwMTU3MywiZW1haWwiOiJsZW9AdGVzdGUuY29tIiwicmVnaXN0cmF0aW9uIjoiMjAxNDIwMzc2In0.LVHS4FFE87xAWmP62mw5XYBZc0YZaiivgWpmuTf4xiA" http://localhost:8000/api/students/
+curl -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6IjEyMzQ1Njc4OSIsImV4cCI6MTUwNTYwMjc0MCwiZW1haWwiOm51bGwsInJlZ2lzdHJhdGlvbiI6IjEyMzQ1Njc4OSJ9.JAmyJGIYKtEsZybZ9VMvUHWfaHhk-IFGFpzmw_tghKY" http://localhost:8000/api/students/
 
 
 '''

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from API_REST.models import Student, Course
-from API_REST.serializers import StudentSerializer, CourseSerializer
+from API_REST.models import *
+from API_REST.serializers import *
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
@@ -29,8 +29,15 @@ class CourseViewSet(viewsets.ModelViewSet):
 	queryset = Course.objects.all()
 	serializer_class = CourseSerializer
 
-
+class BlockViewSet(viewsets.ModelViewSet):
+	permission_classes = (AllowAny,)
+	queryset = Block.objects.all()
+	serializer_class = BlockSerializer
 	
+class AptoViewSet(viewsets.ModelViewSet):
+	permissions_classes = (AllowAny,)
+	queryset = Apartament.objects.all()
+	serializer_class = AptoSerializer
 
 
 def jwt_response_payload_handler(token, student=None, request=None):
