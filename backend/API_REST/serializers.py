@@ -25,7 +25,6 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = ('courseName', 'duration', '_type')
 
 class StudentSerializer(serializers.ModelSerializer):
-    confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
         model = Student

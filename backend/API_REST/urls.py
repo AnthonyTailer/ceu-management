@@ -8,7 +8,8 @@ from django.conf.urls import url, include
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework import renderers
 
-
+from rest_framework_swagger.views import get_swagger_view
+schema_view = get_swagger_view(title='Pastebin API')
 
 student_list = StudentViewSet.as_view({
     'get': 'list',
@@ -37,6 +38,7 @@ blocks = BlockViewSet.as_view({
 aptos = AptoViewSet.as_view({
     'post': 'create',
     'get' : 'list',
+    'get' : 'retrieve'
 })
 
 
@@ -54,6 +56,9 @@ urlpatterns = [
     url(r'^blocks', blocks, name='blocks'),
     url(r'^aptos', aptos, name='aptos'),
     
+
+    url(r'^docs', schema_view),
+
     # url(r'^users/new/$', user_create),
     # url(r'^users/(?P<pk>[0-9]+)/$', user_detail, name='user-detail'),
 
