@@ -7,6 +7,8 @@ yarn-debug.log*
 yarn-error.log*
 ps2-env/
 backend/db.sqlite3
+backend/API_REST/__pycache__
+backend/Backend/__pycache__
 
 # Editor directories and files
 .idea
