@@ -6,7 +6,7 @@
       <v-container>
         <v-card>
           <v-card-title>
-            Lista de Alunos
+            <v-subheader>Lista de Alunos</v-subheader>
             <v-spacer></v-spacer>
             <v-text-field
               append-icon="search"
