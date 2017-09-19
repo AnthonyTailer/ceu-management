@@ -9,15 +9,16 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.conf import settings
 
-'''class Apartament(models.Model):
+
+class Block(models.Model):
+	number = models.IntegerField(_('número do bloco'), unique=True)
+	buildNumber = models.IntegerField(_('número do prédio ao qual o bloco pertence'), unique=True)
+
+class Apartament(models.Model):
 	number = models.IntegerField(_('número'), unique=True)
 	vacancy = models.IntegerField(_('vagas'))
 	capacity = models.IntegerField(_('capacidade'))
-	#id_block - COLOCAR A CHAVE ESTRANGEIRA
-
-class Block(models.Model):
-	number = models.IntegerField(_('número'), unique=True)
-	buildNumber = models.IntegerField(_('número do prédio'), unique=True)'''
+	id_block = models.ForeignKey(to=Block, to_field='id', related_name='block', on_delete=models.CASCADE, null=True)
 
 
 class Course(models.Model):
@@ -86,6 +87,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
 	gender = models.CharField(_('genero'), max_length=1, choices=GENDER)
 
 	id_course = models.ForeignKey(to=Course, to_field="id" ,related_name='course' ,on_delete=models.CASCADE, null=True)
+	id_apto = models.ForeignKey(to=Apartament, to_field='id', related_name='apto', on_delete=models.CASCADE, null=True)
 
 	USERNAME_FIELD = 'registration'
 	REQUIRED_FIELDS = ['email']

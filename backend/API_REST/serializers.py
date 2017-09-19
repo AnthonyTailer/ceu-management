@@ -1,9 +1,22 @@
-from API_REST.models import Student, Course
+from API_REST.models import *
 
 from django.contrib.auth import update_session_auth_hash
+from django.core.mail import send_mail
 
 from rest_framework import serializers
 
+
+class BlockSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Block
+        fields = ('number', 'buildNumber')
+
+class AptoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Apartament
+        fields = ('number', 'vacancy', 'capacity', 'id_block')
 
 class CourseSerializer(serializers.ModelSerializer):
 
@@ -16,7 +29,7 @@ class StudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ('fullName', 'registration','id_course','age','email', 'rg', 'cpf', 'phone1', 'password', 'confirm_password')
+        fields = ('fullName', 'registration','id_course','age','email', 'rg', 'cpf', 'phone1')
 
     def create(self, validated_data):
         student = Student(
@@ -29,8 +42,20 @@ class StudentSerializer(serializers.ModelSerializer):
             age=validated_data['age'],
             id_course=validated_data['id_course'],
         )
-        student.set_password(validated_data['password'])
+
+        senha = Student.objects.make_random_password(length=8)
+        student.set_password(senha)
+        print(student.password)
         student.save()
+
+        send_mail(
+            'CEU MANAGEMANT - SUA SENHA',
+            'SUA SENHA É: ' + senha,
+            'leosteil@hotmail.com',
+            ['lsteil@inf.ufsm.br'],
+            fail_silently=False,
+        )
+
         return student
 
     def validate(self, data):
