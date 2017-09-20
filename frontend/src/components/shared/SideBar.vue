@@ -32,22 +32,58 @@
 </template>
 
 <script>
-  module.exports = {
+  export default {
+    props: {
+      drawer: {
+        default: this.drawer
+      }
+    },
+    mounted () {
+      this.$nextTick(() => {
+        window.addEventListener('resize', this.getWindowWidth)
+        window.addEventListener('resize', this.getWindowHeight)
+
+        this.getWindowWidth()
+        this.getWindowHeight()
+      })
+    },
     data () {
       return {
-        drawer: true,
         items: [
           { title: 'Home', icon: 'dashboard' },
           { title: 'Alunos', icon: 'face' },
           { title: 'Sobre', icon: 'question_answer' }
         ],
         mini: false,
-        right: null
+        right: null,
+        windowWidth: 0,
+        windowHeight: 0
       }
+    },
+    methods: {
+      getWindowWidth (event) {
+        this.windowWidth = document.documentElement.clientWidth
+      },
+      getWindowHeight (event) {
+        this.windowHeight = document.documentElement.clientHeight
+      }
+    },
+    watch: {
+      windowWidth: function () {
+        if (this.windowWidth <= 800) {
+          this.mini = true
+        } else {
+          this.mini = false
+        }
+      }
+    },
+    beforeDestroy () {
+      window.removeEventListener('resize', this.getWindowWidth)
+      window.removeEventListener('resize', this.getWindowHeight)
     }
   }
 </script>
 
 <style lang="stylus">
-  @import '../stylus/main'
+  @import '../../stylus/main'
 </style>

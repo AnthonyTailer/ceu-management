@@ -77,13 +77,12 @@
     methods: {
       submit (e) {
         e.preventDefault()
-        this.$validator.validateAll({ email: this.user.email, pass: this.user.pass }).then(result => {
+        this.$validator.validateAll({ email: this.user.registration, pass: this.user.pass }).then(result => {
           if (!result) {
             console.log('validation failed.')
           } else {
             this.loading = true
-
-            this.$http.post('api/login',
+            this.$http.post('api/login/',
               { password: this.user.password, registration: this.user.registration }
             ).then(response => {
               console.log(response)

@@ -1,29 +1,23 @@
 <template>
   <v-app light toolbar>
-    <side-bar></side-bar>
-    <top-menu></top-menu>
+    <side-bar :drawer="drawer"></side-bar>
+    <top-menu :drawer="drawer" @changeDrawer="drawer = $event"></top-menu>
     <main>
       <v-container fluid>
         <h1 class="text--accent-4">{{msg}}</h1>
       </v-container>
     </main>
-
   </v-app>
 </template>
 
 <script>
-  import TopMenu from './TopMenu.vue'
-  import SideBar from './SideBar.vue'
   export default {
     name: 'dash',
     data () {
       return {
-        msg: 'Rodou Bonito...'
+        msg: 'Rodou Bonito...',
+        drawer: true
       }
-    },
-    components: {
-      TopMenu,
-      SideBar
     }
   }
 </script>
