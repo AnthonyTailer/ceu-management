@@ -1,6 +1,5 @@
 from API_REST.models import *
 
-from django.contrib.auth import update_session_auth_hash
 from django.core.mail import send_mail
 
 from rest_framework import serializers
@@ -26,6 +25,10 @@ class CourseSerializer(serializers.ModelSerializer):
 
 class StudentSerializer(serializers.ModelSerializer):
 
+    def __init__(self, *args, **kwargs):
+        many = kwargs.pop('many', True)
+        super(StudentSerializer, self).__init__(many=many, *args, **kwargs)
+
     class Meta:
         model = Student
         fields = ('fullName', 'registration','id_course','age','email', 'rg', 'cpf', 'phone1')
@@ -44,31 +47,23 @@ class StudentSerializer(serializers.ModelSerializer):
 
         senha = Student.objects.make_random_password(length=8)
         student.set_password(senha)
-        print(student.password)
         student.save()
 
-        send_mail(
-            'CEU MANAGEMANT - SUA SENHA',
-            'SUA SENHA É: ' + senha,
-            'leosteil@hotmail.com',
-            ['lsteil@inf.ufsm.br'],
-            fail_silently=False,
-        )
+        if(Student.objects.filter(email='email') != None):
+            send_mail(
+                'CEU MANAGEMANT - SUA SENHA',
+                'SUA SENHA É: ' + senha,
+                'settings.EMAIL_HOST_USER',
+                [student.email],
+                fail_silently=False,
+                )
+        else:
+            print("Não salvei")
 
         return student
 
-    def validate(self, data):
-        '''
-        Ensure the passwords are the same
-        '''
-        print(data)
-        if data['password']:
-            print ("Here")
-            if data['password'] != data['confirm_password']:
-                raise serializers.ValidationError(
-                    "The passwords have to be the same"
-                )
-        return data
+
+
 
 '''class AdminSerializer(serializer_class.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)

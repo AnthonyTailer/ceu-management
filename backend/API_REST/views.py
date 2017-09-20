@@ -2,7 +2,7 @@
 from API_REST.models import *
 from API_REST.serializers import *
 from rest_framework import viewsets
-from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 
 
@@ -14,6 +14,7 @@ class StudentViewSet(viewsets.ModelViewSet):
 	queryset = Student.objects.all()
 	serializer_class = StudentSerializer
 
+
 class StudentRegister(viewsets.ModelViewSet):
 	"""
 	Used to register a new student.
@@ -22,6 +23,7 @@ class StudentRegister(viewsets.ModelViewSet):
 	permission_classes = (AllowAny,)
 	queryset = Student.objects.all()
 	serializer_class = StudentSerializer
+
 
 
 class CourseViewSet(viewsets.ModelViewSet):

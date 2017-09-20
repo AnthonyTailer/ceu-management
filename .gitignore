@@ -9,6 +9,8 @@ ps2-env/
 backend/db.sqlite3
 backend/API_REST/__pycache__
 backend/Backend/__pycache__
+backend/Backend/email_info.py
+
 
 # Editor directories and files
 .idea
