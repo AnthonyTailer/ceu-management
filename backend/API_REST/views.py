@@ -2,6 +2,7 @@
 from API_REST.models import *
 from API_REST.serializers import *
 from rest_framework import viewsets
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 
@@ -20,10 +21,18 @@ class StudentRegister(viewsets.ModelViewSet):
 	Used to register a new student.
 	"""
 
+
+
 	permission_classes = (AllowAny,)
 	queryset = Student.objects.all()
 	serializer_class = StudentSerializer
 
+	def create(self, request, *args, **kwargs):
+		serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
+		serializer.is_valid(raise_exception=True)
+		self.perform_create(serializer)
+		headers = self.get_success_headers(serializer.data)
+		return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class CourseViewSet(viewsets.ModelViewSet):

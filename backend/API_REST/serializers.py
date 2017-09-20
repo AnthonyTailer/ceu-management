@@ -25,9 +25,9 @@ class CourseSerializer(serializers.ModelSerializer):
 
 class StudentSerializer(serializers.ModelSerializer):
 
-    def __init__(self, *args, **kwargs):
+    '''def __init__(self, *args, **kwargs):
         many = kwargs.pop('many', True)
-        super(StudentSerializer, self).__init__(many=many, *args, **kwargs)
+        super(StudentSerializer, self).__init__(many=many, *args, **kwargs)'''
 
     class Meta:
         model = Student
