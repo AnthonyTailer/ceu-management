@@ -53,7 +53,7 @@ Vue.use(Vuetify)
 export const eventBus = new Vue({
   methods: {
     closeModal (dialog) {
-      this.$emit('closeModal', )
+      this.$emit('closeModal', !dialog)
     }
   }
 })
