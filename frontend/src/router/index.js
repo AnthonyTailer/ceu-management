@@ -14,19 +14,19 @@ export default new Router({
     },
     {
       path: '/login',
-      name: 'Login',
+      name: 'login',
       component: Login,
       meta: {forVisitors: true}
     },
     {
       path: '/dash',
-      name: 'Dash',
+      name: 'dash',
       component: Dash,
       meta: {forAuth: true}
     },
     {
       path: '/alunos',
-      name: 'Alunos',
+      name: 'alunos',
       component: Alunos,
       meta: {forAuth: true}
     }

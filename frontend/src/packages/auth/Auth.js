@@ -24,6 +24,14 @@ export default function (Vue) {
 
     isAuthenticated () {
       if (this.getToken()) {
+        // Vue.http.post('api/token-verify/', {token: this.getToken()}).then((response) => {
+        //   return true
+        // }).catch((response) => {
+        //   if (response.ok === false && response.statusText === 'Bad Request') {
+        //     this.destroyToken()
+        //     return false
+        //   }
+        // })
         return true
       } else {
         return false
