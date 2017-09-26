@@ -23,4 +23,3 @@ backend/yarn-error.log
 *.njsproj
 *.sln
 *.swp
-*.pyc
