@@ -14,17 +14,20 @@ use Illuminate\Mail\Mailer;
 
 class UsersController extends Controller {
 
-    public function register(Request $request, Mailer $mailer) {
+    public function postUser(Request $request, Mailer $mailer) {
         $this->validate($request, [
             'fullName' => 'required',
             'email' => 'required|email|unique:users',
             'registration' => 'required|Min:9|Max:9|unique:users',
             'cpf' => 'required|Min:11|Max:11|unique:users',
             'rg' => 'required|Min:10|Max:10|unique:users',
-            'is_admin' => 'required'
+            'is_admin' => 'required',
+            'id_course' => 'required'
         ]);
 
         $randomPass = str_random(8);
+
+        #dd($request);
 
         $user = new User([
             'fullName' => $request->input('fullName'),
@@ -40,6 +43,9 @@ class UsersController extends Controller {
             'id_apto' => $request->input('id_apto')
         ]);
 
+        $user->save();
+
+
         if($user->save()) {
             $mailer->to($request->input('email'))
                 ->send(new \App\Mail\UserCreated(
@@ -52,4 +58,48 @@ class UsersController extends Controller {
         ],201);
     }
 
+
+    public function getUsers(){
+        $users = User::all();
+        $response = [
+            'users' => $users
+        ];
+
+        return response()->json($response, 200);
+    }
+
+    public function putUser(Request $request, $id){
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(['message' => "Usuário não encontrado"], 404);
+        }
+
+
+        $this->validate($request, [
+            'fullName' => 'required',
+            'email' => 'required|email|unique:users',
+            'registration' => 'required|Min:9|Max:9|unique:users',
+            'cpf' => 'required|Min:11|Max:11|unique:users',
+            'rg' => 'required|Min:10|Max:10|unique:users',
+            'is_admin' => 'required',
+            'id_course' => 'required'
+        ]);
+
+        $user->content = $request->input('content');
+        $user->save;
+
+        return response()->json(['user' => $user], 200);
+    }
+
+    public function deleteUser($id){
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(['message' => "Usuário não encontrado"], 404);
+        }
+
+        $user->delete();
+        return response()->json(['message' => "Usuário deletado com sucesso"], 200);
+    }
 }

@@ -26,10 +26,12 @@ class CreateUsersTable extends Migration
             $table->enum('genre', ['M', 'F']);
             $table->boolean('is_bse_active')->nullable();
             $table->boolean('is_admin');
-//            $table->foreign('id_course')->references('id')->on('course')->nullable();
-//            $table->foreign('id_apto')->references('id')->on('apartment')->nullable();2
-            $table->integer('id_course')->nullable(); //TODO usar foreignKey depois id_course
-            $table->integer('id_apto')->nullable();//TODO usar foreignKey depois id_apto
+
+            $table->integer('id_course')->unsigned()->nullable();
+            $table->integer('id_apto')->unsigned()->nullable();
+            $table->foreign('id_course')->references('id')->on('courses');
+            $table->foreign('id_apto')->references('id')->on('apartaments')->nullable();
+
             $table->timestamps();
             $table->rememberToken();
         });
