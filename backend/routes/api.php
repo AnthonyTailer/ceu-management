@@ -21,6 +21,22 @@ Route::get('/test', function () {
 //    return $request->user();
 //});
 
-Route::post('/user/register', [
-    'uses' => 'UsersController@register'
-]);
+Route::group(['prefix' => '/user'], function () {
+
+    Route::post('/login', [
+        'uses' => 'UsersController@login'
+    ]);
+
+    Route::post('/register', [
+        'uses' => 'UsersController@register'
+    ]);
+
+    Route::group(['middleware' => 'jwt-auth'], function () {
+
+        Route::get('/user', [
+            'uses' => 'UserController@getAuthUser'
+        ]);
+    });
+
+});
+
