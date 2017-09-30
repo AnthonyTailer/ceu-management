@@ -19,18 +19,23 @@
         <vue-xlsx-table class="ml-2" @on-select-file="handleSelectedFile">
           <span class="d-flex align-center"><i class="material-icons">attachment</i> Selecione um arquivo Excel</span>
         </vue-xlsx-table>
-        <slot name="modalContent"></slot>
-
+        <app-many-students :students="studentsCsv"></app-many-students>
       </v-card>
     </v-dialog>
   </v-layout>
 </template>
 <script>
   import { eventBus } from '../../main'
+
   export default {
     props: {
       dialogFull: {
         type: Boolean
+      }
+    },
+    data () {
+      return {
+        studentsCsv: []
       }
     },
     watch: {
@@ -44,7 +49,26 @@
         eventBus.closeModal(this.dialogFull)
       },
       handleSelectedFile (convertedData) {
-        console.log(convertedData)
+        let obj = {}
+        this.studentsCsv = []
+        convertedData.body.forEach((item, index) => {
+          obj['cpf'] = item['CPF']
+          obj['corse'] = item['Curso']
+          obj['age'] = item['Idade']
+          obj['registration'] = item['Matrícula']
+          obj['fullName'] = item['Nome Completo']
+          obj['rg'] = item['RG']
+          obj['phone'] = item['Telefone']
+          obj['email'] = item['email']
+          this.studentsCsv.push(obj)
+          obj = {}
+        })
+
+        this.$http.post('api/users/register',
+          {body: this.studentsCsv}
+        ).then(response => {
+          console.log(response)
+        })
       }
     }
   }
