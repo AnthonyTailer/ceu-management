@@ -32,7 +32,6 @@
 
       <app-modal-full :dialogFull="newManyStudents">
         <p slot="modalTitle activator">Cadastro de Alunos de um arquivo Excel</p>
-        <!--<app-many-students slot="mainModal"></app-many-students>-->
       </app-modal-full>
 
       <div id="people">
@@ -46,7 +45,6 @@
   import ModalForm from './shared/Modal.vue'
   import ModalFormFull from './shared/ModalFull.vue'
   import OneStudentModal from './forms/OneStudentForm.vue'
-  import ManyStudentsModal from './forms/ManyStudentForm.vue'
   import { eventBus } from '../main'
 
   export default {
@@ -105,8 +103,7 @@
     components: {
       appModal: ModalForm,
       appOneStudent: OneStudentModal,
-      appModalFull: ModalFormFull,
-      appManyStudents: ManyStudentsModal
+      appModalFull: ModalFormFull
     }
   }
 </script>

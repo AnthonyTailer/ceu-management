@@ -27,6 +27,10 @@ Route::post('/user/register', [
     'uses' => 'UsersController@postUser'
 ]);
 
+Route::post('/users/register', [
+    'uses' => 'UsersController@postUsers'
+]);
+
 Route::get('/users', [
     'uses' => 'UsersController@getUsers'
 ]);

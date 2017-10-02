@@ -9,12 +9,21 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use Validator;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Mailer;
+use Illuminate\Support\Facades\DB;
+
 
 class UsersController extends Controller {
 
+    public function __construct(){
+        $this->user = new User;
+    }
+
     public function postUser(Request $request, Mailer $mailer) {
+
+        dd($request);
         $this->validate($request, [
             'fullName' => 'required',
             'email' => 'required|email|unique:users',
@@ -23,11 +32,21 @@ class UsersController extends Controller {
             'rg' => 'required|Min:10|Max:10|unique:users',
             'is_admin' => 'required',
             'id_course' => 'required'
+        ],[
+            'fullName.required' => 'Um nome completo é necessário',
+            'email.required'  => 'Preencha o campo de email',
+            'email.unique' => "Este email já esta cadastrado no sistema",
+            'registration.required' => "Você deve fornecer o número de matrícula",
+            'registration.unique' => "Esta mátricula já esta cadastrada no sistema",
+            'cpf.required' => "Você deve fornecer o número do CPF",
+            'cpf.unique' => "Este CPF já esta cadastrado",
+            'rg.required' => "Você deve fornecer o número do RG",
+            'rg.unique' => "Este RG já esta cadastrado",
+            'id_course.required' => "Você deve especificar o curso",
+            'is_admin.required' => "Você deve especificar se o usuário é administrador",
         ]);
 
         $randomPass = str_random(8);
-
-        #dd($request);
 
         $user = new User([
             'fullName' => $request->input('fullName'),
@@ -37,14 +56,11 @@ class UsersController extends Controller {
             'cpf' => $request->input('cpf'),
             'rg' => $request->input('rg'),
             'genre' => $request->input('genre'),
-            'is_bse_active' => $request->input('is_bse_active'),
+//            'is_bse_active' => $request->input('is_bse_active'),
             'is_admin' => $request->input('is_admin'),
             'id_course' => $request->input('id_course'),
-            'id_apto' => $request->input('id_apto')
+//            'id_apto' => $request->input('id_apto')
         ]);
-
-        $user->save();
-
 
         if($user->save()) {
             $mailer->to($request->input('email'))
@@ -56,6 +72,76 @@ class UsersController extends Controller {
         return response()->json([
             'message' => 'Usuário criado com sucesso, um e-mail foi mandado para '. $request->input('email')
         ],201);
+    }
+
+    public function postUsers(Request $request, Mailer $mailer){
+
+        $errors = Array();
+        $success = Array();
+        foreach ( $request->body as $key=>$value) {
+
+            $db_email = DB::table('users')->where('email', $value['email'])->value('email');
+            $db_registration = DB::table('users')->where('registration', $value['registration'])->value('registration');
+            $db_cpf = DB::table('users')->where('cpf', $value['cpf'])->value('cpf');
+            $db_rg = DB::table('users')->where('rg', $value['rg'])->value('rg');
+
+            if(empty($value['email'])){
+                $errors[$key]["email"] = "O campo email é obrigatório e deve ser preenchido.";
+            }
+            else if(!empty($db_email)){
+                $errors[$key]["email"] = "O email ".$db_email." deste usuário já existe no sistema.";
+            }
+            else if(empty($value['registration'])){
+                $errors[$key]["registration"] = "O campo Matrícula é obrigatório e deve ser preenchido.";
+            }
+            else if(!empty($db_registration)){
+                $errors[$key]["registration"] = "A Matrícula ".$db_registration." já existe no sistema.";
+            }
+            else if(empty($value['cpf'])){
+                $errors[$key]["cpf"] = "O campo CPF é obrigatório e deve ser preenchido.";
+            }
+            else if(!empty($db_cpf)){
+                $errors[$key]["cpf"] = "O CPF ".$db_cpf." já existe no sistema.";
+            }
+            else if(empty($value['rg'])){
+                $errors[$key]["rg"] = "O RG é obrigatório e deve ser preenchido.";
+            }
+            else if(!empty($db_rg)){
+                $errors[$key]["rg"] = "O RG ".$db_rg." já existe no sistema.";
+            }else {
+                $randomPass = str_random(8);
+                $user = new User([
+                    'fullName' => $value['fullName'],
+                    'email' => $value['email'],
+                    'registration' => $value['registration'],
+                    'password' => bcrypt($randomPass),
+                    'cpf' => $value['cpf'],
+                    'rg' => $value['rg'],
+//                'genre' => $i['genre'],
+//                'is_bse_active' => $i['is_bse_active'],
+                    'is_admin' => false,
+//                'id_course' => $i['id_course'],
+//                'id_apto' => $i['id_apto']
+                ]);
+                $user->save();
+
+//                if($user->save()) {
+//                    $mailer->to($value['email'])
+//                        ->send(new \App\Mail\UserCreated(
+//                            $value['fullName'], $value['registration'], $randomPass
+//                        ));
+//
+//                    $success[$key]["message"] = "Usuário criado com sucesso, um e-mail foi mandado para ".$value['email'];
+//                }
+            }
+        }
+
+
+        return response()->json([
+            "erros" => $errors,
+            "success" => $success
+        ], 200);
+
     }
 
 
@@ -102,4 +188,34 @@ class UsersController extends Controller {
         $user->delete();
         return response()->json(['message' => "Usuário deletado com sucesso"], 200);
     }
+
+    public function login(Request $request) {
+        $credentials = $request->only('registration', 'password');
+        $token = null;
+        try {
+            if (!$token = JWTAuth::attempt($credentials)) {
+                return response()->json([
+                    'response' => 'error',
+                    'message' => 'E-mail ou senha estão incorretos',
+                ]);
+            }
+        } catch (JWTAuthException $e) {
+            return response()->json([
+                'response' => 'error',
+                'message' => 'failed_to_create_token',
+            ]);
+        }
+        return response()->json([
+            'response' => 'success',
+            'result' => [
+                'token' => $token,
+            ],
+        ]);
+    }
+
+    public function getAuthUser(Request $request){
+        $user = JWTAuth::toUser($request->token);
+        return response()->json(['result' => $user]);
+    }
+
 }
