@@ -23,19 +23,24 @@
           </v-list>
         </v-bottom-sheet>
       </div>
-
+      
       <app-modal :dialog="newOneStudent">
         <p slot="titleModal">Cadastro de novo Aluno</p>
         <app-one-student slot="mainModal"></app-one-student>
         <v-btn class="blue--text darken-1" flat slot="footerModal">Salvar</v-btn>
       </app-modal>
-
+      
       <app-modal-full :dialogFull="newManyStudents">
         <p slot="modalTitle activator">Cadastro de Alunos de um arquivo Excel</p>
+        
+        <vue-xlsx-table slot="mainContent" class="ml-2" @on-select-file="handleSelectedFile">
+          <span class="d-flex align-center"><i class="material-icons">attachment</i> Selecione um arquivo Excel</span>
+        </vue-xlsx-table>
+      
       </app-modal-full>
-
+      
       <div id="people">
-        <v-server-table url="api/students" :columns="columns" :options="options"></v-server-table>
+        <v-server-table url="api/users" :columns="columns" :options="options"></v-server-table>
       </div>
     </v-container>
   </main>
@@ -49,7 +54,7 @@
 
   export default {
     created () {
-      eventBus.$on('closeModal', (data) => {
+      eventBus.listen('closeModal', (data) => {
         this.newOneStudent = data
         this.newManyStudents = data
       })
@@ -59,6 +64,9 @@
         sheet: false,
         newOneStudent: false,
         newManyStudents: false,
+        manyResponse: [
+          {erro: '', status: false}
+        ],
         tiles: [
           {icon: 'add_box', title: 'Um Aluno', wichComponent: 'OneStudentFom'},
           {icon: 'attachment', title: 'Importar de arquivo Excel', wichComponent: 'ManyStudentFom'}
@@ -80,7 +88,7 @@
             return {data: resp.body, count: 100}
           },
           requestFunction (data) {
-            return this.$http.get('api/students/', {body: data})
+            return this.$http.get('api/users/', {body: data})
               .catch(function (e) {
                 this.dispatch('error', e)
               }.bind(this))
@@ -98,6 +106,39 @@
           this.newManyStudents = true
         }
         this.sheet = false
+      },
+      handleSelectedFile (convertedData) {
+        let obj = {}
+        this.studentsCsv = []
+        convertedData.body.forEach((item, index) => {
+          obj['cpf'] = item['CPF']
+          obj['corse'] = item['Curso']
+          obj['age'] = item['Idade']
+          obj['registration'] = item['Matrícula']
+          obj['fullName'] = item['Nome Completo']
+          obj['rg'] = item['RG']
+          obj['phone'] = item['Telefone']
+          obj['email'] = item['email']
+          this.studentsCsv.push(obj)
+          obj = {}
+        })
+
+        this.$http.post('api/users/register',
+          {body: this.studentsCsv}
+        ).then(response => {
+          console.log(response)
+          if (response.body.erros) {
+            for (let i in response.body.erros) {
+              this.manyResponse.push({
+                erro: response.body.erros[i],
+                status: true
+              })
+            }
+            eventBus.fire('alerts', this.manyResponse)
+          }
+        }).then(e => {
+          this.manyResponse = e
+        })
       }
     },
     components: {
@@ -108,7 +149,6 @@
   }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .newStudentList {
     cursor: pointer;

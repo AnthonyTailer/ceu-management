@@ -9,14 +9,16 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class UserCreated extends Mailable
 {
-    use Queueable, SerializesModels;
+        use Queueable, SerializesModels;
 
     public $userName, $registration, $password;
 
     /**
      * Create a new message instance.
      *
-     * @return void
+     * @param $userName
+     * @param $registration
+     * @param $password
      */
     public function __construct($userName, $registration, $password)
     {

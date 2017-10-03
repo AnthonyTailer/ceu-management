@@ -54,6 +54,12 @@ export const eventBus = new Vue({
   methods: {
     closeModal (dialog) {
       this.$emit('closeModal', !dialog)
+    },
+    fire (event, data = null) {
+      this.$emit(event, data)
+    },
+    listen (event, callback) {
+      this.$on(event, callback)
     }
   }
 })

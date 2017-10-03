@@ -8,7 +8,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendEmailJob;
 use App\User;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Validator;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Mailer;
@@ -17,13 +20,8 @@ use Illuminate\Support\Facades\DB;
 
 class UsersController extends Controller {
 
-    public function __construct(){
-        $this->user = new User;
-    }
-
     public function postUser(Request $request, Mailer $mailer) {
 
-        dd($request);
         $this->validate($request, [
             'fullName' => 'required',
             'email' => 'required|email|unique:users',
@@ -74,7 +72,7 @@ class UsersController extends Controller {
         ],201);
     }
 
-    public function postUsers(Request $request, Mailer $mailer){
+    public function postUsers(Request $request){
 
         $errors = Array();
         $success = Array();
@@ -123,16 +121,19 @@ class UsersController extends Controller {
 //                'id_course' => $i['id_course'],
 //                'id_apto' => $i['id_apto']
                 ]);
-                $user->save();
 
-//                if($user->save()) {
-//                    $mailer->to($value['email'])
-//                        ->send(new \App\Mail\UserCreated(
-//                            $value['fullName'], $value['registration'], $randomPass
-//                        ));
-//
-//                    $success[$key]["message"] = "Usuário criado com sucesso, um e-mail foi mandado para ".$value['email'];
-//                }
+                if($user->save()) {
+
+                    $job = (new SendEmailJob($user, $randomPass))
+                        ->delay(Carbon::now()->addSeconds(5));
+
+                    $this->dispatch($job);
+//                    Mail::later(5, 'emails.registeredUser', $data, function($message){
+//                        $message->to($value['email'], $value['fullName'])->subject('Bem-vindo à CEU II');
+//                    });
+
+                    $success[$key]["message"] = "Usuário criado com sucesso, um e-mail foi mandado para ".$value['email'];
+                }
             }
         }
 
