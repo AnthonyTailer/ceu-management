@@ -55,6 +55,13 @@ Route::group(['prefix' => 'users',  'middleware' => 'auth.jwt'], function () {
     ]);
 });
 
+Route::get('/users/genre', [
+    'uses' => 'UsersController@getGenre'
+]);
+
+Route::get('/users/courseType', [
+    'uses' => 'UsersController@getCoursesType'
+]);
 //user routes
 
 
@@ -102,6 +109,10 @@ Route::delete('/aptoblock/{id}', [
 
 Route::post('/course/register', [
     'uses' => 'CourseController@postCourse'
+]);
+
+Route::post('/courses/register',[
+    'uses' => 'CourseController@postCourses'
 ]);
 
 Route::get('/courses', [
