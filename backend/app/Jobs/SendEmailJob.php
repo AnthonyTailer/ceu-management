@@ -38,7 +38,7 @@ class SendEmailJob implements ShouldQueue
     {
         Mail::to($this->data['email'])
             ->send(new UserCreated(
-                $this->data['fullName'], $this->data['registration'], $this->pass
+                $this->data['fullName'], $this->dalta['registration'], $this->pass
             ));
     }
 }

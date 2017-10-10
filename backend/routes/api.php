@@ -22,26 +22,38 @@ Route::get('/test', function () {
 //});
 
 //user routes
-
 Route::post('/user/register', [
     'uses' => 'UsersController@postUser'
 ]);
 
-Route::post('/users/register', [
-    'uses' => 'UsersController@postUsers'
-]);
+Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
+//    Route::post('register', [
+//        'uses' => 'UsersController@postUser'
+//    ]);
 
-Route::get('/users', [
-    'uses' => 'UsersController@getUsers'
-]);
+    Route::post('login', [
+        'uses' => 'UsersController@login'
+    ]);
 
-Route::put('/user/{id}', [
-    'uses' => 'UsersController@putUser'
-]);
+    Route::put('{id}', [
+        'uses' => 'UsersController@putUser'
+    ]);
 
-Route::delete('/user/{id}', [
-    'uses' => 'UserController@deleteUser'
-]);
+    Route::delete('{id}', [
+        'uses' => 'UserController@deleteUser'
+    ]);
+});
+
+
+Route::group(['prefix' => 'users',  'middleware' => 'auth.jwt'], function () {
+    Route::post('register', [
+        'uses' => 'UsersController@postUsers'
+    ]);
+
+    Route::get('/', [
+        'uses' => 'UsersController@getUsers'
+    ]);
+});
 
 Route::get('/users/genre', [
     'uses' => 'UsersController@getGenre'
