@@ -219,7 +219,13 @@ class UsersController extends Controller {
         $male = User::where('genre', "M")->get();
         $female = User::where('genre', "F")->get();
 
-        return response()->json(['Male' => count($male), 'Female' => count($female)], 201);
+        $total = count($male) + count($female);
+
+        return response()->json([
+            'body' =>['Male' => count($male),
+                      'Female' => count($female)],
+                      'Total' => $total
+        ], 200);
     }
 
     public function getCoursesType(){
@@ -229,6 +235,10 @@ class UsersController extends Controller {
 
         $total = count($graduation) + count($mestrado);
 
-        return response()->json(['Graduation' => count($graduation), "Master" => count($mestrado), "Total" => $total]);
+        return response()->json([
+            'body' =>['Graduation' => count($graduation),
+                      'Master' => count($mestrado)],
+                      'Total' => $total
+        ], 200);
     }
 }
