@@ -10,6 +10,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\SendEmailJob;
 use App\User;
+use App\Course;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Validator;
@@ -77,7 +78,6 @@ class UsersController extends Controller {
         $errors = Array();
         $success = Array();
         foreach ( $request->body as $key=>$value) {
-
             $db_email = DB::table('users')->where('email', $value['email'])->value('email');
             $db_registration = DB::table('users')->where('registration', $value['registration'])->value('registration');
             $db_cpf = DB::table('users')->where('cpf', $value['cpf'])->value('cpf');
@@ -219,4 +219,21 @@ class UsersController extends Controller {
         return response()->json(['result' => $user]);
     }
 
+
+    public function getGenre(){
+        $male = User::where('genre', "M")->get();
+        $female = User::where('genre', "F")->get();
+
+        return response()->json(['Male' => count($male), 'Female' => count($female)], 201);
+    }
+
+    public function getCoursesType(){
+
+        $graduation = DB::select( DB::raw("select c.type from courses as c inner join (users) on users.id_course = c.id and c.type = \"Graduação\";") );
+        $mestrado = DB::select( DB::raw("select c.type from courses as c inner join (users) on users.id_course = c.id and c.type = \"Mestrado\";") );
+
+        $total = count($graduation) + count($mestrado);
+
+        return response()->json(['Graduation' => count($graduation), "Master" => count($mestrado), "Total" => $total]);
+    }
 }
