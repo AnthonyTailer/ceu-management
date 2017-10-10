@@ -33,17 +33,13 @@ class CourseController extends Controller
 
     public function postCourses(Request $request){
 
-
         $errors = Array();
         $success = Array();
 
         #dd($request[0]);
 
         foreach ( $request->all() as $key=>$value) {
-            #dd($value['courseName']);
             $db_courseName = DB::table('courses')->where('courseName', $value['courseName'])->value('courseName');
-            #*$db_duration = DB::table('course')->where('duration', $value['duration'])->value('duration');
-            #$db_type = DB::table('course')->where('type', $value['type'])->value('type');
 
             if(empty($value['courseName'])){
                 $errors[$key]["courseName"] = "O campo Nome do Curso é obrigatório e deve ser preenchido.";
@@ -58,9 +54,7 @@ class CourseController extends Controller
                 $errors[$key]["type"] = "O campo Tipo é obrigatório e deve ser preenchido.";
             }
 
-            #dd($errors);
-
-            if(empty($errors)){
+            if(empty($errors[$key])){
                 $course = New Course([
                     'courseName' => $value['courseName'],
                     'duration' => $value['duration'],
