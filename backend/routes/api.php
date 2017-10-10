@@ -22,17 +22,20 @@ Route::get('/test', function () {
 //});
 
 //user routes
-Route::post('/user/register', [
-    'uses' => 'UsersController@postUser'
+//Route::post('/user/register', [
+//    'uses' => 'UsersController@postUser'
+//]);
+Route::post('/user/login', [
+    'uses' => 'UsersController@login'
 ]);
 
 Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
-//    Route::post('register', [
-//        'uses' => 'UsersController@postUser'
-//    ]);
+    Route::get('/', [
+        'uses' => 'UsersController@getAuthUser'
+    ]);
 
-    Route::post('login', [
-        'uses' => 'UsersController@login'
+    Route::post('register', [
+        'uses' => 'UsersController@postUser'
     ]);
 
     Route::put('{id}', [
@@ -53,17 +56,15 @@ Route::group(['prefix' => 'users',  'middleware' => 'auth.jwt'], function () {
     Route::get('/', [
         'uses' => 'UsersController@getUsers'
     ]);
+
+    Route::get('genre', [
+        'uses' => 'UsersController@getGenre'
+    ]);
+
+    Route::get('courseType', [
+        'uses' => 'UsersController@getCoursesType'
+    ]);
 });
-
-Route::get('/users/genre', [
-    'uses' => 'UsersController@getGenre'
-]);
-
-Route::get('/users/courseType', [
-    'uses' => 'UsersController@getCoursesType'
-]);
-//user routes
-
 
 //block routes
 

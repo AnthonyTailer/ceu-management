@@ -142,7 +142,7 @@
     },
     methods: {
       getUsers () {
-        this.$http.get('api/users/')
+        this.$http.get('api/users?token='+ this.$auth.getToken())
           .then(response => {
             this.datatable.loading = false
             let result = response.body.data

@@ -22,23 +22,23 @@ Vue.http.headers.common['Authorization'] = 'Bearer ' + Vue.auth.getToken()
 Vue.config.productionTip = false
 Vue.router = router
 
-// router.beforeEach(
-//   (to, from, next) => {
-//     if (to.matched.some(record => record.meta.forVisitors)) {
-//       if (Vue.auth.isAuthenticated()) {
-//         next({
-//           path: '/dash'
-//         })
-//       } else next()
-//     } else if (to.matched.some(record => record.meta.forAuth)) {
-//       if (!Vue.auth.isAuthenticated()) {
-//         next({
-//           path: '/login'
-//         })
-//       } else next()
-//     }
-//   }
-// )
+router.beforeEach(
+  (to, from, next) => {
+    if (to.matched.some(record => record.meta.forVisitors)) {
+      if (Vue.auth.isAuthenticated()) {
+        next({
+          path: '/dash'
+        })
+      } else next()
+    } else if (to.matched.some(record => record.meta.forAuth)) {
+      if (!Vue.auth.isAuthenticated()) {
+        next({
+          path: '/login'
+        })
+      } else next()
+    }
+  }
+)
 
 // Add locale helper.
 Validator.addLocale(pt)

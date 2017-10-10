@@ -26,7 +26,6 @@ class CreateUsersTable extends Migration
             $table->enum('genre', ['M', 'F']);
             $table->boolean('is_bse_active')->nullable();
             $table->boolean('is_admin');
-
             $table->integer('id_course')->unsigned()->nullable();
             $table->integer('id_apto')->unsigned()->nullable();
             $table->foreign('id_course')->references('id')->on('courses');

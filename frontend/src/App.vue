@@ -35,13 +35,22 @@
       <v-toolbar-side-icon @click.native.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>CEU II Management</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon class="pr-1">
+      
+      <v-btn icon class="mr-5">
         <v-icon large v-badge="{ value: 6 , left: true}" class="red--after">mail</v-icon>
       </v-btn>
-      <v-btn icon class="pr-1">
-        <v-icon large>account_circle</v-icon>
-        <v-icon>keyboard_arrow_down</v-icon>
-      </v-btn>
+      
+      <div class="text-xs-center">
+        <v-menu open-on-hover top offset-y>
+          <v-btn icon slot="activator">{{ user.name }} <v-icon>keyboard_arrow_down</v-icon></v-btn>
+          <v-list>
+            <v-list-tile>
+              <v-list-tile-title @click="logout()">Sair</v-list-tile-title>
+            </v-list-tile>
+          </v-list>
+        </v-menu>
+      </div>
+    
     </v-toolbar>
     <main fullscreen>
       <router-view></router-view>
@@ -54,6 +63,7 @@
 </template>
 
 <script>
+  import { eventBus } from './main'
   export default {
     mounted () {
       this.$nextTick(() => {
@@ -66,6 +76,12 @@
     },
     created: function () {
       console.log(this.$router.currentRoute.name)
+      console.log('created menu')
+      this.user.name = localStorage.getItem('user').split(' ')[0]
+    },
+    updated () {
+      console.log('updated menu')
+      this.user.name = localStorage.getItem('user').split(' ')[0]
     },
     data () {
       return {
@@ -77,6 +93,9 @@
           { title: 'Alunos', icon: 'face', route: '/alunos' }
           // { title: 'Sobre', icon: 'question_answer', route: this.$router.push('/dash') }
         ],
+        user: {
+          name: ''
+        },
         mini: false,
         right: null,
         windowWidth: 0,
@@ -92,6 +111,10 @@
       },
       getWindowHeight: function (event) {
         this.windowHeight = document.documentElement.clientHeight
+      },
+      logout: function () {
+        this.$auth.destroyToken()
+        this.$router.push('/')
       }
     },
     watch: {
@@ -116,7 +139,7 @@
 
 <style lang="stylus">
   @import './stylus/main'
-
+  
   .sideMenuItens {
     cursor: pointer
   }

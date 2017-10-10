@@ -62,7 +62,7 @@ class CourseController extends Controller
                 ]);
 
                 if($course->save()){
-                    $success[$key]["message"] = "O Curso" .$value['courseName']. "foi salvo com sucesso";
+                    $success[$key]["message"] = "O Curso " .$value['courseName']. " foi salvo com sucesso";
                 };
             }
         }

@@ -63,10 +63,9 @@ class UsersController extends Controller {
         ]);
 
         if($user->save()) {
-            $mailer->to($request->input('email'))
-                ->send(new \App\Mail\UserCreated(
-                    $request->input('fullName'), $request->input('registration'), $randomPass
-                ));
+            $job = (new SendEmailJob($user, $randomPass))
+                ->delay(Carbon::now()->addSeconds(2));
+            $this->dispatch($job);
         }
 
         return response()->json([
@@ -203,17 +202,14 @@ class UsersController extends Controller {
         }
         return response()->json([
             'response' => 'success',
-            'body' => [
-                'token' => $token,
-            ],
+            'token' => $token
         ], 200);
     }
 
     public function getAuthUser(Request $request){
         $user = JWTAuth::toUser($request->token);
-        return response()->json(['body' => $user]);
+        return response()->json(['user' => $user]);
     }
-
 
     public function getGenre(){
         $male = User::where('genre', "M")->get();

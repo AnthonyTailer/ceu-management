@@ -65,6 +65,8 @@
   </v-container>
 </template>
 <script>
+  import { eventBus } from '../main'
+  
   export default {
     $validates: true,
     data () {
@@ -82,29 +84,39 @@
       }
     },
     methods: {
-      submit (e) {
-        e.preventDefault()
-        this.$validator.validateAll({
-          email: this.user.registration,
-          pass: this.user.pass }).then(result => {
+      submit () {
+        this.$validator.validateAll()
+          .then(result => {
             if (!result) {
               console.log('validation failed.')
             } else {
               this.loading = true
-              this.$http.post('api/login/',
-                { password: this.user.password, registration: this.user.registration }
+              
+              this.$http.post(
+                'api/user/login',
+                {
+                  password: this.user.password,
+                  registration: this.user.registration
+                }
               ).then(response => {
                 this.loading = false
                 console.log(response)
                 if (response.ok) {
                   this.$auth.setToken(response.body.token)
-                  this.$router.push('/dash')
+                  this.$http.get(
+                    'api/user?token='+this.$auth.getToken()
+                  ).then((response) => {
+                    console.log(response)
+                    localStorage.setItem('user', response.body.user.fullName)
+                    this.$router.push('/dash')
+                  }).catch((error) => {
+                    console.log(error)
+                  })
                 }
               }).catch((response) => {
                 this.loading = false
                 this.snackbar = true
-                let erros = response.body.non_field_errors
-                this.msg = erros.join()
+                this.msg = response.body.message
               })
             }
           // success stuff.
