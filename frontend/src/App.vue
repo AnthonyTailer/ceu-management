@@ -1,6 +1,6 @@
 <template>
-  <v-app>
-    <v-navigation-drawer v-if="this.$router.currentRoute.name !== 'login'" absolute persistent light :mini-variant.sync="mini" v-model="drawer">
+  <v-app toolbar footer :style="{ 'background-image': 'url(' + backgroundLogin + ')', 'background-size': 'cover' }">
+    <v-navigation-drawer v-if="this.$router.currentRoute.name !== 'login'"  persistent overflow light :mini-variant.sync="mini" v-model="drawer">
       <v-toolbar flat class="transparent">
         <v-list class="pa-0">
           <v-list-tile avatar>
@@ -43,7 +43,13 @@
         <v-icon>keyboard_arrow_down</v-icon>
       </v-btn>
     </v-toolbar>
-    <router-view></router-view>
+    <main fullscreen>
+      <router-view></router-view>
+    </main>
+    <v-footer class="pa-3"  v-if="footer">
+      <v-spacer></v-spacer>
+      <div>© {{ new Date().getFullYear() }}</div>
+    </v-footer>
   </v-app>
 </template>
 
@@ -64,6 +70,8 @@
     data () {
       return {
         drawer: true,
+        footer: this.$router.currentRoute.name !== 'login',
+        backgroundLogin: this.$router.currentRoute.name === 'login' ? '/static/back-login.jpg' : '',
         items: [
           { title: 'Home/Dashboard', icon: 'dashboard', route: '/dash' },
           { title: 'Alunos', icon: 'face', route: '/alunos' }

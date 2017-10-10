@@ -12,6 +12,7 @@ use App\Jobs\SendEmailJob;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use JWTAuth;
 use Validator;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Mailer;
@@ -80,33 +81,24 @@ class UsersController extends Controller {
 
             $db_email = DB::table('users')->where('email', $value['email'])->value('email');
             $db_registration = DB::table('users')->where('registration', $value['registration'])->value('registration');
-            $db_cpf = DB::table('users')->where('cpf', $value['cpf'])->value('cpf');
-            $db_rg = DB::table('users')->where('rg', $value['rg'])->value('rg');
 
+
+            if(!empty($db_email) || !empty($db_registration)){
+                continue;
+            }
             if(empty($value['email'])){
                 $errors[$key]["email"] = "O campo email é obrigatório e deve ser preenchido.";
             }
-            else if(!empty($db_email)){
-                $errors[$key]["email"] = "O email ".$db_email." deste usuário já existe no sistema.";
-            }
-            else if(empty($value['registration'])){
+            if(empty($value['registration'])){
                 $errors[$key]["registration"] = "O campo Matrícula é obrigatório e deve ser preenchido.";
             }
-            else if(!empty($db_registration)){
-                $errors[$key]["registration"] = "A Matrícula ".$db_registration." já existe no sistema.";
-            }
-            else if(empty($value['cpf'])){
+            if(empty($value['cpf'])){
                 $errors[$key]["cpf"] = "O campo CPF é obrigatório e deve ser preenchido.";
             }
-            else if(!empty($db_cpf)){
-                $errors[$key]["cpf"] = "O CPF ".$db_cpf." já existe no sistema.";
-            }
-            else if(empty($value['rg'])){
+            if(empty($value['rg'])){
                 $errors[$key]["rg"] = "O RG é obrigatório e deve ser preenchido.";
             }
-            else if(!empty($db_rg)){
-                $errors[$key]["rg"] = "O RG ".$db_rg." já existe no sistema.";
-            }else {
+            if(empty($errors[$key])){
                 $randomPass = str_random(8);
                 $user = new User([
                     'fullName' => $value['fullName'],
@@ -125,12 +117,9 @@ class UsersController extends Controller {
                 if($user->save()) {
 
                     $job = (new SendEmailJob($user, $randomPass))
-                        ->delay(Carbon::now()->addSeconds(5));
+                        ->delay(Carbon::now()->addSeconds(2));
 
                     $this->dispatch($job);
-//                    Mail::later(5, 'emails.registeredUser', $data, function($message){
-//                        $message->to($value['email'], $value['fullName'])->subject('Bem-vindo à CEU II');
-//                    });
 
                     $success[$key]["message"] = "Usuário criado com sucesso, um e-mail foi mandado para ".$value['email'];
                 }
@@ -140,16 +129,17 @@ class UsersController extends Controller {
 
         return response()->json([
             "erros" => $errors,
-            "success" => $success
+            "total_erros" => count($errors),
+            "success" => $success,
+            "total_success" => count($success),
         ], 200);
 
     }
 
-
     public function getUsers(){
         $users = User::all();
         $response = [
-            'users' => $users
+            'data' => $users
         ];
 
         return response()->json($response, 200);
@@ -191,6 +181,11 @@ class UsersController extends Controller {
     }
 
     public function login(Request $request) {
+
+        $this->validate($request, [
+           'registration' => 'required',
+           'password' => 'required'
+        ]);
         $credentials = $request->only('registration', 'password');
         $token = null;
         try {
@@ -198,20 +193,20 @@ class UsersController extends Controller {
                 return response()->json([
                     'response' => 'error',
                     'message' => 'E-mail ou senha estão incorretos',
-                ]);
+                ], 401);
             }
         } catch (JWTAuthException $e) {
             return response()->json([
                 'response' => 'error',
-                'message' => 'failed_to_create_token',
-            ]);
+                'message' => 'Não pode criar o token',
+            ], 500);
         }
         return response()->json([
             'response' => 'success',
-            'result' => [
+            'body' => [
                 'token' => $token,
             ],
-        ]);
+        ], 200);
     }
 
     public function getAuthUser(Request $request){

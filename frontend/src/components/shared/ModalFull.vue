@@ -9,19 +9,29 @@
           <v-toolbar-title>
             <slot name="modalTitle"></slot>
           </v-toolbar-title>
-          <!--<v-spacer></v-spacer>-->
-          <!--<v-toolbar-items>-->
-            <!--<v-btn dark flat @click.native="alert('TODO - salvar no banco')">Salvar</v-btn>-->
-          <!--</v-toolbar-items>-->
         </v-toolbar>
         <v-divider></v-divider>
         <br>
         <slot name="mainContent"></slot>
         <br>
+        <br>
         <v-divider></v-divider>
+  
+        <div class="text-xs-center">
+          <br>
+          <v-progress-circular slot="loader" v-show="loading" indeterminate v-bind:size="70" v-bind:width="7" class="primary--text"></v-progress-circular>
+        </div>
         
         <div v-for="(err, key) in alertsError">
-          <v-alert error dismissible transition="scale-transition" :value="err.status" @click="err.status = !err.status">
+          <v-alert v-if="err.total_success > 0" success dismissible transition="scale-transition" v-model="err.status">
+            {{ err.total_success_text }}
+          </v-alert>
+          
+          <v-alert v-if="err.total_erros > 0" warning dismissible transition="scale-transition" v-model="err.status">
+            {{ err.total_erros_text }}
+          </v-alert>
+          
+          <v-alert v-if="err.erro" error dismissible transition="scale-transition" v-model="err.status">
             <strong> A linha {{ key+1 }} do arquivo upado possui erro nos campos: </strong>
             <br>
             {{ err.erro.email }}
@@ -30,7 +40,6 @@
             {{ err.erro.rg }}
           </v-alert>
         </div>
-        
       </v-card>
     </v-dialog>
   </v-layout>
@@ -42,18 +51,19 @@
     props: {
       dialogFull: {
         type: Boolean
+      },
+      loading: {
+        type: Boolean
       }
     },
-    created () {
+    updated () {
       eventBus.listen('alerts', (data) => {
-        console.log(data)
         this.alertsError = data
       })
     },
     data () {
       return {
-        alertsError: null,
-        alert: true
+        alertsError: null
       }
     },
     watch: {

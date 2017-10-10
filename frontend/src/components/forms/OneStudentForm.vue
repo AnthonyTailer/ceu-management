@@ -1,5 +1,5 @@
 <template>
-  <form v-on:submit.prevent="submit()">
+  <form>
     <v-layout row>
       <v-flex x12>
         <v-text-field
@@ -95,10 +95,16 @@
   </form>
 </template>
 <script>
+  import { eventBus } from '../../main'
+  
   export default {
     $validate: true,
-    mounted: function () {
+    created () {
       this.getCourses()
+      
+      eventBus.listen('createUser', data => {
+        this.submit()
+      })
     },
     data () {
       return {
@@ -117,19 +123,20 @@
     },
     methods: {
       getCourses () {
-        this.$http.get('api/course').then((response) => {
-          console.log(response)
-          for (let i in response.body) {
-            this.courses.push(response.body[i]['courseName'])
-          }
-        })
+        // this.$http.get('api/course').then((response) => {
+          // console.log(response)
+          // for (let i in response.body) {
+           // this.courses.push(response.body[i]['courseName'])
+          // }
+        // })
       },
       submit () {
-        this.$validator.validateAll(this.student).then(result => {
+        this.$validator.validateAll().then(result => {
           if (!result) {
-            console.log('validation failed.')
+            console.log('User -> validation failed.')
           } else {
-            // TODO Ajax Call to save Student
+            console.log('Submited User' )
+            eventBus.fire('createUser', this.student)
           }
           // success stuff.
         }).catch(() => {
