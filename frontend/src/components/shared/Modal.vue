@@ -1,6 +1,6 @@
 <template>
   <v-layout row justify-center>
-    <v-dialog v-model="dialog" persistent width="80%">
+    <v-dialog v-model="dialog" persistent width="80%" scrollable>
       <!--<v-btn primary dark slot="activator">Open Dialog</v-btn>-->
       <v-card>
         <v-card-title>
@@ -11,11 +11,10 @@
               <!-- Conteudo principal do Modal-->
               <slot name="mainModal"></slot>
           </v-container>
-          <small><span style="color: red">*</span>Campos obrigatórios</small>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn class="blue--text darken-1" flat @click.native="closeModal">Fechar</v-btn>
+          <v-btn class="grey lighten-1 black--text" dark @click.native="closeModal">Fechar</v-btn>
           <slot name="footerModal"></slot>
         </v-card-actions>
       </v-card>

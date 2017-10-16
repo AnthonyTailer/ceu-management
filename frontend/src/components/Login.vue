@@ -10,9 +10,8 @@
             <form v-on:submit.prevent="submit()">
               <v-text-field
                 name="input-registration"
-                v-model="user.registration"
                 label="Matrícula"
-                class="input-group--focused"
+                v-model="user.registration"
                 :error-messages="errors.collect('matricula')"
                 v-validate="'required|digits:9'"
                 data-vv-name="matricula"
@@ -21,7 +20,6 @@
               <v-text-field
                 name="input-pass"
                 v-model="user.password"
-                class="input-group--focused"
                 label="Coloque sua senha"
                 :error-messages="errors.collect('senha')"
                 v-validate="'required|min:8'"
@@ -45,7 +43,7 @@
                     <v-icon light>cached</v-icon>
                   </span>
                 </v-btn>
-                <v-btn flat class="purple--text" @click="clear">Esqueceu a Senha?</v-btn>
+                <!--<v-btn flat class="purple&#45;&#45;text" @click="clear">Esqueceu a Senha?</v-btn>-->
               </v-card-actions>
             </form>
           </v-card-text>

@@ -4,7 +4,26 @@
     <app-modal :dialog="newOneStudent">
       <p slot="titleModal">Cadastro de novo Aluno</p>
       <app-one-student slot="mainModal"></app-one-student>
-      <v-btn class="blue--text darken-1"  slot="footerModal" @click.stop="createUser">Salvar</v-btn>
+      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.prevent="createUser">Salvar</v-btn>
+    </app-modal>
+  
+    <app-modal :dialog="seeStudent">
+      <p slot="titleModal">Mais informações do Aluno</p>
+      <p slot="mainModal">
+          <strong>Nome Completo</strong>: {{this.studentData['fullName']}}<br>
+          <strong>E-mail</strong>: {{this.studentData['email']}}<br>
+          <strong>Matrícula</strong>: {{this.studentData['registration']}}<br>
+          <strong>CPF</strong>: {{this.studentData['cpf']}}<br>
+          <strong>RG</strong>: {{this.studentData['rg']}}<br>
+          <strong>Tem Benefício</strong>: {{this.studentData['is_bse_active'] !== null && this.studentData['is_bse_active'] === 1 ? 'Sim' : 'Não' }}<br>
+          <strong>É da Diretoria</strong>: {{this.studentData['is_admin'] !== null && this.studentData['is_admin'] === 1  ? 'Sim' : 'Não' }}<br>
+      </p>
+    </app-modal>
+  
+    <app-modal :dialog="editStudent">
+      <p slot="titleModal">Edição de Aluno</p>
+      <app-one-student slot="mainModal"></app-one-student>
+      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.native="alert()">Alterar</v-btn>
     </app-modal>
     
     <app-modal-full :dialogFull="newManyStudents" :loading="loading">
@@ -13,7 +32,7 @@
       <vue-xlsx-table slot="mainContent" class="ml-2" @on-select-file="handleSelectedFile">
         <span id="btn-import-csv" class="d-flex align-center"><i class="material-icons">attachment</i> Selecione um arquivo Excel</span>
       </vue-xlsx-table>
-    
+      
     </app-modal-full>
     <v-layout row wrap>
       <v-flex xs12>
@@ -77,6 +96,19 @@
               <td class="text-xs-left">{{ props.item.fullName }}</td>
               <td class="text-xs-left">{{ props.item.email }}</td>
               <td class="text-xs-left">{{ props.item.registration }}</td>
+              <td class="text-xs-left">
+                <div  class="ma-0 pa-0">
+                  <v-btn class="green darken-1" fab dark small color="success" @click.stop="seeUser(props.item)">
+                    <v-icon dark>zoom_in</v-icon>
+                  </v-btn>
+                  <v-btn class="blue darken-1" fab dark small color="primary" @click.stop="editUser(props.item)">
+                    <v-icon dark>edit</v-icon>
+                  </v-btn>
+                  <v-btn class="red darken-1" fab dark small color="error" @click.stop="deleteUser(props.item)">
+                    <v-icon dark>delete_forever</v-icon>
+                  </v-btn>
+                </div>
+              </td>
             </template>
           </v-data-table>
         </v-card>
@@ -101,6 +133,10 @@
     updated () {
       eventBus.listen('closeModal', (data) => {
         this.newOneStudent = data
+        this.seeStudent = data
+        this.deleteStudent = data
+        this.editStudent = data
+        this.studentData = []
         this.newManyStudents = data
         this.manyResponse = []
         this.loading = false
@@ -112,6 +148,10 @@
         loading: false,
         hidden: false,
         newOneStudent: false,
+        editStudent: false,
+        deleteStudent: false,
+        seeStudent: false,
+        studentData: '',
         studentsCsv: [],
         newManyStudents: false,
         manyResponse: [
@@ -135,7 +175,8 @@
           headers: [
             {value: 'fullName', text: 'Nome Completo', align: 'left', color: ''},
             {value: 'email', text: 'E-mail', align: 'left'},
-            {value: 'registration', text: 'Matrícula', align: 'left'}
+            {value: 'registration', text: 'Matrícula', align: 'left'},
+            {value: 'actions', text: 'Ações', align: 'left'}
           ]
         }
       }
@@ -144,16 +185,32 @@
       getUsers () {
         this.$http.get('api/users?token='+ this.$auth.getToken())
           .then(response => {
+            console.log(response)
             this.datatable.loading = false
             let result = response.body.data
             for (let i = 0; i < result.length; i++) {
-              Object.assign(result[i], {'value': false})
+              Object.assign(result[i], {'value': false })
             }
             this.datatable.items = result
+            console.log(this.datatable.items)
           })
       },
       createUser () {
         eventBus.fire('createUser')
+      },
+      editUser (data) {
+        console.log("Edit delete -> ", data)
+        eventBus.fire('getUserData', data)
+        this.editStudent = true
+      },
+      deleteUser (data) {
+        console.log("Delete User -> ", data)
+        
+      },
+      seeUser (data) {
+        console.log("See User -> ", data)
+        this.seeStudent = true
+        this.studentData = data
       },
       componentSelector (param) {
         this.selectedComponent = param
@@ -185,7 +242,7 @@
           obj = {}
         })
 
-        this.$http.post('api/users/register',
+        this.$http.post('api/users/register?token='+ this.$auth.getToken(),
           {body: this.studentsCsv}
         ).then(response => {
           this.loading = false

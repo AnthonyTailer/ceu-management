@@ -77,21 +77,25 @@
     created: function () {
       console.log(this.$router.currentRoute.name)
       console.log('created menu')
-      this.user.name = localStorage.getItem('user').split(' ')[0]
+      this.user.name = localStorage.getItem('user') ? localStorage.getItem('user').split(' ')[0] : ''
+      this.backgroundLogin = this.$router.currentRoute.name === 'login' ? '/static/back-login.jpg' : ''
+      this.footer = this.$router.currentRoute.name !== 'login'
     },
     updated () {
       console.log('updated menu')
-      this.user.name = localStorage.getItem('user').split(' ')[0]
+      this.user.name = localStorage.getItem('user') ? localStorage.getItem('user').split(' ')[0] : ''
+      this.backgroundLogin = this.$router.currentRoute.name === 'login' ? '/static/back-login.jpg' : ''
+      this.footer = this.$router.currentRoute.name !== 'login'
+      
     },
     data () {
       return {
         drawer: true,
-        footer: this.$router.currentRoute.name !== 'login',
-        backgroundLogin: this.$router.currentRoute.name === 'login' ? '/static/back-login.jpg' : '',
+        footer: false,
+        backgroundLogin: '/static/back-login.jpg',
         items: [
           { title: 'Home/Dashboard', icon: 'dashboard', route: '/dash' },
           { title: 'Alunos', icon: 'face', route: '/alunos' }
-          // { title: 'Sobre', icon: 'question_answer', route: this.$router.push('/dash') }
         ],
         user: {
           name: ''

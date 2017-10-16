@@ -10,17 +10,32 @@ import Auth from './packages/auth/Auth.js'
 import {ServerTable} from 'vue-tables-2'
 import Vuetify from 'vuetify'
 import vueXlsxTable from 'vue-xlsx-table'
+import 'vue-material-design-icons/styles.css'
 
 Vue.use(vueXlsxTable, {rABS: false})
 Vue.use(ServerTable, {}, false)
 Vue.use(VueResource)
 Vue.use(Auth)
 
-// a constante API
-Vue.http.options.root = process.env.API
-Vue.http.headers.common['Authorization'] = 'Bearer ' + Vue.auth.getToken()
 Vue.config.productionTip = false
 Vue.router = router
+
+// vue-resource configs
+Vue.http.options.root = process.env.API
+Vue.http.headers.common['Authorization'] = 'Bearer ' + Vue.auth.getToken()
+
+// vue-resource interceptor
+Vue.http.interceptors.push((request, next) => {
+  next(response => {
+    if (response.status == 401 && !response.ok) {
+      if (response.body.error.toString() === "Token is Expired" ){
+        Vue.auth.destroyToken()
+        Vue.router.push('/')
+      }
+    }
+  })
+})
+
 
 router.beforeEach(
   (to, from, next) => {

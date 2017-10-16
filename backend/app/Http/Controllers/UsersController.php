@@ -22,6 +22,10 @@ use Illuminate\Support\Facades\DB;
 
 class UsersController extends Controller {
 
+    /*
+     * TODO diminuir vags conforme cadastro se for designado apartamento
+     * TODO verifcar se ainda ha vagas para cadastrar usuarios naquele apartamneto
+    */
     public function postUser(Request $request, Mailer $mailer) {
 
         $this->validate($request, [
@@ -30,8 +34,11 @@ class UsersController extends Controller {
             'registration' => 'required|Min:9|Max:9|unique:users',
             'cpf' => 'required|Min:11|Max:11|unique:users',
             'rg' => 'required|Min:10|Max:10|unique:users',
+            'age' => 'required|Min:2',
+            'genre' => 'required',
+            'id_course' => 'required',
             'is_admin' => 'required',
-            'id_course' => 'required'
+            'is_bse_active' => 'required'
         ],[
             'fullName.required' => 'Um nome completo é necessário',
             'email.required'  => 'Preencha o campo de email',
@@ -42,8 +49,11 @@ class UsersController extends Controller {
             'cpf.unique' => "Este CPF já esta cadastrado",
             'rg.required' => "Você deve fornecer o número do RG",
             'rg.unique' => "Este RG já esta cadastrado",
+            'age.required' => "Você deve especificar a idade do usuário",
+            'genre.required' => "Você deve fornecer o gênero do usuário",
             'id_course.required' => "Você deve especificar o curso",
             'is_admin.required' => "Você deve especificar se o usuário é administrador",
+            'is_bse_active.required' => "Você deve especificar se o usuário possui BSE ativo",
         ]);
 
         $randomPass = str_random(8);
@@ -55,11 +65,12 @@ class UsersController extends Controller {
             'password' => bcrypt($randomPass),
             'cpf' => $request->input('cpf'),
             'rg' => $request->input('rg'),
+            'age' => $request->input('age'),
             'genre' => $request->input('genre'),
-//            'is_bse_active' => $request->input('is_bse_active'),
+            'is_bse_active' => $request->input('is_bse_active'),
             'is_admin' => $request->input('is_admin'),
             'id_course' => $request->input('id_course'),
-//            'id_apto' => $request->input('id_apto')
+            'id_apto' => $request->input('id_apto')
         ]);
 
         if($user->save()) {
@@ -144,8 +155,8 @@ class UsersController extends Controller {
         return response()->json($response, 200);
     }
 
-    public function putUser(Request $request, $id){
-        $user = User::find($id);
+    public function putUser(Request $request){
+        $user = User::find($request['registration']);
 
         if(!$user){
             return response()->json(['message' => "Usuário não encontrado"], 404);
