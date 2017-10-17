@@ -72,9 +72,11 @@ export const eventBus = new Vue({
     },
     fire (event, data = null) {
       this.$emit(event, data)
+      eventBus.$off
     },
     listen (event, callback) {
       this.$on(event, callback)
+      eventBus.$off
     }
   }
 })

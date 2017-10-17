@@ -31,7 +31,7 @@ class UsersController extends Controller {
         $this->validate($request, [
             'fullName' => 'required',
             'email' => 'required|email|unique:users',
-            'registration' => 'required|Min:9|Max:9|unique:users',
+            'registration' => 'required|Min:9 |Max:9|unique:users',
             'cpf' => 'required|Min:11|Max:11|unique:users',
             'rg' => 'required|Min:10|Max:10|unique:users',
             'age' => 'required|Min:2',
@@ -202,8 +202,8 @@ class UsersController extends Controller {
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
                     'response' => 'error',
-                    'message' => 'E-mail ou senha estão incorretos',
-                ], 401);
+                    'message' => 'Matrícula ou Senha estão incorretos',
+                ], 403);
             }
         } catch (JWTAuthException $e) {
             return response()->json([
