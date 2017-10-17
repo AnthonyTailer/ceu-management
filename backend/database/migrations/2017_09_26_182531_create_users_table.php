@@ -24,12 +24,13 @@ class CreateUsersTable extends Migration
             $table->string('cpf', 11)->unique();
             $table->string('rg', 10)->unique();
             $table->enum('genre', ['M', 'F']);
+            $table->integer('age');
             $table->boolean('is_bse_active')->nullable();
             $table->boolean('is_admin');
             $table->integer('id_course')->unsigned()->nullable();
             $table->integer('id_apto')->unsigned()->nullable();
-            $table->foreign('id_course')->references('id')->on('courses');
-            $table->foreign('id_apto')->references('id')->on('apartaments')->nullable();
+            $table->foreign('id_course')->references('id')->on('courses')->onDelete("cascade");
+            $table->foreign('id_apto')->references('id')->on('apartaments')->nullable()->onDelete("cascade");
 
             $table->timestamps();
             $table->rememberToken();
@@ -43,6 +44,9 @@ class CreateUsersTable extends Migration
      */
     public function down()
     {
+
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('users');
+        Schema::enableForeignKeyConstraints();
     }
 }

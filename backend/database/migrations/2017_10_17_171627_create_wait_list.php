@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateWaitListTable extends Migration
+class CreateWaitList extends Migration
 {
     /**
      * Run the migrations.
@@ -17,8 +17,8 @@ class CreateWaitListTable extends Migration
             $table->increments('id');
             $table->integer('id_user')->unsigned()->nullable();
             $table->integer('id_apto')->unsigned()->nullable();
-            $table->foreign('id_user')->references('id')->on('users');
-            $table->foreign('id_apto')->references('id')->on('apartaments')->nullable();
+            $table->foreign('id_user')->references('id')->on('users')->onDelete("cascade");
+            $table->foreign('id_apto')->references('id')->on('apartaments')->nullable()->onDelete("cascade");
             $table->timestamps();
         });
     }
@@ -30,6 +30,6 @@ class CreateWaitListTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('waitList');
+        Schema::dropIfExists('wait_lists');
     }
 }

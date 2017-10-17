@@ -12,6 +12,6 @@ class Block extends Model
      * @var array
      */
     protected $fillable = [
-        'number', 'buildNumber'
+        'number'
     ];
 }

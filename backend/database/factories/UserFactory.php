@@ -13,13 +13,21 @@ use Faker\Generator as Faker;
 |
 */
 
-$factory->define(App\Users::class, function (Faker $faker) {
+$factory->define(App\User::class, function (Faker $faker) {
     static $password;
 
     return [
-        'name' => $faker->name,
+        'fullName' => $faker->name,
         'email' => $faker->unique()->safeEmail,
-        'password' => $password ?: $password = bcrypt('secret'),
+        'password' => $password ?: $password = bcrypt('segredo123'),
         'remember_token' => str_random(10),
+        'rg' => $faker->unique()->numberBetween(1000000000,9999999999),
+        'cpf' => $faker->numerify("###########"),
+        'genre' => $faker->randomElement(["M", "F"]),
+        'id_course' => random_int(\DB::table('courses')->min('id'), \DB::table('courses')->max('id')),
+        'is_bse_active' => rand(0,1),
+        'is_admin' => rand(0,1),
+        'age' => rand(15,85),
+        'registration' => $faker->unique()->numberBetween(100000000,999999999)
     ];
 });
