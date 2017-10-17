@@ -16,7 +16,6 @@ class CreateBlockTable extends Migration
         Schema::create('blocks', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('number')->unique();
-            $table->integer('buildNumber');
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ class CreateBlockTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('block');
+        Schema::dropIfExists('blocks');
     }
 }

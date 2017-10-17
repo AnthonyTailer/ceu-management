@@ -9,15 +9,13 @@ class BlockController extends Controller
 {
     public function postBlock(Request $request){
         $this->validate($request,[
-            'number' => 'required|unique:blocks',
-            'buildNumber' => 'required',
+            'number' => 'required|unique:blocks'
         ]);
 
         #dd($request);
 
         $block = new Block([
             'number' => $request->input('number'),
-            'buildNumber' => $request->input('buildNumber'),
         ]);
 
 
@@ -49,11 +47,9 @@ class BlockController extends Controller
 
         $this->validate($request,[
             'number' => 'required|unique:course',
-            'buildNumber' => 'required',
         ]);
 
         $block->number = $request->input('number');
-        $block->buildNumber = $request->input('buildNumber');
 
         $block->save;
 
