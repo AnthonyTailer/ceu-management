@@ -46,7 +46,7 @@
           v-model="student.age"
           label="Idade"
           :error-messages="errors.collect('idade')"
-          v-validate="'required|digits:3'"
+          v-validate="'required|digits:2'"
           data-vv-name="idade"
           required
         ></v-text-field>
@@ -108,7 +108,7 @@
           class="input-group"
           name="input-bse"
           type="checkbox"
-          v-model="student.bse"
+          v-model="student.is_bse_active"
           label="BSE Ativo?"
           :error-messages="errors.collect('BSE')"
           v-validate="'required'"
@@ -121,7 +121,7 @@
           class="input-group"
           name="input-admin"
           type="checkbox"
-          v-model="student.admin"
+          v-model="student.is_admin"
           label="É da diretoria?"
           :error-messages="errors.collect('Diretoria')"
           v-validate="'required'"
@@ -136,11 +136,21 @@
         </v-radio-group>
       </v-flex>
     </v-layout>
+    <v-snackbar
+      :timeout="8000"
+      :error="snackError"
+      :success="snackSuccess"
+      :vertical="true"
+      v-model="snackbar"
+    >
+      <div v-html="snackMsg"></div>
+      <v-btn dark flat @click.native="snackbar = false">Fechar</v-btn>
+    </v-snackbar>
   </form>
 </template>
 <script>
   import { eventBus } from '../../main'
-  
+
   export default {
     $validate: true,
     updated () {
@@ -152,19 +162,19 @@
       eventBus.listen('getUserData', data => {
         this.student = data
       })
-      
+
     },
     created () {
       this.getCourses()
       this.getAptos()
-      
+
       eventBus.listen('updateUser', data => {
         this.updateUser()
       })
-      
+
     },
     mounted () {
-      
+
       eventBus.listen('createUser', () => {
         this.submit()
       })
@@ -178,6 +188,11 @@
       return {
         courses: [],
         aptos: [],
+        snackbar: false,
+        snackError: false,
+        snackSuccess: false,
+        color: 'success',
+        snackMsg: '',
         student: {
           fullName: '',
           registration: '',
@@ -189,19 +204,19 @@
           rg: '',
           cpf: '',
           phone1: '',
-          bse: false,
-          admin: false
+          is_bse_active: false,
+          is_admin: false
         }
       }
     },
     methods: {
       getCourses () {
-         this.$http.get('api/courses?token='+ this.$auth.getToken()).then((response) => {
-           console.log(response)
-           for (let i in response.body.courses) {
+        this.$http.get('api/courses?token='+ this.$auth.getToken()).then((response) => {
+          console.log(response)
+          for (let i in response.body.courses) {
             this.courses.push({'text': response.body.courses[i]['courseName'], 'id': response.body.courses[i]['id']})
-           }
-         })
+          }
+        })
       },
       getAptos () {
         this.$http.get('api/aptos?token='+ this.$auth.getToken()).then((response) => {
@@ -218,7 +233,32 @@
           } else {
             this.$validator.reset()
             console.log('Submited User' )
-            console.log(this.student) //TODO AJAX create user
+            console.log(this.student)
+            this.$http.post('api/user/register?token='+ this.$auth.getToken(), this.student)
+              .then( (response) => {
+                this.snackbar = response.ok
+                this.snackMsg = response.body.message
+                this.snackSuccess = true
+                this.snackError = false
+
+              }).catch( (response) =>  {
+                this.snackbar = true
+                let msg = ' '
+
+                if( response.body.errors !== null ){
+                  for( let i in response.body.errors){
+                    response.body.errors[i].forEach( (item) => {
+                      msg += item + '<br>'
+                    })
+                  }
+                  
+                }else {
+                  msg = response.body.message
+                }
+                this.snackMsg = msg
+              this.snackSuccess = false
+                this.snackError = true
+            })
           }
           // success stuff.
         }).catch(() => {

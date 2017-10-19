@@ -25,8 +25,9 @@ class UsersController extends Controller {
     /*
      * TODO diminuir vags conforme cadastro se for designado apartamento
      * TODO verifcar se ainda ha vagas para cadastrar usuarios naquele apartamneto
+     * TODO Adicionar telefone
     */
-    public function postUser(Request $request, Mailer $mailer) {
+    public function postUser(Request $request) {
 
         $this->validate($request, [
             'fullName' => 'required',
@@ -36,7 +37,7 @@ class UsersController extends Controller {
             'rg' => 'required|Min:10|Max:10|unique:users',
             'age' => 'required|Min:2',
             'genre' => 'required',
-            'id_course' => 'required',
+            'id_course.id' => 'required',
             'is_admin' => 'required',
             'is_bse_active' => 'required'
         ],[
@@ -51,7 +52,7 @@ class UsersController extends Controller {
             'rg.unique' => "Este RG já esta cadastrado",
             'age.required' => "Você deve especificar a idade do usuário",
             'genre.required' => "Você deve fornecer o gênero do usuário",
-            'id_course.required' => "Você deve especificar o curso",
+            'id_course.id.required' => "Você deve especificar o curso",
             'is_admin.required' => "Você deve especificar se o usuário é administrador",
             'is_bse_active.required' => "Você deve especificar se o usuário possui BSE ativo",
         ]);
@@ -69,13 +70,13 @@ class UsersController extends Controller {
             'genre' => $request->input('genre'),
             'is_bse_active' => $request->input('is_bse_active'),
             'is_admin' => $request->input('is_admin'),
-            'id_course' => $request->input('id_course'),
+            'id_course' => $request->input('id_course.id'),
             'id_apto' => $request->input('id_apto')
         ]);
-
         if($user->save()) {
-            $job = (new SendEmailJob($user, $randomPass))
-                ->delay(Carbon::now()->addSeconds(2));
+
+            $job = (new SendEmailJob($user, $randomPass))->delay(Carbon::now()->addSeconds(3));
+
             $this->dispatch($job);
         }
 
@@ -127,7 +128,7 @@ class UsersController extends Controller {
                 if($user->save()) {
 
                     $job = (new SendEmailJob($user, $randomPass))
-                        ->delay(Carbon::now()->addSeconds(2));
+                        ->delay(Carbon::now()->addSeconds(3));
 
                     $this->dispatch($job);
 

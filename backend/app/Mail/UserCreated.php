@@ -20,7 +20,7 @@ class UserCreated extends Mailable
      * @param $registration
      * @param $password
      */
-    public function __construct($userName, $registration, $password)
+    public function __construct(String $userName,String  $registration,String  $password)
     {
         $this->userName = $userName;
         $this->registration = $registration;
