@@ -84,7 +84,7 @@
       <v-flex x12 sm6 md6>
         <v-select
           class="input-group"
-          v-bind:items="courses"
+          :items="courses"
           v-model="student.id_course"
           label="Selecione o Curso do aluno"
           autocomplete
@@ -96,9 +96,8 @@
           class="input-group"
           v-bind:items="aptos"
           v-model="student.id_apto"
-          label="Possui apartamento?"
+          label="Apartamento"
           autocomplete
-          required
         ></v-select>
       </v-flex>
     </v-layout>
@@ -113,7 +112,6 @@
           :error-messages="errors.collect('BSE')"
           v-validate="'required'"
           data-vv-name="BSE"
-          required
         ></v-checkbox>
       </v-flex>
       <v-flex x4 sm4 md4>
@@ -126,11 +124,10 @@
           :error-messages="errors.collect('Diretoria')"
           v-validate="'required'"
           data-vv-name="Diretoria"
-          required
         ></v-checkbox>
       </v-flex>
       <v-flex x4 sm4 md4>
-        <v-radio-group  class="input-group" v-model="student.genre" :mandatory="false" row>
+        <v-radio-group  class="input-group" v-model="student.genre" :mandatory="false" row required>
           <v-radio color="blue" label="Masculino" value="M"></v-radio>
           <v-radio color="pink" label="Feminino" value="F"></v-radio>
         </v-radio-group>
@@ -153,50 +150,58 @@
 
   export default {
     $validate: true,
-    updated () {
-      eventBus.listen('closeModal', (data) => {
-        this.student = []
-        this.$validator.reset()
-      })
+    props: ['courses', 'aptos'],
+    beforeCreate () {
 
       eventBus.listen('getUserData', data => {
         this.student = data
+        for(let i in this.courses) {
+          if(this.courses[i].id === this.student.id_course){
+            this.student.id_course = this.courses[i]
+          }
+        }
       })
 
-    },
-    created () {
-      this.getCourses()
-      this.getAptos()
+      eventBus.listen('deleteUserData', data => {
+        this.student = data
+      })
 
-      eventBus.listen('updateUser', data => {
+      eventBus.listen('createUserSubmit', () => {
+        this.createUser()
+      })
+
+      eventBus.listen('updateUserSubmit', () => {
         this.updateUser()
       })
 
-    },
-    mounted () {
-
-      eventBus.listen('createUser', () => {
-        this.submit()
+      eventBus.listen('deleteUserSubmit', () => {
+        this.deleteUser()
       })
+      
+      eventBus.listen('closeModal', (data) => {
+        this.student = this.initialData()
+        this.$validator.reset()
+      })
+
     },
     beforeDestroy () {
-      eventBus.$off('createUser')
+      eventBus.$off('createUserSubmit')
+      eventBus.$off('userCreated')
+      eventBus.$off('updateUserSubmit')
+      eventBus.$off('userUpdated')
       eventBus.$off('getUserData')
-      eventBus.$off('updateUser')
+      eventBus.$off('closeModal')
     },
     data () {
       return {
-        courses: [],
-        aptos: [],
         snackbar: false,
         snackError: false,
         snackSuccess: false,
-        color: 'success',
         snackMsg: '',
         student: {
           fullName: '',
           registration: '',
-          id_course: null,
+          id_course: [],
           id_apto: null,
           age: null,
           genre: 'M',
@@ -210,54 +215,36 @@
       }
     },
     methods: {
-      getCourses () {
-        this.$http.get('api/courses?token='+ this.$auth.getToken()).then((response) => {
-          console.log(response)
-          for (let i in response.body.courses) {
-            this.courses.push({'text': response.body.courses[i]['courseName'], 'id': response.body.courses[i]['id']})
-          }
-        })
-      },
-      getAptos () {
-        this.$http.get('api/aptos?token='+ this.$auth.getToken()).then((response) => {
-          console.log(response)
-          for (let i in response.body.aptos) {
-            this.aptos.push({'text' : response.body.aptos[i]['number'], 'id': response.body.aptos[i]['id']})
-          }
-        })
-      },
-      submit () {
+      createUser () {
         this.$validator.validateAll().then(result => {
           if (!result) {
             console.log('User Created-> validation failed.')
           } else {
-            this.$validator.reset()
             console.log('Submited User' )
             console.log(this.student)
             this.$http.post('api/user/register?token='+ this.$auth.getToken(), this.student)
               .then( (response) => {
-                this.snackbar = response.ok
                 this.snackMsg = response.body.message
-                this.snackSuccess = true
-                this.snackError = false
+                eventBus.fire('userCreated', this.snackMsg)
+                eventBus.closeModal(true)
 
               }).catch( (response) =>  {
-                this.snackbar = true
-                let msg = ' '
+              this.snackbar = true
+              let msg = ' '
 
-                if( response.body.errors !== null ){
-                  for( let i in response.body.errors){
-                    response.body.errors[i].forEach( (item) => {
-                      msg += item + '<br>'
-                    })
-                  }
-                  
-                }else {
-                  msg = response.body.message
+              if( response.body.errors ){
+                for( let i in response.body.errors){
+                  response.body.errors[i].forEach( (item) => {
+                    msg += item + '<br>'
+                  })
                 }
-                this.snackMsg = msg
+
+              }else {
+                msg = response.body.message
+              }
+              this.snackMsg = msg
               this.snackSuccess = false
-                this.snackError = true
+              this.snackError = true
             })
           }
           // success stuff.
@@ -270,12 +257,79 @@
           if (!result) {
             console.log('User Updated -> validation failed.')
           } else {
+            console.log('User Update Submit')
             this.$validator.reset()
-            console.log(this.student) //TODO AJAX update user
+            console.log(this.student)
+            this.$http.put(`api/user/${this.student.id}?token=`+ this.$auth.getToken(), this.student)
+              .then( (response) => {
+                this.snackMsg = response.body.message
+                eventBus.fire('userUpdated', this.snackMsg)
+                eventBus.closeModal(true)
+
+              }).catch( (response) =>  {
+              this.snackbar = true
+              let msg = ' '
+
+              if( response.body.errors ){
+                for( let i in response.body.errors){
+                  response.body.errors[i].forEach( (item) => {
+                    msg += item + '<br>'
+                  })
+                }
+
+              }else {
+                msg = response.body.message
+              }
+              this.snackMsg = msg
+              this.snackSuccess = false
+              this.snackError = true
+            })
           }
         }).catch( () => {
           console.log('something went wrong (non-validation related')
         })
+      },
+      deleteUser () {
+        this.$http.delete(`api/user/${this.student.id}?token=`+ this.$auth.getToken(), this.student.id)
+          .then( (response) => {
+            eventBus.closeModal(true)
+            this.snackMsg = response.body.message
+            eventBus.fire('userDeleted', this.snackMsg)
+
+          }).catch( (response) =>  {
+            this.snackbar = true
+            let msg = ' '
+
+            if( response.body.errors ){
+              for( let i in response.body.errors){
+                response.body.errors[i].forEach( (item) => {
+                  msg += item + '<br>'
+                })
+              }
+  
+            }else {
+              msg = response.body.message
+            }
+            this.snackMsg = msg
+            this.snackSuccess = false
+            this.snackError = true
+        })
+      },
+      initialData () {
+        return {
+          fullName: '',
+          registration: '',
+          id_course: null,
+          id_apto: null,
+          age: null,
+          genre: 'M',
+          email: '',
+          rg: '',
+          cpf: '',
+          phone1: '',
+          is_bse_active: false,
+          is_admin: false
+        }
       }
     }
   }

@@ -47,7 +47,7 @@ Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
     ]);
 
     Route::delete('{id}', [
-        'uses' => 'UserController@deleteUser'
+        'uses' => 'UsersController@deleteUser'
     ]);
 });
 

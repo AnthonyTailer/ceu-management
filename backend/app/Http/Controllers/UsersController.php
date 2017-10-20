@@ -29,6 +29,7 @@ class UsersController extends Controller {
     */
     public function postUser(Request $request) {
 
+
         $this->validate($request, [
             'fullName' => 'required',
             'email' => 'required|email|unique:users',
@@ -148,7 +149,7 @@ class UsersController extends Controller {
     }
 
     public function getUsers(){
-        $users = User::all();
+        $users = User::with(['course', 'apto'])->get();
         $response = [
             'data' => $users
         ];
@@ -157,30 +158,57 @@ class UsersController extends Controller {
     }
 
     public function putUser(Request $request){
-        $user = User::find($request['registration']);
+
+
+        $user = User::find($request['id']);
 
         if(!$user){
             return response()->json(['message' => "Usuário não encontrado"], 404);
+        }else {
+            $this->validate($request, [
+                'fullName' => 'required',
+                'email' => 'required|email',
+                'registration' => 'required|Min:9 |Max:9',
+                'cpf' => 'required|Min:11|Max:11',
+                'rg' => 'required|Min:10|Max:10',
+                'age' => 'required|Min:2',
+                'genre' => 'required',
+//                'id_course.id' => 'required',
+                'is_admin' => 'required',
+                'is_bse_active' => 'required'
+            ],[
+                'fullName.required' => 'Um nome completo é necessário',
+                'email.required'  => 'Preencha o campo de email',
+                'registration.required' => "Você deve fornecer o número de matrícula",
+                'cpf.required' => "Você deve fornecer o número do CPF",
+                'rg.required' => "Você deve fornecer o número do RG",
+                'age.required' => "Você deve especificar a idade do usuário",
+                'genre.required' => "Você deve fornecer o gênero do usuário",
+//                'id_course.id.required' => "Você deve especificar o curso",
+                'is_admin.required' => "Você deve especificar se o usuário é administrador",
+                'is_bse_active.required' => "Você deve especificar se o usuário possui BSE ativo",
+            ]);
+
+            $user->update([
+                'fullName' => $request->input('fullName'),
+                'email' => $request->input('email'),
+                'registration' => $request->input('registration'),
+                'cpf' => $request->input('cpf'),
+                'rg' => $request->input('rg'),
+                'age' => $request->input('age'),
+                'genre' => $request->input('genre'),
+                'is_bse_active' => $request->input('is_bse_active'),
+                'is_admin' => $request->input('is_admin'),
+                'id_course' => $request->input('id_course.id'),
+                'id_apto' => $request->input('id_apto')
+            ]);
+
+            return response()->json(['message' => 'Usuário '.$user->fullName.' alterado com sucesso'], 200);
         }
-
-
-        $this->validate($request, [
-            'fullName' => 'required',
-            'email' => 'required|email|unique:users',
-            'registration' => 'required|Min:9|Max:9|unique:users',
-            'cpf' => 'required|Min:11|Max:11|unique:users',
-            'rg' => 'required|Min:10|Max:10|unique:users',
-            'is_admin' => 'required',
-            'id_course' => 'required'
-        ]);
-
-        $user->content = $request->input('content');
-        $user->save;
-
-        return response()->json(['user' => $user], 200);
     }
 
     public function deleteUser($id){
+
         $user = User::find($id);
 
         if(!$user){
