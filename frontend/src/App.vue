@@ -95,7 +95,8 @@
         backgroundLogin: '/static/back-login.jpg',
         items: [
           { title: 'Home/Dashboard', icon: 'dashboard', route: '/dash' },
-          { title: 'Alunos', icon: 'face', route: '/alunos' }
+          { title: 'Alunos', icon: 'face', route: '/alunos' },
+          { title: 'Apartamentos/Blocos', icon: 'domain', route: '/aptos' }
         ],
         user: {
           name: ''

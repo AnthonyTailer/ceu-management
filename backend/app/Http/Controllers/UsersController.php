@@ -33,9 +33,9 @@ class UsersController extends Controller {
         $this->validate($request, [
             'fullName' => 'required',
             'email' => 'required|email|unique:users',
-            'registration' => 'required|Min:9 |Max:9|unique:users',
+            'registration' => 'required|Min:9|unique:users',
             'cpf' => 'required|Min:11|Max:11|unique:users',
-            'rg' => 'required|Min:10|Max:10|unique:users',
+            'rg' => 'required|unique:users',
             'age' => 'required|Min:2',
             'genre' => 'required',
             'id_course.id' => 'required',
