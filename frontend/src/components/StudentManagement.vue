@@ -249,7 +249,7 @@
         })
       },
       getAptos () {
-        this.$http.get('api/aptos?token='+ this.$auth.getToken()).then((response) => {
+        this.$http.get('api/apto?token='+ this.$auth.getToken()).then((response) => {
           console.log(response)
           for (let i in response.body.aptos) {
             this.aptos.push({'text' : response.body.aptos[i]['number'], 'id': response.body.aptos[i]['id']})

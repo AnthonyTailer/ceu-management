@@ -1,5 +1,5 @@
 <template>
-  <form>
+  <form data-vv-scope="user-form">
     <v-layout row>
       <v-flex x12 sm6 md6>
         <v-text-field
@@ -166,8 +166,8 @@
         this.student = data
       })
 
-      eventBus.listen('createUserSubmit', () => {
-        this.createUser()
+      eventBus.listen('createUserSubmit', (data) => {
+        this.createUser(data)
       })
 
       eventBus.listen('updateUserSubmit', () => {
@@ -201,7 +201,7 @@
         student: {
           fullName: '',
           registration: '',
-          id_course: [],
+          id_course: null,
           id_apto: null,
           age: null,
           genre: 'M',
@@ -215,13 +215,14 @@
       }
     },
     methods: {
-      createUser () {
-        this.$validator.validateAll().then(result => {
+      createUser (data) {
+        this.$validator.validateAll(data).then(result => {
           if (!result) {
             console.log('User Created-> validation failed.')
           } else {
             console.log('Submited User' )
             console.log(this.student)
+//            this.student.id_course = this.student.id_course.id
             this.$http.post('api/user/register?token='+ this.$auth.getToken(), this.student)
               .then( (response) => {
                 this.snackMsg = response.body.message

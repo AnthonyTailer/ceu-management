@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Alunos from '@/components/Alunos'
+import Apartaments from '@/components/ApartamentManagement'
+import Students from '@/components/StudentManagement'
 import Dash from '@/components/Dash'
 import Login from '@/components/Login'
 
@@ -27,7 +28,13 @@ export default new Router({
     {
       path: '/alunos',
       name: 'alunos',
-      component: Alunos,
+      component: Students,
+      meta: {forAuth: true}
+    },
+    {
+      path: '/aptos',
+      name: 'apartamentos',
+      component: Apartaments,
       meta: {forAuth: true}
     }
   ]
