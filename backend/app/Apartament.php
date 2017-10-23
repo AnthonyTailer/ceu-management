@@ -12,7 +12,7 @@ class Apartament extends Model
      * @var array
      */
     protected $fillable = [
-        'number', 'vacancy', 'capacity', 'block'
+        'number', 'vacancy', 'capacity', 'block', 'building'
     ];
 
 }

@@ -270,7 +270,7 @@
           })
       },
       createUserEvent () {
-        eventBus.fire('createUserSubmit')
+        eventBus.fire('createUserSubmit', 'user-form')
       },
       editUser (data) {
         this.editStudent = true

@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function () {
-   return response([1,2,3,4,34,5], 200);
+    return response([1,2,3,4,34,5], 200);
 });
 
 //Route::middleware('auth:api')->get('/user', function (Request $request) {
@@ -91,22 +91,28 @@ Route::delete('/block/{id}', [
 //block routes
 
 //apto routes
+Route::group(['prefix' => 'apto',  'middleware' => 'auth.jwt'], function () {
 
-Route::post('/apto/register', [
-    'uses' => 'ApartamentController@postApto'
-]);
+    Route::post('/register', [
+        'uses' => 'ApartamentController@postApto'
+    ]);
 
-Route::get('/aptos', [
-    'uses' => 'ApartamentController@getAptos'
-]);
+    Route::post('/bulk-register', [
+        'uses' => 'ApartamentController@postAptos'
+    ]);
 
-Route::put('/apto/{id}', [
-    'uses' => 'ApartamentController@putAptos'
-]);
+    Route::get('/', [
+        'uses' => 'ApartamentController@getAptos'
+    ]);
 
-Route::delete('/aptoblock/{id}', [
-    'uses' => 'ApartamentController@deleteAptos'
-]);
+    Route::put('/{number}', [
+        'uses' => 'ApartamentController@putApto'
+    ]);
+
+    Route::delete('/{number}', [
+        'uses' => 'ApartamentController@deleteAptos'
+    ]);
+});
 
 //apto routes
 
