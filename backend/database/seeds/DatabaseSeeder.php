@@ -13,7 +13,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             BlockSeeder::class,
-            UserTableSeeder::class,
+            #AptoTableSeeder::class,
+            #UserTableSeeder::class,
         ]);
     }
 }

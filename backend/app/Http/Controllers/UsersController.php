@@ -77,6 +77,8 @@ class UsersController extends Controller {
 
             $job = (new SendEmailJob($user, $randomPass))->delay(Carbon::now()->addSeconds(3));
 
+            dd($job);
+
             $this->dispatch($job);
         }
 
@@ -192,6 +194,7 @@ class UsersController extends Controller {
     }
 
     public function login(Request $request) {
+
 
         $this->validate($request, [
            'registration' => 'required',

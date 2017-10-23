@@ -135,3 +135,9 @@ Route::delete('course/{id}', [
 
 //course routes
 
+//WAIT LIST
+
+Route::post('waitList/register',[
+    'uses' => 'WaitListController@postWaitList'
+]);
+
