@@ -4,11 +4,21 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use JWTAuth;
 
 class User extends Authenticatable
 {
     use Notifiable;
+    use SoftDeletes;
+
+    public function course(){
+        return $this->belongsTo('App\Course', 'id_course');
+    }
+
+    public function apto(){
+        return $this->belongsTo('App\Apartament', 'id_apto');
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -25,9 +35,23 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'is_admin'
+        'password', 'remember_token'
     ];
 
-    public function handle() { $this->fire(); }
+    /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = ['deleted_at'];
+
+    public function handle() {
+
+//        Schema::table('users', function ($table) {
+//            $table->softDeletes();
+//        });
+//
+        $this->fire();
+    }
 
 }

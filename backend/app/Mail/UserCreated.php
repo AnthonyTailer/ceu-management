@@ -11,7 +11,9 @@ class UserCreated extends Mailable
 {
         use Queueable, SerializesModels;
 
-    public $userName, $registration, $password;
+    public $userName;
+    public $registration;
+    public $password;
 
     /**
      * Create a new message instance.
@@ -20,7 +22,7 @@ class UserCreated extends Mailable
      * @param $registration
      * @param $password
      */
-    public function __construct(String $userName,String  $registration,String  $password)
+    public function __construct($userName, $registration, $password)
     {
         $this->userName = $userName;
         $this->registration = $registration;

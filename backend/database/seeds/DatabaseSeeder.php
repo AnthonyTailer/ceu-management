@@ -12,9 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            BlockSeeder::class,
-            #AptoTableSeeder::class,
-            #UserTableSeeder::class,
+            UserTableSeeder::class,
         ]);
     }
 }

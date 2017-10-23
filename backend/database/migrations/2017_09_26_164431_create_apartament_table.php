@@ -15,11 +15,11 @@ class CreateApartamentTable extends Migration
     {
         Schema::create('apartaments', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer("number")->unique();
-            $table->integer("vacancy")->nullable();
+            $table->string("number")->unique();
+            $table->integer("vacancy");
             $table->integer("capacity");
-            $table->integer('id_block')->unsigned();
-            $table->foreign('id_block')->references('id')->on('blocks')->nullable();
+            $table->string('block');
+            $table->string('building');
             $table->timestamps();
         });
     }

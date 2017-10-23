@@ -1,18 +1,19 @@
 <template>
   <v-container fluid>
     
-    <app-modal :dialog="newOneStudent">
+    <app-modal v-show="newOneStudent" :dialog="newOneStudent">
       <p slot="titleModal">Cadastro de novo Aluno</p>
-      <app-one-student slot="mainModal"></app-one-student>
-      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.prevent="createUser">Salvar</v-btn>
+      <app-student slot="mainModal" :courses="courses" :aptos="aptos"></app-student>
+      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.prevent="createUserEvent">Salvar</v-btn>
     </app-modal>
   
-    <app-modal :dialog="seeStudent">
+    <app-modal v-if="seeStudent" :dialog="seeStudent">
       <p slot="titleModal">Mais informações do Aluno</p>
       <p slot="mainModal">
           <strong>Nome Completo</strong>: {{this.studentData['fullName']}}<br>
           <strong>E-mail</strong>: {{this.studentData['email']}}<br>
           <strong>Matrícula</strong>: {{this.studentData['registration']}}<br>
+          <strong>Curso</strong>: {{this.studentData['course']['courseName']}}<br>
           <strong>CPF</strong>: {{this.studentData['cpf']}}<br>
           <strong>RG</strong>: {{this.studentData['rg']}}<br>
           <strong>Tem Benefício</strong>: {{this.studentData['is_bse_active'] !== null && this.studentData['is_bse_active'] === 1 ? 'Sim' : 'Não' }}<br>
@@ -20,13 +21,21 @@
       </p>
     </app-modal>
   
-    <app-modal :dialog="editStudent">
+    <app-modal v-show="editStudent" :dialog="editStudent">
       <p slot="titleModal">Edição de Aluno</p>
-      <app-one-student slot="mainModal"></app-one-student>
-      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.native="alert()">Alterar</v-btn>
+      <app-student slot="mainModal" :courses="courses" :aptos="aptos"></app-student>
+      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.prevent="updateUserEvent">Alterar</v-btn>
+    </app-modal>
+  
+    <app-modal v-show="deleteStudent" :dialog="deleteStudent">
+      <p slot="titleModal">Remover Aluno</p>
+      <p slot="mainModal">
+        Você deseja mesmo remover este usuário:?
+      </p>
+      <v-btn class="white--text red accent-3" dark slot="footerModal" @click.prevent="deleteUserEvent">Remover</v-btn>
     </app-modal>
     
-    <app-modal-full :dialogFull="newManyStudents" :loading="loading">
+    <app-modal-full v-if="newManyStudents" :dialogFull="newManyStudents" :loading="loading">
       <p slot="modalTitle activator">Cadastro de Alunos de um arquivo Excel</p>
       
       <vue-xlsx-table slot="mainContent" class="ml-2" @on-select-file="handleSelectedFile">
@@ -96,6 +105,7 @@
               <td class="text-xs-left">{{ props.item.fullName }}</td>
               <td class="text-xs-left">{{ props.item.email }}</td>
               <td class="text-xs-left">{{ props.item.registration }}</td>
+              <td class="text-xs-left">{{ props.item.updated_at }}</td>
               <td class="text-xs-left">
                 <div  class="ma-0 pa-0">
                   <v-btn class="green darken-1" fab dark small color="success" @click.stop="seeUser(props.item)">
@@ -117,20 +127,33 @@
         </div>
       </v-flex>
     </v-layout>
+  
+    <v-snackbar
+      :timeout="8000"
+      :error="snackError"
+      :success="snackSuccess"
+      :vertical="true"
+      v-model="snackbar"
+    >
+      <div v-html="snackMsg"></div>
+      <v-btn dark flat @click.native="snackbar = false">Fechar</v-btn>
+    </v-snackbar>
   </v-container>
 </template>
 
 <script>
-  import ModalForm from './shared/Modal.vue'
-  import ModalFormFull from './shared/ModalFull.vue'
-  import OneStudentModal from './forms/OneStudentForm.vue'
+  import Modal from './shared/Modal.vue'
+  import ModalFull from './shared/ModalFull.vue'
+  import StudentForm from './forms/StudentForm.vue'
   import { eventBus } from '../main'
 
   export default {
     created () {
       this.getUsers()
+      this.getCourses()
+      this.getAptos()
     },
-    updated () {
+    mounted () {
       eventBus.listen('closeModal', (data) => {
         this.newOneStudent = data
         this.seeStudent = data
@@ -141,6 +164,34 @@
         this.manyResponse = []
         this.loading = false
       })
+      
+      eventBus.listen('userCreated',(data) => {
+        this.snackbar = true
+        this.snackMsg = data
+        this.snackSuccess = true
+        this.snackError = false
+        this.$validator.reset()
+        this.getUsers()
+      })
+
+      eventBus.listen('userUpdated',(data) => {
+        this.snackbar = true
+        this.snackMsg = data
+        this.snackSuccess = true
+        this.snackError = false
+        this.$validator.reset()
+        this.getUsers()
+      })
+
+      eventBus.listen('userDeleted',(data) => {
+        this.snackbar = true
+        this.snackMsg = data
+        this.snackSuccess = true
+        this.snackError = false
+        this.$validator.reset()
+        this.getUsers()
+      })
+      
     },
     data () {
       return {
@@ -152,6 +203,8 @@
         deleteStudent: false,
         seeStudent: false,
         studentData: '',
+        courses: [],
+        aptos: [],
         studentsCsv: [],
         newManyStudents: false,
         manyResponse: [
@@ -176,12 +229,33 @@
             {value: 'fullName', text: 'Nome Completo', align: 'left', color: ''},
             {value: 'email', text: 'E-mail', align: 'left'},
             {value: 'registration', text: 'Matrícula', align: 'left'},
+            {value: 'updated_at', text: 'Última atualização', align: 'left'},
             {value: 'actions', text: 'Ações', align: 'left'}
           ]
-        }
+        },
+        snackbar: false,
+        snackError: false,
+        snackSuccess: false,
+        snackMsg: ''
       }
     },
     methods: {
+      getCourses: function () {
+        this.$http.get('api/courses?token='+ this.$auth.getToken()).then((response) => {
+          console.log(response)
+          for (let i in response.body.courses) {
+            this.courses.push({'text': response.body.courses[i]['courseName'], 'id': response.body.courses[i]['id']})
+          }
+        })
+      },
+      getAptos () {
+        this.$http.get('api/aptos?token='+ this.$auth.getToken()).then((response) => {
+          console.log(response)
+          for (let i in response.body.aptos) {
+            this.aptos.push({'text' : response.body.aptos[i]['number'], 'id': response.body.aptos[i]['id']})
+          }
+        })
+      },
       getUsers () {
         this.$http.get('api/users?token='+ this.$auth.getToken())
           .then(response => {
@@ -192,20 +266,27 @@
               Object.assign(result[i], {'value': false })
             }
             this.datatable.items = result
-            console.log(this.datatable.items)
+            console.log('GET Users -> ',this.datatable.items)
           })
       },
-      createUser () {
-        eventBus.fire('createUser')
+      createUserEvent () {
+        eventBus.fire('createUserSubmit', 'user-form')
       },
       editUser (data) {
-        console.log("Edit delete -> ", data)
-        eventBus.fire('getUserData', data)
         this.editStudent = true
+        console.log("Edit user -> ", data)
+        eventBus.fire('getUserData', data)
+      },
+      updateUserEvent () {
+        eventBus.fire('updateUserSubmit')
       },
       deleteUser (data) {
-        console.log("Delete User -> ", data)
-        
+        this.deleteStudent = true
+        console.log("Delete user -> ", data)
+        eventBus.fire('deleteUserData', data)
+      },
+      deleteUserEvent () {
+        eventBus.fire('deleteUserSubmit')
       },
       seeUser (data) {
         console.log("See User -> ", data)
@@ -285,9 +366,9 @@
       }
     },
     components: {
-      appModal: ModalForm,
-      appOneStudent: OneStudentModal,
-      appModalFull: ModalFormFull
+      appModal: Modal,
+      appStudent: StudentForm,
+      appModalFull: ModalFull
     }
   }
 </script>
