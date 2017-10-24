@@ -8,6 +8,8 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Notification;
+use Gate;
+use App;
 
 
 class WaitListController extends Controller
@@ -26,6 +28,10 @@ class WaitListController extends Controller
             'id_apto' => $request->input('id_apto'),
         ]);
 
+
+        if(Gate::allows('create-user')){
+            App::abort();
+        }
 
         Notification::route('mail', 'taylor@laravel.com')
             ->notify(new RepliedToAlocation());

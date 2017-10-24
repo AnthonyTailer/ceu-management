@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class CourseController extends Controller
 {
     public function postCourse(Request $request){
-       dd($request);
+
 
         $this->validate($request, [
             'courseName' => 'required',

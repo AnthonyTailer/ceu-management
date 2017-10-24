@@ -18,6 +18,7 @@ use Validator;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Mailer;
 use Illuminate\Support\Facades\DB;
+use Gate;
 
 
 class UsersController extends Controller {
@@ -57,6 +58,11 @@ class UsersController extends Controller {
             'is_admin.required' => "Você deve especificar se o usuário é administrador",
             'is_bse_active.required' => "Você deve especificar se o usuário possui BSE ativo",
         ]);
+
+
+        if(Gate::denies('create-user')){
+            App::abort();
+        }
 
         $randomPass = str_random(8);
 
@@ -192,6 +198,8 @@ class UsersController extends Controller {
             ]);
 
             $user->update([
+
+
                 'fullName' => $request->input('fullName'),
                 'email' => $request->input('email'),
                 'registration' => $request->input('registration'),
