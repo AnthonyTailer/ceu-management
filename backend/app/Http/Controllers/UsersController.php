@@ -30,7 +30,6 @@ class UsersController extends Controller {
     */
     public function postUser(Request $request) {
 
-
         $this->validate($request, [
             'fullName' => 'required',
             'email' => 'required|email|unique:users',
@@ -39,7 +38,7 @@ class UsersController extends Controller {
             'rg' => 'required|unique:users',
             'age' => 'required|Min:2',
             'genre' => 'required',
-            'id_course.id' => 'required',
+            'id_course' => 'required',
             'is_admin' => 'required',
             'is_bse_active' => 'required'
         ],[
@@ -54,7 +53,7 @@ class UsersController extends Controller {
             'rg.unique' => "Este RG já esta cadastrado",
             'age.required' => "Você deve especificar a idade do usuário",
             'genre.required' => "Você deve fornecer o gênero do usuário",
-            'id_course.id.required' => "Você deve especificar o curso",
+            'id_course.required' => "Você deve especificar o curso",
             'is_admin.required' => "Você deve especificar se o usuário é administrador",
             'is_bse_active.required' => "Você deve especificar se o usuário possui BSE ativo",
         ]);
@@ -77,14 +76,12 @@ class UsersController extends Controller {
             'genre' => $request->input('genre'),
             'is_bse_active' => $request->input('is_bse_active'),
             'is_admin' => $request->input('is_admin'),
-            'id_course' => $request->input('id_course.id'),
+            'id_course' => $request->input('id_course'),
             'id_apto' => $request->input('id_apto')
         ]);
         if($user->save()) {
 
             $job = (new SendEmailJob($user, $randomPass))->delay(Carbon::now()->addSeconds(3));
-
-            dd($job);
 
             $this->dispatch($job);
         }
@@ -181,7 +178,7 @@ class UsersController extends Controller {
                 'rg' => 'required|Min:10|Max:10',
                 'age' => 'required|Min:2',
                 'genre' => 'required',
-//                'id_course.id' => 'required',
+                'id_course' => 'required',
                 'is_admin' => 'required',
                 'is_bse_active' => 'required'
             ],[
@@ -192,7 +189,7 @@ class UsersController extends Controller {
                 'rg.required' => "Você deve fornecer o número do RG",
                 'age.required' => "Você deve especificar a idade do usuário",
                 'genre.required' => "Você deve fornecer o gênero do usuário",
-//                'id_course.id.required' => "Você deve especificar o curso",
+                'id_course.required' => "Você deve especificar o curso",
                 'is_admin.required' => "Você deve especificar se o usuário é administrador",
                 'is_bse_active.required' => "Você deve especificar se o usuário possui BSE ativo",
             ]);
@@ -209,7 +206,7 @@ class UsersController extends Controller {
                 'genre' => $request->input('genre'),
                 'is_bse_active' => $request->input('is_bse_active'),
                 'is_admin' => $request->input('is_admin'),
-                'id_course' => $request->input('id_course.id'),
+                'id_course' => $request->input('id_course'),
                 'id_apto' => $request->input('id_apto')
             ]);
 
