@@ -160,6 +160,12 @@
             this.student.id_course = this.courses[i]
           }
         }
+
+        for(let i in this.aptos) {
+          if(this.aptos[i].id === this.student.id_apto){
+            this.student.id_apto = this.aptos[i]
+          }
+        }
       })
 
       eventBus.listen('deleteUserData', data => {
