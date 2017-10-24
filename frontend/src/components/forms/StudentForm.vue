@@ -221,9 +221,11 @@
             console.log('User Created-> validation failed.')
           } else {
             console.log('Submited User' )
-            console.log(this.student)
-//            this.student.id_course = this.student.id_course.id
-            this.$http.post('api/user/register?token='+ this.$auth.getToken(), this.student)
+            let aux =  this.student
+            aux.id_course = this.student.id_course.id
+            aux.id_apto = this.student.id_apto.id
+            console.log(aux)
+            this.$http.post('api/user/register?token='+ this.$auth.getToken(), aux)
               .then( (response) => {
                 this.snackMsg = response.body.message
                 eventBus.fire('userCreated', this.snackMsg)
@@ -260,8 +262,10 @@
           } else {
             console.log('User Update Submit')
             this.$validator.reset()
-            console.log(this.student)
-            this.$http.put(`api/user/${this.student.id}?token=`+ this.$auth.getToken(), this.student)
+            let aux =  this.student
+            aux.id_course = this.student.id_course.id
+            aux.id_apto = this.student.id_apto.id
+            this.$http.put(`api/user/${this.student.id}?token=`+ this.$auth.getToken(), aux)
               .then( (response) => {
                 this.snackMsg = response.body.message
                 eventBus.fire('userUpdated', this.snackMsg)
