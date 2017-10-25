@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Notifications\RepliedToAlocation;
+use App\Notifications\Teste;
 use App\WaitList;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Notification;
+use Illuminate\Notifications\Notification;
 use Gate;
 use App;
-
+use Illuminate\Notifications\Notifiable;
 
 class WaitListController extends Controller
 {
@@ -29,12 +29,7 @@ class WaitListController extends Controller
         ]);
 
 
-        if(Gate::allows('create-user')){
-            App::abort();
-        }
 
-        Notification::route('mail', 'taylor@laravel.com')
-            ->notify(new RepliedToAlocation());
 
         $aptoVacancy = DB::table('apartaments')->where('id', $request->input('id_apto'))->value('vacancy');
 
@@ -59,7 +54,14 @@ class WaitListController extends Controller
 
     }
 
-    public function delete(Request $request, $id){
+    public function deleteWaitList($id){
+        $waitList = WaitList::find($id);
 
+        if(!$waitList){
+            return response()->json(['message' => "Nada encontrado"], 404);
+        }
+
+        $waitList->delete();
+        return response()->json(['message' => "Posição na lista de espera removida  "], 200);
     }
 }

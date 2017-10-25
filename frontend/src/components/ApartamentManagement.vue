@@ -17,7 +17,7 @@
     <app-modal v-show="deleteApartament" :dialog="deleteApartament">
       <p slot="titleModal">Remover Aluno</p>
       <p slot="mainModal">
-        Você deseja mesmo remover este usuário:?
+        Você deseja mesmo remover este apartamento?
       </p>
       <v-btn class="white--text red accent-3" dark slot="footerModal" @click.prevent="deleteApartamentEvent">Remover</v-btn>
     </app-modal>

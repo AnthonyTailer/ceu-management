@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Apartament;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
+use App\Notifications\ChangeApto;
+
+use JWTAuth;
 
 class ApartamentController extends Controller
 {
@@ -169,5 +174,13 @@ class ApartamentController extends Controller
 
         $apto->delete();
         return response()->json(['message' => "Apartamento deletado com sucesso"], 200);
+    }
+
+    public function changeApto(Request $request){
+
+        $user = JWTAuth::toUser($request->token);
+        $user2 = User::find($request->input('id_user'));
+
+        $user->notify(new ChangeApto($user, $user2));
     }
 }

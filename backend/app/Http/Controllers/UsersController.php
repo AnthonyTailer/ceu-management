@@ -11,6 +11,7 @@ namespace App\Http\Controllers;
 use App\Jobs\SendEmailJob;
 use App\User;
 use App\Course;
+use App\Apartament;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use JWTAuth;
@@ -59,9 +60,6 @@ class UsersController extends Controller {
         ]);
 
 
-        if(Gate::denies('create-user')){
-            App::abort();
-        }
 
         $randomPass = str_random(8);
 
@@ -79,7 +77,12 @@ class UsersController extends Controller {
             'id_course' => $request->input('id_course'),
             'id_apto' => $request->input('id_apto')
         ]);
+
         if($user->save()) {
+
+            $apto = Apartament::find($request->input('id_apto'));
+            $apto->vacancy = $apto->vacancy - 1;
+            $apto->save();
 
             $job = (new SendEmailJob($user, $randomPass))->delay(Carbon::now()->addSeconds(3));
 
@@ -164,8 +167,11 @@ class UsersController extends Controller {
 
     public function putUser(Request $request){
 
-
         $user = User::find($request['id']);
+        $userApto = Apartament::where('id', $user->id_apto)->first();
+
+
+        $newApto = Apartament::find($request->input('id_apto'));
 
         if(!$user){
             return response()->json(['message' => "Usuário não encontrado"], 404);
@@ -194,8 +200,8 @@ class UsersController extends Controller {
                 'is_bse_active.required' => "Você deve especificar se o usuário possui BSE ativo",
             ]);
 
-            $user->update([
 
+            if($user->update([
 
                 'fullName' => $request->input('fullName'),
                 'email' => $request->input('email'),
@@ -208,7 +214,25 @@ class UsersController extends Controller {
                 'is_admin' => $request->input('is_admin'),
                 'id_course' => $request->input('id_course'),
                 'id_apto' => $request->input('id_apto')
-            ]);
+            ])
+
+            )
+
+            if (!($userApto) AND ($newApto)){
+                $newApto->vacancy = $newApto->vacancy - 1;
+                $newApto->save();
+            }elseif(!($userApto->number == $newApto->number)) {
+
+                if ($userApto) {
+                    $userApto->vacancy = $userApto->vacancy + 1;
+                    $userApto->save();
+                }
+
+                if ($newApto) {
+                    $newApto->vacancy = $newApto->vacancy - 1;
+                    $newApto->save();
+                }
+            }
 
             return response()->json(['message' => 'Usuário '.$user->fullName.' alterado com sucesso'], 200);
         }
