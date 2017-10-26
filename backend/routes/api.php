@@ -53,6 +53,14 @@ Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
     Route::put('{id}/apto', [
         'uses' => 'UsersController@removeUserFromApto'
     ]);
+
+    Route::post('get-notifications',[
+        'uses' => 'UsersController@getNotifications'
+    ]);
+
+    Route::post('mark-read',[
+        'uses' => 'UsersController@markAsRead'
+    ]);
 });
 
 
@@ -106,6 +114,13 @@ Route::group(['prefix' => 'apto',  'middleware' => 'auth.jwt'], function () {
     Route::delete('/{number}', [
         'uses' => 'ApartamentController@deleteApto'
     ]);
+
+
+    /*Rota referente a notificação de solicitação de troca de apartamento*/
+    Route::post('/change-notify',[
+        'uses' => 'ApartamentController@changeApto'
+
+    ]);
 });
 
 //apto routes
@@ -137,7 +152,9 @@ Route::delete('course/{id}', [
 
 //WAIT LIST
 
-Route::post('waitList/register',[
-    'uses' => 'WaitListController@postWaitList'
-]);
+Route::group(['prefix' => 'waitList',  'middleware' => 'auth.jwt'], function () {
 
+    Route::post('/register', [
+        'uses' => 'WaitListController@postWaitList'
+    ]);
+});

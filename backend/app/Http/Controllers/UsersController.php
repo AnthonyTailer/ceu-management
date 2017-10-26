@@ -11,6 +11,7 @@ namespace App\Http\Controllers;
 use App\Jobs\SendEmailJob;
 use App\User;
 use App\Course;
+use App\Apartament;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use JWTAuth;
@@ -59,9 +60,6 @@ class UsersController extends Controller {
         ]);
 
 
-//        if(Gate::denies('create-user')){
-//            App::abort();
-//        }
 
         $randomPass = str_random(8);
 
@@ -79,7 +77,21 @@ class UsersController extends Controller {
             'id_course' => $request->input('id_course'),
             'id_apto' => $request->input('id_apto')
         ]);
+
         if($user->save()) {
+
+            $apto = Apartament::find($request->input('id_apto'));
+
+            if($apto){
+                if( $apto-> vacancy == 0 ) {
+                    return response()->json([
+                        'message' => 'Usuário não pode ser alocado a um apartamento sem vaga'
+                    ],403);
+                }
+                $apto->vacancy = $apto->vacancy - 1;
+                $apto->save();
+            }
+
 
             $job = (new SendEmailJob($user, $randomPass))->delay(Carbon::now()->addSeconds(3));
 
@@ -164,8 +176,11 @@ class UsersController extends Controller {
 
     public function putUser(Request $request){
 
-
         $user = User::find($request['id']);
+        $userApto = Apartament::where('id', $user->id_apto)->first();
+
+
+        $newApto = Apartament::find($request->input('id_apto'));
 
         if(!$user){
             return response()->json(['message' => "Usuário não encontrado"], 404);
@@ -194,8 +209,7 @@ class UsersController extends Controller {
                 'is_bse_active.required' => "Você deve especificar se o usuário possui BSE ativo",
             ]);
 
-            $user->update([
-
+            if($user->update([
 
                 'fullName' => $request->input('fullName'),
                 'email' => $request->input('email'),
@@ -208,7 +222,25 @@ class UsersController extends Controller {
                 'is_admin' => $request->input('is_admin'),
                 'id_course' => $request->input('id_course'),
                 'id_apto' => $request->input('id_apto')
-            ]);
+            ])
+
+            )
+
+            if (!($userApto) AND ($newApto)){
+                $newApto->vacancy = $newApto->vacancy - 1;
+                $newApto->save();
+            }elseif(!($userApto->number == $newApto->number)) {
+
+                if ($userApto) {
+                    $userApto->vacancy = $userApto->vacancy + 1;
+                    $userApto->save();
+                }
+
+                if ($newApto) {
+                    $newApto->vacancy = $newApto->vacancy - 1;
+                    $newApto->save();
+                }
+            }
 
             return response()->json(['message' => 'Usuário '.$user->fullName.' alterado com sucesso'], 200);
         }
@@ -301,5 +333,77 @@ class UsersController extends Controller {
                       'Master' => count($mestrado)],
                       'Total' => $total
         ], 200);
+    }
+
+
+    /*Verificar se esta é melhor forma para essa operação, quando e onde chamar esse método*/
+    /*Método que realiza a busca de todas as notificações referentes ao usuário logado*/
+    /*Formato do JSON de entrada
+        {
+            "id_user" ---> id do usuário logado
+        }
+    */
+    /*Formato do JSON de saida
+        {
+            "Notifications": [
+                {
+                    Nesta seção estarão os dados referentes a notificação, podendo variar de acordo com o tipo da notificação
+                    EX:
+                    "type": "Apto Change",
+                    "from": 27,
+                    "to": 29
+                }
+            ],
+            "IDs": [
+                Nesta seção constarão os ids das notificações, estes devem ser retornado para a funcão makeAsRead, para marcar os notificações como lidas
+                "d3b1e7e4-7aa9-483e-81e2-3a1ea3a72ff7"
+            ]
+        }
+
+    */
+
+    public function getNotifications(Request $request){
+        $user = JWTAuth::toUser($request->token);
+
+        $response = Null;
+
+        foreach ($user->notifications as $notification) {
+            if(!$notification->read_at){
+                $response = array($notification->data);
+                $ids = array($notification->id);
+            }
+        }
+
+        if($response){
+            return response()->json([
+                'Notifications' => $response,
+                'IDs' => $ids
+            ]);
+        }else{
+            return response()->json([
+                'response' => 'Sem Notificações',
+            ]);
+        }
+    }
+
+    /*Método que marca a notificão como lida*/
+    /*Formato do JSON de entrada
+        {
+            "id_user" ---> id do usuário logado
+            "id_notification --> id da notificação que deve ser marcada como lida
+        }
+    */
+    /*Formato do JSON de saida
+
+    */
+
+    public function markAsRead(Request $request){
+        $user = JWTAuth::toUser($request->token);
+        $id_not = $request->input('id_notification');
+
+        $notification = $user->notifications()->where('id',$id_not)->first();
+
+        $notification->markAsRead();
+
     }
 }

@@ -249,7 +249,7 @@
         })
       },
       getAptos () {
-        this.$http.get('api/apto?token='+ this.$auth.getToken()).then((response) => {
+        this.$http.get('api/apto/all?token='+ this.$auth.getToken()).then((response) => {
           console.log(response)
           for (let i in response.body.aptos) {
             this.aptos.push({'text' : response.body.aptos[i]['number'] + ' - ' + response.body.aptos[i]['vacancy'] + ' vagas' , 'id': response.body.aptos[i]['id']})
@@ -275,8 +275,8 @@
       editUser (data) {
         this.editStudent = true
         console.log("Edit user -> ", data)
-        let aux = JSON.parse( JSON.stringify( data ) )
-        eventBus.fire('getUserData', aux)
+        
+        eventBus.fire('getUserData', data)
       },
       updateUserEvent () {
         eventBus.fire('updateUserSubmit')
@@ -284,8 +284,7 @@
       deleteUser (data) {
         this.deleteStudent = true
         console.log("Delete user -> ", data)
-        let aux = JSON.parse( JSON.stringify( data ) )
-        eventBus.fire('deleteUserData', aux)
+        eventBus.fire('deleteUserData', data)
       },
       deleteUserEvent () {
         eventBus.fire('deleteUserSubmit')
@@ -293,8 +292,7 @@
       seeUser (data) {
         console.log("See User -> ", data)
         this.seeStudent = true
-        let aux = JSON.parse( JSON.stringify( data ) )
-        this.studentData = aux
+        this.studentData = data
       },
       componentSelector (param) {
         this.selectedComponent = param
