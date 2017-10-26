@@ -59,9 +59,9 @@ class UsersController extends Controller {
         ]);
 
 
-        if(Gate::denies('create-user')){
-            App::abort();
-        }
+//        if(Gate::denies('create-user')){
+//            App::abort();
+//        }
 
         $randomPass = str_random(8);
 
@@ -224,6 +224,23 @@ class UsersController extends Controller {
 
         $user->delete();
         return response()->json(['message' => "Usuário deletado com sucesso"], 200);
+    }
+
+    public function removeUserFromApto($id){
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(['message' => "Usuário não encontrado"], 404);
+        }
+
+        $id_apto = $user->id_apto;
+
+        $user->id_apto = null;
+
+        if($user->update()){
+            DB::table('apartaments')->where('id', $id_apto)->increment('vacancy', 1); //aumenta uma vaga
+            return response()->json(['message' => "Usuário removido com sucesso do apartamento"], 200);
+        }
     }
 
     public function login(Request $request) {

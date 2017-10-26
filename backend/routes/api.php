@@ -49,6 +49,10 @@ Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
     Route::delete('{id}', [
         'uses' => 'UsersController@deleteUser'
     ]);
+
+    Route::put('{id}/apto', [
+        'uses' => 'UsersController@removeUserFromApto'
+    ]);
 });
 
 
@@ -70,25 +74,7 @@ Route::group(['prefix' => 'users',  'middleware' => 'auth.jwt'], function () {
     ]);
 });
 
-//block routes
 
-Route::post('/block/register', [
-    'uses' => 'BlockController@postBlock'
-]);
-
-Route::get('/blocks', [
-    'uses' => 'BlockController@getBlocks'
-]);
-
-Route::put('/block/{id}', [
-    'uses' => 'BlockController@putBlocks'
-]);
-
-Route::delete('/block/{id}', [
-    'uses' => 'BlockController@deleteBlock'
-]);
-
-//block routes
 
 //apto routes
 Route::group(['prefix' => 'apto',  'middleware' => 'auth.jwt'], function () {
@@ -101,8 +87,16 @@ Route::group(['prefix' => 'apto',  'middleware' => 'auth.jwt'], function () {
         'uses' => 'ApartamentController@postAptos'
     ]);
 
-    Route::get('/', [
+    Route::get('/all', [
         'uses' => 'ApartamentController@getAptos'
+    ]);
+
+    Route::get('/', [
+        'uses' => 'ApartamentController@getVacancyAptos'
+    ]);
+
+    Route::get('/{number}', [
+        'uses' => 'ApartamentController@getApto'
     ]);
 
     Route::put('/{number}', [
@@ -110,7 +104,7 @@ Route::group(['prefix' => 'apto',  'middleware' => 'auth.jwt'], function () {
     ]);
 
     Route::delete('/{number}', [
-        'uses' => 'ApartamentController@deleteAptos'
+        'uses' => 'ApartamentController@deleteApto'
     ]);
 });
 
