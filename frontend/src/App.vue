@@ -148,4 +148,8 @@
   .sideMenuItens {
     cursor: pointer
   }
+  
+  .input-group {
+    padding: 18px 5px 0;
+  }
 </style>

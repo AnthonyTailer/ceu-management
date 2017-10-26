@@ -2,24 +2,24 @@
   <v-container fluid>
     
     <app-modal v-show="newOneApartament" :dialog="newOneApartament">
-      <p slot="titleModal">Cadastro de novo Aluno</p>
+      <p slot="titleModal">Cadastro de novo Apartamento</p>
       <app-apartament slot="mainModal"></app-apartament>
-      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.prevent="createApartamentEvent">Salvar</v-btn>
+      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.stop.prevent="createApartamentEvent">Salvar</v-btn>
     </app-modal>
   
   
     <app-modal v-show="editApartament" :dialog="editApartament">
-      <p slot="titleModal">Edição de Aluno</p>
+      <p slot="titleModal">Edição de Apartamento</p>
       <app-apartament slot="mainModal"></app-apartament>
-      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.prevent="updateApartamentEvent">Alterar</v-btn>
+      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.stop.prevent="updateApartamentEvent()">Alterar</v-btn>
     </app-modal>
   
     <app-modal v-show="deleteApartament" :dialog="deleteApartament">
-      <p slot="titleModal">Remover Aluno</p>
+      <p slot="titleModal">Remover Apartamento</p>
       <p slot="mainModal">
         Você deseja mesmo remover este apartamento?
       </p>
-      <v-btn class="white--text red accent-3" dark slot="footerModal" @click.prevent="deleteApartamentEvent">Remover</v-btn>
+      <v-btn class="white--text red accent-3" dark slot="footerModal" @click.native.stop="deleteApartamentEvent">Remover</v-btn>
     </app-modal>
     
     <app-modal-full v-if="newManyApartaments" :dialogFull="newManyApartaments" :loading="loading">
@@ -33,7 +33,6 @@
     <v-layout row wrap>
       <v-flex xs12>
         <v-card id="apartamentsDatatable" >
-          <!--<v-server-table url="api/users" :columns="columns" :options="options"></v-server-table>-->
           <v-toolbar class="blue lighten-1" extended>
             <v-card-title class="white--text headline"><v-icon dark>list</v-icon>&nbsp;Lista de todos Apartamentos</v-card-title>
             <v-fab-transition>
@@ -96,13 +95,13 @@
               <td class="text-xs-left">{{ props.item.building }}</td>
               <td class="text-xs-left">
                 <div  class="ma-0 pa-0">
-                  <!--<v-btn class="green darken-1" fab dark small color="success" @click.stop="seeUser(props.item)">-->
-                    <!--<v-icon dark>zoom_in</v-icon>-->
-                  <!--</v-btn>-->
-                  <v-btn class="blue darken-1" fab dark small color="primary" @click.stop="editApto(props.item)">
+                  <v-btn class="green darken-1" fab dark small color="success" @click.stop="seeApto(props.item)">
+                    <v-icon dark>zoom_in</v-icon>
+                  </v-btn>
+                  <v-btn class="blue darken-1" fab dark small color="primary" @click.target.prevent.stop="editApto(props.item)">
                     <v-icon dark>edit</v-icon>
                   </v-btn>
-                  <v-btn class="red darken-1" fab dark small color="error" @click.stop="deleteApto(props.item)">
+                  <v-btn class="red darken-1" fab dark small color="error" @click.native.stop="deleteApto(props.item)">
                     <v-icon dark>delete_forever</v-icon>
                   </v-btn>
                 </div>
@@ -124,7 +123,7 @@
       v-model="snackbar"
     >
       <div v-html="snackMsg"></div>
-      <v-btn dark flat @click.native="snackbar = false">Fechar</v-btn>
+      <v-btn dark flat @click.native.stop="snackbar = false">Fechar</v-btn>
     </v-snackbar>
   </v-container>
 </template>
@@ -152,11 +151,15 @@
       
       eventBus.listen('apartamentCreated',(data) => {
         this.snackbar = true
-        this.snackMsg = data
+        this.snackMsg = data['message']
         this.snackSuccess = true
         this.snackError = false
         this.$validator.reset()
-        this.getApartaments()
+        let result = data['aptos']
+        for (let i in result) {
+          Object.assign(result[i], {'value': false })
+        }
+        this.datatable.items = result
       })
 
       eventBus.listen('apartamentUpdated',(data) => {
@@ -190,7 +193,6 @@
         newOneApartament: false,
         editApartament: false,
         deleteApartament: false,
-        seeApartament: false,
         apartamentData: '',
         aptos: [],
         apartamentsCsv: [],
@@ -229,9 +231,8 @@
       }
     },
     methods: {
-      getApartaments () {
-        this.datatable.loading = true
-        this.$http.get('api/apto?token='+ this.$auth.getToken())
+      getApartaments: function() {
+        this.$http.get('api/apto/all?token='+ this.$auth.getToken())
           .then((response) => {
             console.log(response)
             this.datatable.loading = false
@@ -240,31 +241,36 @@
               Object.assign(result[i], {'value': false })
             }
             this.datatable.items = result
-        })
+          })
       },
-      createApartamentEvent () {
-        eventBus.fire('createApartamentSubmit', 'apartament-form')
+      createApartamentEvent: function() {
+        
+        eventBus.fire('createApartamentSubmit')
       },
-      editApto (data) {
+      editApto: function(data) {
+       
         this.editApartament = true
-        console.log("Edit user -> ", data)
-        eventBus.fire('getApartamentData', data)
+        console.log("Edit apartament -> ", data)
+        let aux = JSON.parse( JSON.stringify( data ) )
+        eventBus.fire('getApartamentData', aux)
       },
-      updateApartamentEvent () {
+      updateApartamentEvent: function() {
         eventBus.fire('updateApartamentSubmit')
       },
-      deleteApto (data) {
+      deleteApto: function(data) {
         this.deleteApartament = true
-        console.log("Delete user -> ", data)
-        eventBus.fire('deleteApartamentData', data)
+        console.log("Delete apartament -> ", data)
+        let aux = JSON.parse( JSON.stringify( data ) )
+        eventBus.fire('deleteApartamentData', aux)
       },
-      deleteApartamentEvent () {
+      deleteApartamentEvent: function() {
+       
         eventBus.fire('deleteApartamentSubmit')
       },
-      seeApto (data) {
-        console.log("See User -> ", data)
-        this.seeApartament = true
-        this.apartamentData = data
+      seeApto: function(data) {
+        
+        console.log("See Apartament -> ", data)
+        this.$router.push(`/aptos/${data.number}`)
       },
       componentSelector (param) {
         this.selectedComponent = param

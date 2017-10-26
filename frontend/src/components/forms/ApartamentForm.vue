@@ -1,5 +1,5 @@
 <template>
- <form data-vv-scope="scopeValidation">
+ <form>
    <v-layout row>
      <v-flex x6 sm6 md6>
        <v-text-field
@@ -29,20 +29,20 @@
      </v-flex>
    </v-layout>
    <v-layout row>
-     <v-flex x4 sm4 md4>
-       <v-text-field
-         name="input-vacancy"
-         v-model="apartament.vacancy"
-         label="Qtde. de Vagas"
-         class="input-group"
-         :error-messages="errors.collect('vagas')"
-         v-validate="'required|numeric'"
-         data-vv-name="vagas"
-         required
-       >
-       </v-text-field>
-     </v-flex>
-     <v-flex x4 sm4 md4>
+     <!--<v-flex x4 sm4 md4>-->
+       <!--<v-text-field-->
+         <!--name="input-vacancy"-->
+         <!--v-model="apartament.vacancy"-->
+         <!--label="Qtde. de Vagas"-->
+         <!--class="input-group"-->
+         <!--:error-messages="errors.collect('vagas')"-->
+         <!--v-validate="'required|numeric'"-->
+         <!--data-vv-name="vagas"-->
+         <!--required-->
+       <!--&gt;-->
+       <!--</v-text-field>-->
+     <!--</v-flex>-->
+     <v-flex x12 sm6 md6>
        <v-text-field
          name="input-block"
          v-model="apartament.block"
@@ -55,7 +55,7 @@
        >
        </v-text-field>
      </v-flex>
-     <v-flex x4 sm4 md4>
+     <v-flex x12 sm6 md6>
        <v-text-field
          name="input-building"
          v-model="apartament.building"
@@ -89,18 +89,14 @@
     computed: {
       number () {
         return this.apartament.number
-      },
-      capacity () {
-        return this.apartament.capacity
       }
     },
     watch: {
       number (value) {
-        this.apartament.block = value ? value.toString().substr(0,2) : ''
-        this.apartament.building = value ? value.toString().substr(0,1) : ''
-      },
-      capacity (value) {
-        this.apartament.vacancy = value ? value.toString().substr(0,1) : ''
+        if(!this.editApto){
+          this.apartament.block = value ? value.toString().substr(0,2) : ''
+          this.apartament.building = value ? value.toString().substr(0,1) : ''
+        }
       }
     },
     data () {
@@ -110,42 +106,52 @@
         snackError: false,
         snackSuccess: false,
         snackMsg: '',
+        editApto: false,
         apartament: {
           number: '',
           block: '',
           building: '',
-          vacancy: '',
           capacity: '',
         }
       }
     },
     beforeCreate() {
-
       eventBus.listen('getApartamentData', data => {
-        this.apartament = data
+        this.apartament = data;
+        this.editApto = true
+      })
+
+      eventBus.listen('deleteApartamentData', data => {
+        this.apartament = data;
       })
       
-      eventBus.listen('createApartamentSubmit', (data) => {
-        this.createApartament(data)
+      eventBus.listen('createApartamentSubmit', () => {
+        this.createApartament()
       })
 
       eventBus.listen('updateApartamentSubmit', () => {
         this.updateApartament()
       })
 
+      eventBus.listen('deleteApartamentSubmit', () => {
+        this.deleteApartament()
+      })
+
       eventBus.listen('closeModal', () => {
         this.apartament = this.initialData()
-        this.$validator.errors.clear()
+        this.editApto = false
+        this.$validator.reset()
       })
     },
-//    beforeDestroy () {
-//      eventBus.$off('createApartamentSubmit')
-//      eventBus.$off('apartamentCreated')
-//      eventBus.$off('updateApartamentSubmit')
-//      eventBus.$off('apartamentUpdated')
-//      eventBus.$off('getAData')
-//      eventBus.$off('closeModal')
-//    },
+    destroyed () {
+      eventBus.$off('createApartamentSubmit')
+      eventBus.$off('apartamentCreated')
+      eventBus.$off('updateApartamentSubmit')
+      eventBus.$off('apartamentUpdated')
+      eventBus.$off('apartamentDeleted')
+      eventBus.$off('getApartamentData')
+      eventBus.$off('closeModal')
+    },
     methods: {
       initialData () {
         return {
@@ -156,8 +162,9 @@
           capacity: null
         }
       },
-      createApartament (data) {
-        this.$validator.validateAll(data).then(result => {
+      createApartament () {
+        this.editApto = false
+        this.$validator.validateAll().then(result => {
           if (!result) {
             console.log('Apartament Create -> validation failed.')
           } else {
@@ -166,7 +173,8 @@
             this.$http.post('api/apto/register?token='+ this.$auth.getToken(), this.apartament)
               .then( (response) => {
                 this.snackMsg = response.body.message
-                eventBus.fire('apartamentCreated', this.snackMsg)
+                let aptos = response.body.aptos
+                eventBus.fire('apartamentCreated', {'message' : this.snackMsg , 'aptos' : aptos})
                 eventBus.closeModal(true)
               }).catch( (response) => {
               this.snackbar = true
@@ -191,7 +199,8 @@
           console.log('something went wrong (non-validation related')
         })
       },
-      updateApartament () {
+      updateApartament: function() {
+        this.editApto = false
         this.$validator.validateAll().then(result => {
           if (!result) {
             console.log('Apartament Updated -> validation failed.')
@@ -201,6 +210,7 @@
             console.log(this.apartament)
             this.$http.put(`api/apto/${this.apartament.number}?token=`+ this.$auth.getToken(), this.apartament)
               .then( (response) => {
+                
                 this.snackMsg = response.body.message
                 let aptos = response.body.aptos
                 eventBus.fire('apartamentUpdated', {'message' : this.snackMsg , 'aptos' : aptos})
@@ -227,6 +237,32 @@
           }
         }).catch( () => {
           console.log('something went wrong (non-validation related')
+        })
+      },
+      deleteApartament () {
+        this.$http.delete(`api/apto/${this.apartament.number}?token=`+ this.$auth.getToken(), this.apartament.number)
+          .then( (response) => {
+            eventBus.closeModal(true)
+            this.snackMsg = response.body.message
+            eventBus.fire('apartamentDeleted', this.snackMsg)
+
+          }).catch( (response) =>  {
+          this.snackbar = true
+          let msg = ' '
+
+          if( response.body.errors ){
+            for( let i in response.body.errors){
+              response.body.errors[i].forEach( (item) => {
+                msg += item + '<br>'
+              })
+            }
+
+          }else {
+            msg = response.body.message
+          }
+          this.snackMsg = msg
+          this.snackSuccess = false
+          this.snackError = true
         })
       }
     }
