@@ -111,7 +111,7 @@
                   <v-btn class="green darken-1" fab dark small color="success" @click.stop="seeUser(props.item)">
                     <v-icon dark>zoom_in</v-icon>
                   </v-btn>
-                  <v-btn class="blue darken-1" fab dark small color="primary" @click.stop="editUser(props.item)">
+                  <v-btn class="blue darken-1" fab dark small color="primary" @click.stop.prevent="editUser(props.item)">
                     <v-icon dark>edit</v-icon>
                   </v-btn>
                   <v-btn class="red darken-1" fab dark small color="error" @click.stop="deleteUser(props.item)">
@@ -252,7 +252,7 @@
         this.$http.get('api/apto?token='+ this.$auth.getToken()).then((response) => {
           console.log(response)
           for (let i in response.body.aptos) {
-            this.aptos.push({'text' : response.body.aptos[i]['number'], 'id': response.body.aptos[i]['id']})
+            this.aptos.push({'text' : response.body.aptos[i]['number'] + ' - ' + response.body.aptos[i]['vacancy'] + ' vagas' , 'id': response.body.aptos[i]['id']})
           }
         })
       },
@@ -275,7 +275,8 @@
       editUser (data) {
         this.editStudent = true
         console.log("Edit user -> ", data)
-        eventBus.fire('getUserData', data)
+        let aux = JSON.parse( JSON.stringify( data ) )
+        eventBus.fire('getUserData', aux)
       },
       updateUserEvent () {
         eventBus.fire('updateUserSubmit')
@@ -283,7 +284,8 @@
       deleteUser (data) {
         this.deleteStudent = true
         console.log("Delete user -> ", data)
-        eventBus.fire('deleteUserData', data)
+        let aux = JSON.parse( JSON.stringify( data ) )
+        eventBus.fire('deleteUserData', aux)
       },
       deleteUserEvent () {
         eventBus.fire('deleteUserSubmit')
@@ -291,7 +293,8 @@
       seeUser (data) {
         console.log("See User -> ", data)
         this.seeStudent = true
-        this.studentData = data
+        let aux = JSON.parse( JSON.stringify( data ) )
+        this.studentData = aux
       },
       componentSelector (param) {
         this.selectedComponent = param

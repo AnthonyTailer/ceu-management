@@ -1,17 +1,19 @@
 <template>
   <v-layout row justify-center>
-    <v-dialog v-model="dialog" persistent width="80%" scrollable>
+    <v-dialog v-model="dialog" persistent width="100%">
       <!--<v-btn primary dark slot="activator">Open Dialog</v-btn>-->
       <v-card>
         <v-card-title>
-          <span class="headline"><slot name="titleModal"></slot></span>
+          <h5><slot name="titleModal"></slot></h5>
         </v-card-title>
-        <v-card-text>
-          <v-container grid-list-md>
+        <v-divider></v-divider>
+        <v-card-text class="modal-body">
+          <!--<v-container grid-list-md  class="fill-height">-->
               <!-- Conteudo principal do Modal-->
               <slot name="mainModal"></slot>
-          </v-container>
+          <!--</v-container>-->
         </v-card-text>
+        <v-divider></v-divider>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn class="grey lighten-1 black--text" dark @click.native="closeModal">Fechar</v-btn>

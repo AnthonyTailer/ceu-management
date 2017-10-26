@@ -1,6 +1,6 @@
 <template>
   <form data-vv-scope="user-form">
-    <v-layout row>
+    <v-layout row wrap>
       <v-flex x12 sm6 md6>
         <v-text-field
           name="input-fullName"
@@ -154,7 +154,7 @@
     beforeCreate () {
 
       eventBus.listen('getUserData', data => {
-        this.student = data
+        this.student = data;
         for(let i in this.courses) {
           if(this.courses[i].id === this.student.id_course){
             this.student.id_course = this.courses[i]
@@ -169,7 +169,7 @@
       })
 
       eventBus.listen('deleteUserData', data => {
-        this.student = data
+        this.student = data;
       })
 
       eventBus.listen('createUserSubmit', (data) => {
