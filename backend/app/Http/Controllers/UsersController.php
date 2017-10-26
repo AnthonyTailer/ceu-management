@@ -274,7 +274,7 @@ class UsersController extends Controller {
         }
         return response()->json([
             'response' => 'success',
-            'token' => $token
+            'token' => $token,
         ], 200);
     }
 
@@ -361,6 +361,7 @@ class UsersController extends Controller {
         }
     }
 
+
     /*Método que marca a notificão como lida*/
     /*Formato do JSON de entrada
         {
@@ -371,7 +372,6 @@ class UsersController extends Controller {
     /*Formato do JSON de saida
 
     */
-
     public function markAsRead(Request $request){
         $user = JWTAuth::toUser($request->token);
         $id_not = $request->input('id_notification');
