@@ -176,11 +176,19 @@ class ApartamentController extends Controller
         return response()->json(['message' => "Apartamento deletado com sucesso"], 200);
     }
 
+
+
+    /*Método que realiza a criação da notificação de troca de apartamento*/
+    /*Formato do JSON
+        {
+            "id_user" ---> referente ao id do usuário com quem o usuário logado deseja trocar de apto
+        }
+    */
     public function changeApto(Request $request){
 
         $user = JWTAuth::toUser($request->token);
         $user2 = User::find($request->input('id_user'));
 
-        $user->notify(new ChangeApto($user, $user2));
+        $user2->notify(new ChangeApto($user, $user2));
     }
 }

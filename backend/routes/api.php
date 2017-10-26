@@ -49,6 +49,14 @@ Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
     Route::delete('{id}', [
         'uses' => 'UsersController@deleteUser'
     ]);
+
+    Route::post('get-notifications',[
+        'uses' => 'UsersController@getNotifications'
+    ]);
+
+    Route::post('mark-read',[
+        'uses' => 'UsersController@markAsRead'
+    ]);
 });
 
 
@@ -113,6 +121,8 @@ Route::group(['prefix' => 'apto',  'middleware' => 'auth.jwt'], function () {
         'uses' => 'ApartamentController@deleteAptos'
     ]);
 
+
+    /*Rota referente a notificação de solicitação de troca de apartamento*/
     Route::post('/change-notify',[
         'uses' => 'ApartamentController@changeApto'
 
