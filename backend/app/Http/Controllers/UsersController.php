@@ -406,7 +406,7 @@ class UsersController extends Controller {
         }
         return response()->json([
             'response' => 'success',
-            'token' => $token
+            'token' => $token,
         ], 200);
     }
 
@@ -415,30 +415,29 @@ class UsersController extends Controller {
         return response()->json(['user' => $user]);
     }
 
-    public function getGenre(){
+    public function stats(){
+
+        /*Estatísticas sobre sexo*/
         $male = User::where('genre', "M")->get();
         $female = User::where('genre', "F")->get();
 
-        $total = count($male) + count($female);
+        $totalSexo = count($male) + count($female);
 
-        return response()->json([
-            'body' =>['Male' => count($male),
-                      'Female' => count($female)],
-                      'Total' => $total
-        ], 200);
-    }
-
-    public function getCoursesType(){
-
+        /*Estatísticas sobre tipo de graduação*/
         $graduation = DB::select( DB::raw("select c.type from courses as c inner join (users) on users.id_course = c.id and c.type = \"Graduação\";") );
         $mestrado = DB::select( DB::raw("select c.type from courses as c inner join (users) on users.id_course = c.id and c.type = \"Mestrado\";") );
 
-        $total = count($graduation) + count($mestrado);
+        $totalGraduacao = count($graduation) + count($mestrado);
 
+
+        /*Respostas*/
         return response()->json([
-            'body' =>['Graduation' => count($graduation),
-                      'Master' => count($mestrado)],
-                      'Total' => $total
+            'genre' =>['Male' => count($male),
+                    'Female' => count($female),
+                    'TotalGenre' => $totalSexo],
+            'courseType' =>['Graduation' => count($graduation),
+                    'Master' => count($mestrado),
+                    'TotalCourseType' => $totalGraduacao]
         ], 200);
     }
 
@@ -493,6 +492,7 @@ class UsersController extends Controller {
         }
     }
 
+
     /*Método que marca a notificão como lida*/
     /*Formato do JSON de entrada
         {
@@ -503,7 +503,6 @@ class UsersController extends Controller {
     /*Formato do JSON de saida
 
     */
-
     public function markAsRead(Request $request){
         $user = JWTAuth::toUser($request->token);
         $id_not = $request->input('id_notification');

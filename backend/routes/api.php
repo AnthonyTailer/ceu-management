@@ -69,6 +69,10 @@ Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
     Route::post('mark-read',[
         'uses' => 'UsersController@markAsRead'
     ]);
+
+    Route::get('stats', [
+        'uses' => 'UsersController@stats'
+    ]);
 });
 
 
@@ -89,13 +93,6 @@ Route::group(['prefix' => 'users',  'middleware' => 'auth.jwt'], function () {
        'uses' => 'UsersController@getUsersFromApto'
     ]);
 
-    Route::get('genre', [
-        'uses' => 'UsersController@getGenre'
-    ]);
-
-    Route::get('courseType', [
-        'uses' => 'UsersController@getCoursesType'
-    ]);
 });
 
 
