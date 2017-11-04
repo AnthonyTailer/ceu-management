@@ -41,6 +41,18 @@
               <v-avatar class="teal darken-4">{{students.length}}</v-avatar>
               {{students.length === 1 ? 'Morador' : 'Moradores' }}
             </v-chip>
+            <v-fab-transition v-if="apartament.vacancy > 0">
+              <v-btn class="info" @click.native.stop="addStudent = !addStudent"
+                dark
+                fab
+                fixed
+                bottom
+                right
+              >
+                <v-icon>add</v-icon>
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-fab-transition>
           </v-toolbar>
           <p class="mt-2 text-"><v-icon>info</v-icon> Para remover um aluno deste apto. basta clicar na lixeira correspondente.</p>
           <v-list three-line>
@@ -59,6 +71,10 @@
                   <v-btn class="red darken-1" fab dark small color="error" @click.native.stop="removeStudentFromApto(student.id)">
                     <v-icon dark>delete</v-icon>
                   </v-btn>
+                  <div class="mt-1"></div>
+                  <v-btn class="success darken-1" fab dark small color="info" @click.native.stop="switchStudentFromApto(student)">
+                    <v-icon dark>compare_arrows</v-icon>
+                  </v-btn>
                 </v-list-tile-action>
               </v-list-tile>
             </template>
@@ -67,15 +83,17 @@
       </v-flex>
     </v-layout>
     
-    <!---->
-    <!--<app-modal v-show="removeStudent" :dialog="removeStudent">-->
-      <!--<p slot="titleModal">Remover Aluno do Apartamento</p>-->
-      <!--<p slot="mainModal">-->
-        <!--Você deseja mesmo remover este Aluno deste Apartamento?-->
-      <!--</p>-->
-      <!--<v-btn class="white&#45;&#45;text red accent-3" dark slot="footerModal" @click.native.stop="">Remover</v-btn>-->
-    <!--</app-modal>-->
-    
+    <app-modal :dialog="addStudent" v-if="apartament.vacancy > 0">
+      <p slot="titleModal">Adicionar novo Aluno ao Apartamento {{apartament.number}}</p>
+      <app-apto-student slot="mainModal" :students="allStudents" :apto="apartament"></app-apto-student>
+      <v-btn class="white--text success accent-3" dark slot="footerModal" @click.native.stop="addStudentToApto">Adicionar</v-btn>
+    </app-modal>
+  
+    <app-modal :dialog="switchStudent">
+      <p slot="titleModal">Trocar Aluno de Apartamento</p>
+      <app-student-change-apto slot="mainModal" :student="oneStudent" :apto="apartament"></app-student-change-apto>
+      <v-btn class="white--text success accent-3" dark slot="footerModal" @click.native.stop="changeStudentApto">Trocar</v-btn>
+    </app-modal>
     
     <v-snackbar
       :timeout="8000"
@@ -92,6 +110,8 @@
 <script>
   import { eventBus } from '../main'
   import Modal from './shared/Modal.vue'
+  import AptoStudentForm from './forms/AptoStudentForm.vue'
+  import StudentChangeAptoForm from './forms/StudentAptoChangeForm.vue'
 
   export default {
     created () {
@@ -99,6 +119,21 @@
       console.log(this.$router.currentRoute)
 
       this.getApto()
+
+      eventBus.listen('closeModal', (data) => {
+        this.addStudent = data
+        this.switchStudent = data
+        this.allStudents = []
+      })
+      
+      eventBus.listen('userAddedToApto', (data) => {
+          this.snackbar = true
+          this.snackError = false
+          this.snackSuccess = true
+          this.snackMsg = data
+
+        this.getApto()
+      })
 
     },
     data () {
@@ -109,10 +144,37 @@
         snackMsg: '',
         apartament: '',
         students: '',
-        removeStudent: false
+        oneStudent: '',
+        removeStudent: false,
+        addStudent: false,
+        switchStudent: false,
+        allStudents: []
+      }
+    },
+    computed: {
+      addStudentValue () {
+        return this.addStudent
+      }
+    },
+    watch: {
+      addStudentValue (value) {
+        if(value)
+          this.getStudentsWithoutApto()
       }
     },
     methods: {
+      getStudentsWithoutApto () {
+        this.$http.get('api/users/noapto?token='+ this.$auth.getToken())
+          .then(response => {
+            console.log(response)
+            let result = response.body.data
+            for (let i = 0; i < result.length; i++) {
+              Object.assign(result[i], {'value': false })
+            }
+            this.allStudents = result
+            console.log('GET Users -> ',this.allStudents)
+          })
+      },
       getApto () {
         let apto = this.$router.currentRoute.path.split('/')
         this.$http.get(`api/apto/${apto[2]}?token=`+ this.$auth.getToken())
@@ -137,10 +199,22 @@
           this.snackSuccess = false
           this.snackError = true
         })
+      },
+      addStudentToApto () {
+        eventBus.fire('addStudentToApto')
+      },
+      changeStudentApto () {
+        eventBus.fire('changeStudentApto')
+      },
+      switchStudentFromApto (data) {
+        this.switchStudent = true
+        this.oneStudent = data
       }
     },
     components: {
-      appModal: Modal
+      appModal: Modal,
+      appAptoStudent: AptoStudentForm,
+      appStudentChangeApto: StudentChangeAptoForm,
     }
 
   }

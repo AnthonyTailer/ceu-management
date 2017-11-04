@@ -76,6 +76,11 @@ Route::group(['prefix' => 'users',  'middleware' => 'auth.jwt'], function () {
     Route::get('/', [
         'uses' => 'UsersController@getUsers'
     ]);
+
+    Route::get('/noapto', [
+        'uses' => 'UsersController@getUsersWithoutApto'
+    ]);
+
 });
 
 
