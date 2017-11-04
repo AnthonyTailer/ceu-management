@@ -183,6 +183,15 @@ class UsersController extends Controller {
         return response()->json($response, 200);
     }
 
+    public function getUsersFromApto($apto_id){
+        $users = User::where('id_apto', $apto_id)->with(['course', 'apto'])->get();
+        $response = [
+            'data' => $users
+        ];
+
+        return response()->json($response, 200);
+    }
+
     public function putUser(Request $request){
 
         $user = User::find($request['id']);
@@ -302,6 +311,74 @@ class UsersController extends Controller {
         if($user->update()){
             DB::table('apartaments')->where('id', $id_apto)->increment('vacancy', 1); //aumenta uma vaga
             return response()->json(['message' => "Usuário removido com sucesso do apartamento"], 200);
+        }
+    }
+
+    public function changeUserApto(Request $request){
+
+        $this->validate($request, [
+            'id' => 'required',
+            'id_apto' => 'required',
+            'option' => 'required'
+        ],[
+            'id.required' => "Você deve especificar o aluno",
+            'id_apto.required' => "Você deve especificar o apartamento de origem",
+            'option.required' => "Você deve escolher uma opção",
+        ]);
+
+        $user = User::find($request['id']);
+        $userApto = Apartament::find($request['id_apto']);
+        $newApto = Apartament::find($request['new_id_apto']);
+
+        if($request->input('option') === 'option-1'){
+            $this->validate($request,[
+                'new_id_apto' => 'required'
+            ],[
+                'new_id_apto.required' => 'Você deve selecionar um apartamento de destino'
+            ]);
+
+            if($request['id_apto'] === $request['new_id_apto']){
+                return response()->json(['message' => 'Selecione um apartamento diferente'], 500);
+            }else{
+
+                $user->id_apto = $request['new_id_apto'];
+
+                if($user->update()){
+                    DB::table('apartaments')->where('id', $userApto->id)->increment('vacancy', 1); //apartamento que saiu
+                    DB::table('apartaments')->where('id', $user->id_apto)->decrement('vacancy', 1); //apartamento que entrou
+                    return response()->json(['message' => "Aluno ". $user->fullName . " trocado para o apartamento ". $newApto->number], 200);
+                }else {
+                    return response()->json(['message' => "Erro ao alterar o apartamento do aluno"], 500);
+                }
+
+            }
+
+        }else if ($request->input('option') === 'option-2'){
+            $this->validate($request,[
+                'new_id_apto' => 'required',
+                'new_student' => 'required'
+            ],[
+                'new_id_apto.required' => 'Você deve selecionar um apartamento de destino',
+                'new_student.required' => 'Você não selecionou um aluno para a troca'
+            ]);
+
+            if($request['id_apto'] === $request['new_id_apto']){
+                return response()->json(['message' => 'Selecione um apartamento diferente'], 500);
+            }else {
+                $newUser = User::find($request['new_student']);
+
+                $user->id_apto = $newUser->id_apto;
+                $newUser->id_apto = $userApto->id;
+
+                if($user->update() && $newUser->update()){
+                    return response()->json(['message' => "Aluno ". $user->fullName . " trocado para o apartamento ". $newApto->number], 200);
+                }else{
+                    return response()->json(['message' => "Erro ao alterar o apartamento do aluno"], 500);
+                }
+            }
+
+        }else{
+            return response()->json(['message' => 'Opção inválida'], 404);
         }
     }
 
