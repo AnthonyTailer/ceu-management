@@ -347,11 +347,18 @@ class UsersController extends Controller {
         $totalSexo = count($male) + count($female);
 
         /*Estatísticas sobre tipo de graduação*/
-        $graduation = DB::select( DB::raw("select c.type from courses as c inner join (users) on users.id_course = c.id and c.type = \"Graduação\";") );
-        $mestrado = DB::select( DB::raw("select c.type from courses as c inner join (users) on users.id_course = c.id and c.type = \"Mestrado\";") );
+        $graduation = DB::select( DB::raw("select c.type from courses as c inner join (users) on users.id_course = c.id and c.type = \"Graduação\";"));
+        $mestrado = DB::select( DB::raw("select c.type from courses as c inner join (users) on users.id_course = c.id and c.type = \"Mestrado\";"));
 
         $totalGraduacao = count($graduation) + count($mestrado);
 
+
+        /*Estatísticas alunos sem aptos*/
+        $noApto = User::where('id_apto', Null)->get();
+
+        /*Estatísticas sobre bse*/
+        $noBSE = User::where('is_bse_active', 0)->get();
+        $yesBSE = User::where('is_bse_active', 1)->get();
 
         /*Respostas*/
         return response()->json([
@@ -360,7 +367,10 @@ class UsersController extends Controller {
                     'TotalGenre' => $totalSexo],
             'courseType' =>['Graduation' => count($graduation),
                     'Master' => count($mestrado),
-                    'TotalCourseType' => $totalGraduacao]
+                    'TotalCourseType' => $totalGraduacao],
+            'noApto' =>['noApto' => count($noApto)],
+            'bse' =>['bse_active' => count($yesBSE),
+                    'bse_inactive' => count($noBSE)]
         ], 200);
     }
 
