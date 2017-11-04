@@ -54,6 +54,10 @@ Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
         'uses' => 'UsersController@removeUserFromApto'
     ]);
 
+    Route::put('{id}/apto/{apto}', [
+        'uses' => 'UsersController@addUserToApto'
+    ]);
+
     Route::post('get-notifications',[
         'uses' => 'UsersController@getNotifications'
     ]);
@@ -71,6 +75,10 @@ Route::group(['prefix' => 'users',  'middleware' => 'auth.jwt'], function () {
 
     Route::get('/', [
         'uses' => 'UsersController@getUsers'
+    ]);
+
+    Route::get('/noapto', [
+        'uses' => 'UsersController@getUsersWithoutApto'
     ]);
 
     Route::get('genre', [

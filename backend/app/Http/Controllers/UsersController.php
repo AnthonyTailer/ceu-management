@@ -174,6 +174,15 @@ class UsersController extends Controller {
         return response()->json($response, 200);
     }
 
+    public function getUsersWithoutApto(){
+        $users = User::where('id_apto', null)->with(['course', 'apto'])->get();
+        $response = [
+            'data' => $users
+        ];
+
+        return response()->json($response, 200);
+    }
+
     public function putUser(Request $request){
 
         $user = User::find($request['id']);
@@ -256,6 +265,27 @@ class UsersController extends Controller {
 
         $user->delete();
         return response()->json(['message' => "Usuário deletado com sucesso"], 200);
+    }
+
+    public function addUserToApto($id, $apto){
+        $user = User::find($id);
+        $apartament = Apartament::where('number',$apto)->first();
+
+        if(empty($apartament) || empty($user)){
+            return response()->json(['message' => "Usuário ou Apartamento não encontrado"], 404);
+        }
+
+        if ($apartament->vacancy > 0) {
+            $user->id_apto = $apartament->id;
+
+            if($user->update()){
+                DB::table('apartaments')->where('id', $apartament->id)->decrement('vacancy', 1); //diminui uma vaga
+                return response()->json(['message' => "Usuário adicionado com sucesso ao apartamento ". $apartament->number], 200);
+            }
+        }else {
+            return response()->json(['message' => "O apartamento não possui vagas"], 403);
+        }
+
     }
 
     public function removeUserFromApto($id){
