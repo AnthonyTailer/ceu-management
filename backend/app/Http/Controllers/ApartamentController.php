@@ -76,7 +76,7 @@ class ApartamentController extends Controller
     }
 
     public function getAptos(){
-        $aptos = Apartament::get();
+        $aptos = Apartament::all();
 
         $response = [
             'aptos' => $aptos

@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->string('cpf', 11)->unique();
             $table->string('rg', 10)->unique();
-            $table->enum('genre', ['M', 'F']);
+                    $table->enum('genre', ['M', 'F']);
             $table->integer('age');
             $table->boolean('is_bse_active')->nullable();
             $table->boolean('is_admin');
