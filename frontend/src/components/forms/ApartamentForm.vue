@@ -143,15 +143,6 @@
         this.$validator.reset()
       })
     },
-    destroyed () {
-      eventBus.$off('createApartamentSubmit')
-      eventBus.$off('apartamentCreated')
-      eventBus.$off('updateApartamentSubmit')
-      eventBus.$off('apartamentUpdated')
-      eventBus.$off('apartamentDeleted')
-      eventBus.$off('getApartamentData')
-      eventBus.$off('closeModal')
-    },
     methods: {
       initialData () {
         return {

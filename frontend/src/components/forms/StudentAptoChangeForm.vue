@@ -4,7 +4,7 @@
       <v-flex xs12 sm6 md6>
         <v-text-field
           class="input-group"
-          v-model="student.fullName"
+          v-model="studentProp.fullName"
           label="Aluno"
           disabled
         ></v-text-field>
@@ -12,28 +12,59 @@
       <v-flex x12 sm6 md6>
         <v-text-field
           class="input-group"
-          v-model="apto.number"
+          v-model="aptoProp.number"
           label="Apartamento"
           disabled
         ></v-text-field>
       </v-flex>
     </v-layout>
     <v-layout row wrap>
-      <v-flex xs12 sm6 md6>
-        <v-text-field
-          class="input-group"
-          v-model="apto2"
-          label="Aluno"
-          disabled
-        ></v-text-field>
+      <v-flex xs12 md12>
+        <v-subheader>Escolha uma opção</v-subheader>
+        <v-card flat>
+          <v-card-text>
+            <v-radio-group v-model="option" row>
+              <v-radio label="Trocar para apto com vaga" value="option-1" ></v-radio>
+              <v-radio label="Trocar apartamento entre alunos" value="option-2"></v-radio>
+            </v-radio-group>
+          </v-card-text>
+        </v-card>
       </v-flex>
-      <v-flex xs12 sm6 md6>
-        <v-text-field
-          class="input-group"
-          v-model="student2"
-          label="Aluno"
-          disabled
-        ></v-text-field>
+    </v-layout>
+    <v-layout row wrap>
+      <v-flex xs12 md12 v-if="option === 'option-1'">
+        <v-flex x12 sm6 md6>
+          <v-select
+            class="input-group"
+            v-bind:items="vacancy_aptos"
+            v-model="newApto"
+            label="Novo Apartamento"
+            autocomplete
+          ></v-select>
+        </v-flex>
+      </v-flex>
+      <v-flex xs12 md12 v-if="option === 'option-2'">
+        <v-layout row wrap>
+          <v-flex x12 sm6 md6>
+            <v-select
+              class="input-group"
+              v-bind:items="aptos"
+              v-model="newApto2"
+              label="Apartamento"
+              autocomplete
+            ></v-select>
+          </v-flex>
+          <v-flex x12 sm6 md6>
+            <v-select
+              class="input-group"
+              v-bind:items="studentsFromApto"
+              v-model="newStudent"
+              label="Aluno"
+              autocomplete
+              :disabled="!selectedApto"
+            ></v-select>
+          </v-flex>
+        </v-layout>
       </v-flex>
     </v-layout>
     <v-snackbar
@@ -54,6 +85,32 @@
   export default {
     $validate: true,
     props: ['student', 'apto'],
+    computed: {
+      studentProp () {
+        return JSON.parse(JSON.stringify(this.student))
+      },
+
+      aptoProp () {
+        return JSON.parse(JSON.stringify(this.apto))
+      }
+    },
+    watch: {
+      option (value) {
+        if( value === 'option-1'){
+          this.getVacancyAptos()
+        }else if (value === 'option-2') {
+          this.getAptos()
+        }
+        else{
+        
+        }
+      },
+      
+      newApto2 (value) {
+        this.selectedApto = true
+        this.getStudentsFromApto(value.id)
+      }
+    },
     beforeCreate () {
 
       eventBus.listen('changeStudentApto', () => {
@@ -61,19 +118,18 @@
       })
 
       eventBus.listen('closeModal', (data) => {
-        this.student = this.initialData()
-        this.selectedStudent = {}
+        this.option = data
+        this.newApto = ''
+        this.newApto2 = ''
+        this.newStudent = ''
+        this.no_vacancy_aptos = []
+        this.aptos = []
+        this.vacancy_aptos = []
+        this.studentsFromApto = []
+        this.selectedApto = false
         this.$validator.reset()
       })
 
-    },
-    beforeDestroy () {
-      eventBus.$off('createUserSubmit')
-      eventBus.$off('userCreated')
-      eventBus.$off('updateUserSubmit')
-      eventBus.$off('userUpdated')
-      eventBus.$off('getUserData')
-      eventBus.$off('closeModal')
     },
     data () {
       return {
@@ -81,78 +137,110 @@
         snackError: false,
         snackSuccess: false,
         snackMsg: '',
-        student: {
-          fullName: '',
-          registration: '',
-          id_course: null,
-          id_apto: null,
-          age: null,
-          genre: 'M',
-          email: '',
-          rg: '',
-          cpf: '',
-          phone1: '',
-          is_bse_active: false,
-          is_admin: false
-        },
-        selectedStudent: {}
+        option: '',
+        selectedStudent: {},
+        selectedApto: false,
+        newApto: '',
+        newApto2: '',
+        newStudent: '',
+        aptos: [],
+        vacancy_aptos: [],
+        studentsFromApto: []
       }
     },
     methods: {
-      updateUserApto () { //TODO alterar funcção para adicionar apartamento
+      updateUserApto () {
         this.$validator.validateAll().then(result => {
           if (!result) {
-            console.log('User Updated -> validation failed.')
+            console.log('User Apto Updated -> validation failed.')
           } else {
-            console.log('User Update Submit')
+            console.log('User Apto Update Submit')
             this.$validator.reset()
-            let aux =  this.selectedStudent
-            console.log(aux)
             
-            this.$http.put(`api/user/${aux.id}/apto/${this.apto.number}?token=`+ this.$auth.getToken())
+            let data = {}
+            
+            if(this.option === 'option-1'){
+              data = {
+                option: 'option-1',
+                id: this.studentProp.id,
+                id_apto: this.aptoProp.id,
+                new_id_apto: this.newApto.id
+              }
+            }else if(this.option === 'option-2') {
+              data = {
+                option: 'option-2',
+                id: this.studentProp.id,
+                id_apto: this.aptoProp.id,
+                new_id_apto: this.newApto2.id,
+                new_student: this.newStudent.id
+              }
+            }else {
+              data = {
+                option: false,
+                id: this.studentProp.id,
+                id_apto: this.aptoProp.id
+              }
+            }
+            
+            this.$http.put(`api/user/apto/change?token=`+ this.$auth.getToken(), data)
               .then( (response) => {
                 this.snackMsg = response.body.message
-                eventBus.fire('userAddedToApto', this.snackMsg)
+                eventBus.fire('userChangedApto', this.snackMsg)
                 eventBus.closeModal(true)
 
               }).catch( (response) =>  {
-              this.snackbar = true
-              let msg = ' '
+                this.snackbar = true
+                let msg = ' '
 
-              if( response.body.errors ){
-                for( let i in response.body.errors){
-                  response.body.errors[i].forEach( (item) => {
-                    msg += item + '<br>'
-                  })
+                if( response.body.errors ){
+                  for( let i in response.body.errors){
+                    response.body.errors[i].forEach( (item) => {
+                      msg += item + '<br>'
+                    })
+                  }
+  
+                }else {
+                  msg = response.body.message
                 }
-
-              }else {
-                msg = response.body.message
-              }
-              this.snackMsg = msg
-              this.snackSuccess = false
-              this.snackError = true
+                this.snackMsg = msg
+                this.snackSuccess = false
+                this.snackError = true
             })
           }
         }).catch( () => {
           console.log('something went wrong (non-validation related')
         })
       },
-      initialData () {
-        return {
-          fullName: '',
-          registration: '',
-          id_course: null,
-          id_apto: null,
-          age: null,
-          genre: 'M',
-          email: '',
-          rg: '',
-          cpf: '',
-          phone1: '',
-          is_bse_active: false,
-          is_admin: false
-        }
+      getVacancyAptos () {
+        this.$http.get('api/apto?token='+ this.$auth.getToken()).then( (response) => {
+          for( let i in response.body.aptos) {
+            this.vacancy_aptos.push({
+              'text': response.body.aptos[i]['number'] + ' - ' + response.body.aptos[i]['vacancy'] + ' vagas',
+              'id': response.body.aptos[i]['id']
+            })
+          }
+        })
+      },
+      getAptos () {
+        this.$http.get('api/apto/with-students?token='+ this.$auth.getToken()).then( (response) => {
+          for( let i in response.body.aptos) {
+            this.aptos.push({
+              'text': response.body.aptos[i]['number'] + ' - ' + (response.body.aptos[i]['capacity'] - response.body.aptos[i]['vacancy']) + ' moradores',
+              'id': response.body.aptos[i]['id']
+            })
+          }
+        })
+      },
+      getStudentsFromApto (apto) {
+        this.studentsFromApto = []
+        this.$http.get(`api/users/from/${apto}?token=`+ this.$auth.getToken()).then( (response) => {
+          for( let i in response.body.data) {
+            this.studentsFromApto.push({
+              'text': response.body.data[i]['fullName'],
+              'id': response.body.data[i]['id']
+            })
+          }
+        })
       }
     }
   }

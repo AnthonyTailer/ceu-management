@@ -134,6 +134,15 @@
 
         this.getApto()
       })
+      
+      eventBus.listen('userChangedApto', (data) => {
+        this.snackbar = true
+        this.snackError = false
+        this.snackSuccess = true
+        this.snackMsg = data
+
+        this.getApto()
+      })
 
     },
     data () {

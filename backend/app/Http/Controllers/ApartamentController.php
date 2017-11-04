@@ -99,8 +99,18 @@ class ApartamentController extends Controller
     }
 
     public function getVacancyAptos(){
-        $aptos = DB::table('apartaments')
-            ->where('vacancy', '>', 0)
+        $aptos = Apartament::where('vacancy', '>', 0)
+            ->get();
+
+        $response = [
+            'aptos' => $aptos
+        ];
+
+        return response()->json($response, 200);
+    }
+
+    public function getAptosWithStudents() {
+        $aptos = Apartament::whereRaw('capacity > vacancy')
             ->get();
 
         $response = [
