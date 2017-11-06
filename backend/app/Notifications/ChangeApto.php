@@ -35,7 +35,7 @@ class ChangeApto extends Notification
      */
     public function via($notifiable)
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -65,7 +65,8 @@ class ChangeApto extends Notification
         return [
             'type' => "Apto Change",
             'from' => $this->user->id,
-            'to' => $this->user2->id
+            'to' => $this->user2->id,
+            'tonho' => "Leonardo"
         ];
     }
 

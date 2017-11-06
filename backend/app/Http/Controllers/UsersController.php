@@ -439,13 +439,13 @@ class UsersController extends Controller {
 
         /*Respostas*/
         return response()->json([
-            'genre' =>['Male' => count($male),
-                    'Female' => count($female),
-                    'TotalGenre' => $totalSexo],
-            'courseType' =>['Graduation' => count($graduation),
-                    'Master' => count($mestrado),
-                    'TotalCourseType' => $totalGraduacao],
-            'noApto' =>['noApto' => count($noApto)],
+            'genre' =>['male' => count($male),
+                    'female' => count($female),
+                    'total' => $totalSexo],
+            'course' =>['graduation' => count($graduation),
+                    'master' => count($mestrado),
+                    'total' => $totalGraduacao],
+            'apto' =>['no_apto' => count($noApto)],
             'bse' =>['bse_active' => count($yesBSE),
                     'bse_inactive' => count($noBSE)]
         ], 200);
@@ -481,19 +481,22 @@ class UsersController extends Controller {
     public function getNotifications(Request $request){
         $user = JWTAuth::toUser($request->token);
 
-        $response = Null;
-
+        $response = array();
+        $ids = array();
+        $notifications =array()
+;
         foreach ($user->notifications as $notification) {
             if(!$notification->read_at){
-                $response = array($notification->data);
-                $ids = array($notification->id);
+                #array_push($response, $notification->data);
+                #array_push($response, array_merge($notification->data,  $notification->id));
+                #array_push($ids, $notification->id);
+                array_push($notifications, array_merge($notification->data, ["id" => $notification->id]));
             }
         }
 
-        if($response){
+        if($notifications){
             return response()->json([
-                'Notifications' => $response,
-                'IDs' => $ids
+                'notifications' => $notifications,
             ]);
         }else{
             return response()->json([
