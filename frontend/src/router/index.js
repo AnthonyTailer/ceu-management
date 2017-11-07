@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Apartaments from '@/components/ApartamentManagement'
+import ApartamentsList from '@/components/ApartamentVacancyList'
 import Apartament from '@/components/ApartamentHome'
 import Students from '@/components/StudentManagement'
 import Dash from '@/components/Dash'
@@ -36,6 +37,12 @@ export default new Router({
       path: '/aptos',
       name: 'apartamentos',
       component: Apartaments,
+      meta: {forAuth: true}
+    },
+    {
+      path: '/aptos/vacancy',
+      name: 'apartamentos vagos',
+      component: ApartamentsList,
       meta: {forAuth: true}
     },
     {

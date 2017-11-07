@@ -19,9 +19,9 @@
       </v-flex>
     </v-layout>
     <v-divider class="mt-3 mb-3"></v-divider>
-    <v-layout row layout justify-left>
+    <v-layout row wrap layout justify-left>
       <v-flex x12 sm6 md6 v-for="i in charts">
-        <v-card :id="i.id"></v-card>
+        <v-card :id="i.id" class="ma-2"></v-card>
       </v-flex>
     </v-layout>
   </v-container>
@@ -30,7 +30,7 @@
 <script>
   export default {
     name: 'dash',
-    mounted () {
+    created () {
       this.getStats()
     },
     data () {
@@ -38,7 +38,7 @@
         quickAccess: [
           { title: 'Alunos', icon: 'face', description: "Gestão de Todos os alunos", route: '/alunos', badge: '' },
           { title: 'Todos Apartamentos', description: "Gestão de Todos os Apartamentos", icon: 'domain', route: '/aptos', badge: '' },
-          { title: 'Lista de Vagas', description: "Lista dos Apartamentos com vagas", icon: 'domain', route: '/aptos', badge: '' }
+          { title: 'Lista de Vagas', description: "Lista dos Apartamentos com vagas", icon: 'domain', route: '/aptos/vacancy', badge: '' }
         ],
         charts: [
           {
@@ -49,6 +49,16 @@
           {
             id: "aptos-chart",
             title: 'Alunos/Vagas e Qtde de Apartamentos',
+            data: []
+          },
+          {
+            id: "bse-chart",
+            title: 'Qtde de alunos com BSE Ativo/Inativo',
+            data: []
+          },
+          {
+            id: "courses-chart",
+            title: 'Porcetagem de alunos por curso',
             data: []
           }
         ]
@@ -73,18 +83,22 @@
               let dataChart = []
 
               if(i == "students"){
+
                 let total = data["students"]["total"]["value"]
                 let male = data["students"]["male"]
                 let female = data["students"]["female"]
 
-                dataChart.push({name: male.text, y: (male.value * 100) / total})
-                dataChart.push({name: female.text, y: (female.value * 100) / total})
+                dataChart = [
+                  {name: male.text, y: ((male.value * 100) / total) },
+                  {name: female.text, y: ((female.value * 100) / total) }
+                ]
 
                 this.charts[0].data = dataChart
 
                 this.$charts.pieChart(this.charts[0])
 
               }else if(i == "aptos"){
+
                 dataChart = [{
                   name: data["aptos"]["no_apto"]["text"],
                   data: [data["aptos"]["no_apto"]["value"]]
@@ -101,6 +115,39 @@
 
                 this.charts[1].data = dataChart
                 this.$charts.barChart(this.charts[1])
+                
+              }else if(i == "bse"){
+                
+                let total = data["bse"]["bse_active"]["value"] + data["bse"]["bse_inactive"]["value"]
+
+                dataChart = [{
+                    name: data["bse"]["bse_active"]["text"],
+                    data: [data["bse"]["bse_active"]["value"]]
+                  },{
+                    name: data["bse"]["bse_inactive"]["text"],
+                    data: [data["bse"]["bse_inactive"]["value"]]
+                  },{
+                    name: "Total",
+                    data: [total]
+                  }
+                ]
+
+                this.charts[2].data = dataChart
+                this.$charts.barChart(this.charts[2])
+
+              }else if (i == "courses") {
+                let total = data["courses"]["total"]["value"]
+                let graduation = data["courses"]["graduation"]
+                let master = data["courses"]["master"]
+
+                dataChart = [
+                  {name: graduation.text, y: ((graduation.value * 100) / total) },
+                  {name: master.text, y: ((master.value * 100) / total) }
+                ]
+
+                this.charts[3].data = dataChart
+
+                this.$charts.pieChart(this.charts[3])
               }
             }
 
