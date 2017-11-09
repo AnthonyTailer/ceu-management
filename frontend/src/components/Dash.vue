@@ -20,7 +20,7 @@
     </v-layout>
     <v-divider class="mt-3 mb-3"></v-divider>
     <v-layout row wrap layout justify-left>
-      <v-flex x12 sm6 md6 v-for="i in charts">
+      <v-flex x12 sm6 md6 v-for="(i, index) in charts" :key="index">
         <v-card :id="i.id" class="ma-2"></v-card>
       </v-flex>
     </v-layout>
@@ -30,7 +30,7 @@
 <script>
   export default {
     name: 'dash',
-    created () {
+    mounted () {
       this.getStats()
     },
     data () {

@@ -84,6 +84,7 @@
       <v-flex x12 sm6 md6>
         <v-select
           class="input-group"
+          name="input-course"
           :items="courses"
           v-model="student.id_course"
           label="Selecione o Curso do aluno"
@@ -94,6 +95,7 @@
       <v-flex x12 sm6 md6>
         <v-select
           class="input-group"
+          name="input-apto"
           v-bind:items="aptos"
           v-model="student.id_apto"
           label="Apartamento"
@@ -151,21 +153,29 @@
   export default {
     $validate: true,
     props: ['courses', 'aptos'],
-    beforeCreate () {
+    
+    mounted () {
 
       eventBus.listen('getUserData', data => {
+        
         this.student = data;
+        
+        let id_course = this.student.id_course
+        let id_apto = this.student.id_apto
+        
         for(let i in this.courses) {
-          if(this.courses[i].id === this.student.id_course){
+          if(this.courses[i].id === id_course){
             this.student.id_course = this.courses[i]
           }
         }
 
         for(let i in this.aptos) {
-          if(this.aptos[i].id === this.student.id_apto){
+          if(this.aptos[i].id === id_apto){
             this.student.id_apto = this.aptos[i]
           }
         }
+
+        console.log(this.student)
       })
 
       eventBus.listen('deleteUserData', data => {
@@ -183,20 +193,12 @@
       eventBus.listen('deleteUserSubmit', () => {
         this.deleteUser()
       })
-      
+
       eventBus.listen('closeModal', (data) => {
         this.student = this.initialData()
         this.$validator.reset()
       })
 
-    },
-    beforeDestroy () {
-      eventBus.$off('createUserSubmit')
-      eventBus.$off('userCreated')
-      eventBus.$off('updateUserSubmit')
-      eventBus.$off('userUpdated')
-      eventBus.$off('getUserData')
-      eventBus.$off('closeModal')
     },
     data () {
       return {
@@ -207,7 +209,7 @@
         student: {
           fullName: '',
           registration: '',
-          id_course: null,
+          id_course: [],
           id_apto: null,
           age: null,
           genre: 'M',
@@ -268,15 +270,15 @@
           } else {
             console.log('User Update Submit')
             this.$validator.reset()
-            let aux =  this.student
-            aux.id_course = this.student.id_course.id
-            aux.id_apto = this.student.id_apto.id
-            this.$http.put(`api/user/${this.student.id}?token=`+ this.$auth.getToken(), aux)
+            let aux =  JSON.parse( JSON.stringify( this.student ) )
+            aux.id_course = aux.id_course !== null ? aux.id_course.id : null
+            aux.id_apto = aux.id_apto !== null ? aux.id_apto.id : null
+
+            this.$http.put(`api/user/${aux.id}?token=`+ this.$auth.getToken(), aux)
               .then( (response) => {
                 this.snackMsg = response.body.message
                 eventBus.fire('userUpdated', this.snackMsg)
                 eventBus.closeModal(true)
-
               }).catch( (response) =>  {
               this.snackbar = true
               let msg = ' '
@@ -287,7 +289,6 @@
                     msg += item + '<br>'
                   })
                 }
-
               }else {
                 msg = response.body.message
               }
@@ -308,29 +309,29 @@
             eventBus.fire('userDeleted', this.snackMsg)
 
           }).catch( (response) =>  {
-            this.snackbar = true
-            let msg = ' '
+          this.snackbar = true
+          let msg = ' '
 
-            if( response.body.errors ){
-              for( let i in response.body.errors){
-                response.body.errors[i].forEach( (item) => {
-                  msg += item + '<br>'
-                })
-              }
-  
-            }else {
-              msg = response.body.message
+          if( response.body.errors ){
+            for( let i in response.body.errors){
+              response.body.errors[i].forEach( (item) => {
+                msg += item + '<br>'
+              })
             }
-            this.snackMsg = msg
-            this.snackSuccess = false
-            this.snackError = true
+
+          }else {
+            msg = response.body.message
+          }
+          this.snackMsg = msg
+          this.snackSuccess = false
+          this.snackError = true
         })
       },
       initialData () {
         return {
           fullName: '',
           registration: '',
-          id_course: null,
+          id_course: [],
           id_apto: null,
           age: null,
           genre: 'M',

@@ -6,27 +6,27 @@
       <app-student slot="mainModal" :courses="courses" :aptos="aptos"></app-student>
       <v-btn class="white--text green accent-3" dark slot="footerModal" @click.prevent="createUserEvent">Salvar</v-btn>
     </app-modal>
-  
+    
     <app-modal v-if="seeStudent" :dialog="seeStudent">
       <p slot="titleModal">Mais informações do Aluno</p>
       <p slot="mainModal">
-          <strong>Nome Completo</strong>: {{this.studentData['fullName']}}<br>
-          <strong>E-mail</strong>: {{this.studentData['email']}}<br>
-          <strong>Matrícula</strong>: {{this.studentData['registration']}}<br>
-          <strong>Curso</strong>: {{this.studentData['course']['courseName']}}<br>
-          <strong>CPF</strong>: {{this.studentData['cpf']}}<br>
-          <strong>RG</strong>: {{this.studentData['rg']}}<br>
-          <strong>Tem Benefício</strong>: {{this.studentData['is_bse_active'] !== null && this.studentData['is_bse_active'] === 1 ? 'Sim' : 'Não' }}<br>
-          <strong>É da Diretoria</strong>: {{this.studentData['is_admin'] !== null && this.studentData['is_admin'] === 1  ? 'Sim' : 'Não' }}<br>
+        <strong>Nome Completo</strong>: {{this.studentData['fullName']}}<br>
+        <strong>E-mail</strong>: {{this.studentData['email']}}<br>
+        <strong>Matrícula</strong>: {{this.studentData['registration']}}<br>
+        <strong>Curso</strong>: {{this.studentData['course']['courseName']}}<br>
+        <strong>CPF</strong>: {{this.studentData['cpf']}}<br>
+        <strong>RG</strong>: {{this.studentData['rg']}}<br>
+        <strong>Tem Benefício</strong>: {{this.studentData['is_bse_active'] !== null && this.studentData['is_bse_active'] === 1 ? 'Sim' : 'Não' }}<br>
+        <strong>É da Diretoria</strong>: {{this.studentData['is_admin'] !== null && this.studentData['is_admin'] === 1  ? 'Sim' : 'Não' }}<br>
       </p>
     </app-modal>
-  
+    
     <app-modal v-show="editStudent" :dialog="editStudent">
       <p slot="titleModal">Edição de Aluno</p>
       <app-student slot="mainModal" :courses="courses" :aptos="aptos"></app-student>
       <v-btn class="white--text green accent-3" dark slot="footerModal" @click.prevent="updateUserEvent">Alterar</v-btn>
     </app-modal>
-  
+    
     <app-modal v-show="deleteStudent" :dialog="deleteStudent">
       <p slot="titleModal">Remover Aluno</p>
       <p slot="mainModal">
@@ -41,7 +41,7 @@
       <vue-xlsx-table slot="mainContent" class="ml-2" @on-select-file="handleSelectedFile">
         <span id="btn-import-csv" class="d-flex align-center"><i class="material-icons">attachment</i> Selecione um arquivo Excel</span>
       </vue-xlsx-table>
-      
+    
     </app-modal-full>
     <v-layout row wrap>
       <v-flex xs12>
@@ -101,7 +101,7 @@
             :search="datatable.search"
             class="elevation-1"
           >
-            <template slot="items" scope="props">
+            <template slot="items" slot-scope="props">
               <td class="text-xs-left">{{ props.item.fullName }}</td>
               <td class="text-xs-left">{{ props.item.email }}</td>
               <td class="text-xs-left">{{ props.item.registration }}</td>
@@ -127,7 +127,7 @@
         </div>
       </v-flex>
     </v-layout>
-  
+    
     <v-snackbar
       :timeout="8000"
       :error="snackError"
@@ -164,7 +164,7 @@
         this.manyResponse = []
         this.loading = false
       })
-      
+
       eventBus.listen('userCreated',(data) => {
         this.snackbar = true
         this.snackMsg = data
@@ -191,7 +191,10 @@
         this.$validator.reset()
         this.getUsers()
       })
-      
+
+    },
+    beforeDestroy () {
+
     },
     data () {
       return {
@@ -252,7 +255,7 @@
         this.$http.get('api/apto/all?token='+ this.$auth.getToken()).then((response) => {
           console.log(response)
           for (let i in response.body.aptos) {
-            this.aptos.push({'text' : response.body.aptos[i]['number'] + ' - ' + response.body.aptos[i]['vacancy'] + ' vagas' , 'id': response.body.aptos[i]['id']})
+            this.aptos.push({'text' : response.body.aptos[i]['number'] , 'id': response.body.aptos[i]['id']})
           }
         })
       },
@@ -275,8 +278,8 @@
       editUser (data) {
         this.editStudent = true
         console.log("Edit user -> ", data)
-        
-        eventBus.fire('getUserData', data)
+        let aux = JSON.parse( JSON.stringify( data ) )
+        eventBus.fire('getUserData', aux)
       },
       updateUserEvent () {
         eventBus.fire('updateUserSubmit')

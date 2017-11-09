@@ -83,7 +83,7 @@ class UsersController extends Controller {
             $apto = Apartament::find($request->input('id_apto'));
 
             if($apto){
-                if( $apto-> vacancy == 0 ) {
+                if( $apto->vacancy == 0 ) {
                     return response()->json([
                         'message' => 'Usuário não pode ser alocado a um apartamento sem vaga'
                     ],403);
@@ -195,14 +195,51 @@ class UsersController extends Controller {
     public function putUser(Request $request){
 
         $user = User::find($request['id']);
-        $userApto = Apartament::where('id', $user->id_apto)->first();
-
-
-        $newApto = Apartament::find($request->input('id_apto'));
 
         if(!$user){
             return response()->json(['message' => "Usuário não encontrado"], 404);
         }else {
+
+            if($user->id_apto !== null){ //ja tem apartamento
+
+                $userApto = Apartament::where('id', $user->id_apto)->first();
+
+                if($request->input('id_apto') !== null) { //ja possui apartamento ou troca de apartamento
+
+                    $newApto = Apartament::find($request->input('id_apto'));
+
+
+                    if ($userApto->id == $newApto->id){ //mesmo apartamento selecionado = não troca de apartamento
+                        ;
+                    } else { //apartamento diferente
+
+                        if( $newApto->vacancy == 0 ) { //verifica se possui vaga
+                            return response()->json([
+                                'message' => 'Usuário não pode ser alocado a um apartamento sem vaga'
+                            ],403);
+                        }else { //troca o usuário de apartamento -> TODO notificar o usuário da troca de apartamento
+
+                            DB::table('apartaments')->where('id', $userApto->id)->increment('vacancy', 1); //apartamento que saiu
+                            DB::table('apartaments')->where('id', $newApto->id)->decrement('vacancy', 1); //apartamento que entrou
+                        }
+                    }
+                } else { //novo apartamento vazio
+                    DB::table('apartaments')->where('id', $userApto->id)->increment('vacancy', 1); //apartamento que saiu
+                }
+            }else if ($user->id_apto == null && $request->input('id_apto') !== null) { // não tem apartamento e quer entrar em apto
+                $newApto = Apartament::find($request->input('id_apto'));
+
+                if( $newApto->vacancy == 0 ) { //verifica se possui vaga
+                    return response()->json([
+                        'message' => 'Usuário não pode ser alocado a um apartamento sem vaga'
+                    ],403);
+                }else { //troca o usuário de apartamento -> TODO notificar o usuário da troca de apartamento
+                    DB::table('apartaments')->where('id', $newApto->id)->decrement('vacancy', 1); //apartamento que entrou
+                }
+
+            }
+
+
             $this->validate($request, [
                 'fullName' => 'required',
                 'email' => 'required|email',
@@ -228,7 +265,6 @@ class UsersController extends Controller {
             ]);
 
             if($user->update([
-
                 'fullName' => $request->input('fullName'),
                 'email' => $request->input('email'),
                 'registration' => $request->input('registration'),
@@ -240,27 +276,8 @@ class UsersController extends Controller {
                 'is_admin' => $request->input('is_admin'),
                 'id_course' => $request->input('id_course'),
                 'id_apto' => $request->input('id_apto')
-            ])
-
-            )
-
-            if (!($userApto) AND ($newApto)){
-                $newApto->vacancy = $newApto->vacancy - 1;
-                $newApto->save();
-            }elseif(!($userApto->number == $newApto->number)) {
-
-                if ($userApto) {
-                    $userApto->vacancy = $userApto->vacancy + 1;
-                    $userApto->save();
-                }
-
-                if ($newApto) {
-                    $newApto->vacancy = $newApto->vacancy - 1;
-                    $newApto->save();
-                }
-            }
-
-            return response()->json(['message' => 'Usuário '.$user->fullName.' alterado com sucesso'], 200);
+            ]))
+                return response()->json(['message' => 'Usuário '.$user->fullName.' alterado com sucesso'], 200);
         }
     }
 
@@ -386,8 +403,8 @@ class UsersController extends Controller {
 
 
         $this->validate($request, [
-           'registration' => 'required',
-           'password' => 'required'
+            'registration' => 'required',
+            'password' => 'required'
         ]);
         $credentials = $request->only('registration', 'password');
         $token = null;
@@ -433,21 +450,34 @@ class UsersController extends Controller {
         /*Estatísticas alunos sem aptos*/
         $noApto = User::where('id_apto', Null)->get();
 
+        $vacancyApto = Apartament::sum('vacancy');
+        $totalAptos = Apartament::all()->count();
+
         /*Estatísticas sobre bse*/
         $noBSE = User::where('is_bse_active', 0)->get();
         $yesBSE = User::where('is_bse_active', 1)->get();
 
         /*Respostas*/
         return response()->json([
-            'genre' =>['male' => count($male),
-                    'female' => count($female),
-                    'total' => $totalSexo],
-            'course' =>['graduation' => count($graduation),
-                    'master' => count($mestrado),
-                    'total' => $totalGraduacao],
-            'apto' =>['no_apto' => count($noApto)],
-            'bse' =>['bse_active' => count($yesBSE),
-                    'bse_inactive' => count($noBSE)]
+            'students' =>[
+                'male' => ['text' => 'Masculino', 'value' => count($male)],
+                'female' => ['text' => 'Feminino', 'value' =>count($female)],
+                'total' => ['text' => 'Total', 'value' => $totalSexo]
+            ],
+            'courses' => [
+                'graduation' => ['text' => 'Graduação', 'value' => count($graduation)],
+                'master' => ['text' => 'Mestrado', 'value' => count($mestrado)],
+                'total' => ['text' => 'Total', 'value' => $totalGraduacao]
+            ],
+            'aptos' => [
+                'no_apto' => ['text' => 'Alunos sem apartamento', 'value' => count($noApto) ],
+                'vacancy' => ['text' => 'Qtde. de vagas', 'value' => $vacancyApto ],
+                'total' => ['text' => 'Total de apartamentos', 'value' => $totalAptos]
+            ],
+            'bse' =>[
+                'bse_active' => ['text' => 'Ativo', 'value' =>count($yesBSE)],
+                'bse_inactive' => ['text' => 'Inativo', 'value' => count($noBSE)]
+            ]
         ], 200);
     }
 
@@ -484,7 +514,7 @@ class UsersController extends Controller {
         $response = array();
         $ids = array();
         $notifications =array()
-;
+        ;
         foreach ($user->notifications as $notification) {
             if(!$notification->read_at){
                 #array_push($response, $notification->data);

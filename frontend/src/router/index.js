@@ -41,7 +41,7 @@ export default new Router({
     },
     {
       path: '/aptos/vacancy',
-      name: 'apartamentos vagos',
+      name: 'vagos',
       component: ApartamentsList,
       meta: {forAuth: true}
     },

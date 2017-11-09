@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-layout row class="mt-2" v-for="apto in vacancy_aptos">
+    <v-layout row class="mt-2" v-for="(apto, i) in vacancy_aptos" :key="i">
       <v-flex xs12 sm8 offset-sm2>
         <v-card>
           <v-toolbar dark class="cyan">
@@ -48,8 +48,8 @@
     methods: {
       getVacancyAptos () {
         this.$http.get('api/apto?token='+ this.$auth.getToken()).then( (response) => {
+          console.log(response)
           for( let i in response.body.aptos) {
-            console.log(response)
             this.vacancy_aptos.push(response.body.aptos[i])
           }
         })

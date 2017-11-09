@@ -87,7 +87,7 @@
             :search="datatable.search"
             class="elevation-1"
           >
-            <template slot="items" scope="props">
+            <template slot="items" slot-scope="props">
               <td class="text-xs-left">{{ props.item.number }}</td>
               <td class="text-xs-left">{{ props.item.capacity }}</td>
               <td class="text-xs-left">{{ props.item.vacancy }}</td>
@@ -244,7 +244,6 @@
           })
       },
       createApartamentEvent: function() {
-        
         eventBus.fire('createApartamentSubmit')
       },
       editApto: function(data) {
@@ -268,7 +267,6 @@
         eventBus.fire('deleteApartamentSubmit')
       },
       seeApto: function(data) {
-        
         console.log("See Apartament -> ", data)
         this.$router.push(`/aptos/${data.number}`)
       },
