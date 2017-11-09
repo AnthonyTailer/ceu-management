@@ -18,8 +18,9 @@ class CreateNotificationsTable extends Migration
             $table->string('type');
             $table->morphs('notifiable');
             $table->text('data');
-            $table->enum('priority', ['Low', 'Medium', 'High']);
+            $table->enum('priority', ['low', 'medium', 'high']);
             $table->timestamp('read_at')->nullable();
+            $table->timestamp('due_date')->nullable();
             $table->timestamps();
         });
     }

@@ -7,79 +7,71 @@ use Illuminate\Http\Request;
 
 class LaundryMachineController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
+
+    public function postLaundryMachine(Request $request){
+        $this->validate($request, [
+            'capacity' =>'required'
+        ],[
+            'capacity.required' => "Deve ser fornecida a capacidade de lavagem da máquina"
+        ]);
+
+
+        $machine = new LaundryMachine([
+            'capacity' => $request->input('capacity')
+        ]);
+
+        if($machine->save()){
+            return response()->json([
+                'message' => 'Máquina registrada com sucesso'
+            ],201);
+        }else{
+            return response()->json([
+                'message' => 'Erro ao criar máquina'
+            ],400);
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+    public function getLaundryMachines(){
+        $machines = LaundryMachine::all();
+
+        $response = [
+            'data' => $machines
+        ];
+
+        return response()->json($response, 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
+    public function getLaundryMachine($id){
+        $machine = LaundryMachine::where('id', $id)->first();
+
+        $response = [
+            'data' =>$machine
+        ];
+
+        return response()->json($response, 200);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\LaundryMachine  $laundryMachine
-     * @return \Illuminate\Http\Response
-     */
-    public function show(LaundryMachine $laundryMachine)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\LaundryMachine  $laundryMachine
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(LaundryMachine $laundryMachine)
-    {
-        //
-    }
+    public function putLaundryMachine(Request $request){
+        $this->validate($request, [
+            'capacity' =>'required'
+        ],[
+            'capacity.required' => "Deve ser fornecida a capacidade de lavagem da máquina"
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\LaundryMachine  $laundryMachine
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, LaundryMachine $laundryMachine)
-    {
-        //
-    }
+        $machine = LaundryMachine::where('id', $request->input('id'))->first;
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\LaundryMachine  $laundryMachine
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(LaundryMachine $laundryMachine)
-    {
-        //
+        if(!$machine){
+            return responss()->json("Não foi possível localizar esta máquina");
+        }
+
+        $machine->capacity = $request->input('capacity');
+
+        if($machine->save()){
+            return response()->json([
+                'message' => 'Máquina '.$machine['id'].' alterada com sucesso'
+            ], 200);
+        }
+
     }
 }

@@ -62,7 +62,7 @@ Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
         'uses' => 'UsersController@changeUserApto'
     ]);
 
-    Route::post('get-notifications',[
+    Route::get('get-notifications',[
         'uses' => 'UsersController@getNotifications'
     ]);
 
@@ -72,6 +72,10 @@ Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
 
     Route::get('stats', [
         'uses' => 'UsersController@stats'
+    ]);
+
+    Route::post('create-notification',[
+        'uses' => 'UsersController@createAlert'
     ]);
 });
 
@@ -95,6 +99,21 @@ Route::group(['prefix' => 'users',  'middleware' => 'auth.jwt'], function () {
 
 });
 
+
+Route::group(['prefix' => 'laundry', 'middleware' => 'auth.jwt'], function(){
+    Route::post('new-machine',[
+        'uses' => 'LaundryMachineController@postLaundryMachine'
+    ]);
+
+    Route::get('get-machines',[
+       'uses' => 'LaundryMachineController@getLaundryMachines'
+    ]);
+
+    Route::get('get-machine/{id}',[
+        'uses' => 'LaundryMachineController@getLaundryMachine'
+    ]);
+    
+});
 
 
 //apto routes
