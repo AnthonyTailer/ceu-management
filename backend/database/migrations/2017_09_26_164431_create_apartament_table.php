@@ -20,6 +20,7 @@ class CreateApartamentTable extends Migration
             $table->integer("capacity");
             $table->string('block');
             $table->string('building');
+            $table->enum('vacancy_type', ['M', 'F', 'MF']);
             $table->timestamps();
         });
     }

@@ -91,8 +91,22 @@
               <td class="text-xs-left">{{ props.item.number }}</td>
               <td class="text-xs-left">{{ props.item.capacity }}</td>
               <td class="text-xs-left">{{ props.item.vacancy }}</td>
+              <td class="text-xs-left">
+                <div class="tooltip" v-if="props.item.vacancy_type == 'M'" >
+                  <img src="/static/mars.png">
+                  <span class="tooltiptext">Vagas Masculinas</span>
+                </div>
+                <div class="tooltip" v-else-if="props.item.vacancy_type == 'F'">
+                  <img src="/static/venus.png">
+                  <span class="tooltiptext">Vagas Femininas</span>
+                </div>
+                <div class="tooltip" v-else>
+                  <img src="/static/genders.png">
+                  <span class="tooltiptext">Vagas Mistas</span>
+                </div>
+                
+              </td>
               <td class="text-xs-left">{{ props.item.block }}</td>
-              <td class="text-xs-left">{{ props.item.building }}</td>
               <td class="text-xs-left">
                 <div  class="ma-0 pa-0">
                   <v-btn class="green darken-1" fab dark small color="success" @click.stop="seeApto(props.item)">
@@ -219,8 +233,8 @@
             {value: 'number', text: 'Apartamento', align: 'left', color: ''},
             {value: 'capacity', text: 'Capacidade', align: 'left'},
             {value: 'vacancy', text: 'Vagas', align: 'left'},
+            {value: 'vacancy_type', text: 'Tipo de Vagas', align: 'left'},
             {value: 'block', text: 'Bloco', align: 'left'},
-            {value: 'building', text: 'Prédio', align: 'left'},
             {value: 'actions', text: 'Ações', align: 'left'}
           ]
         },

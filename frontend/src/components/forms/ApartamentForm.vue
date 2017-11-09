@@ -69,6 +69,15 @@
        </v-text-field>
      </v-flex>
    </v-layout>
+   <v-layout row wrap>
+     <v-flex x4 sm4 md4>
+       <v-radio-group  label="Gênero das Vagas" class="input-group" v-model="apartament.vacancy_type" :mandatory="false" row v-validate="'required'" :error-messages="errors.collect('Gênero das vagas')" data-vv-name="gênero das vagas">
+         <v-radio color="blue" label="Masculino" value="M"></v-radio>
+         <v-radio color="pink" label="Feminino" value="F"></v-radio>
+         <v-radio color="green" label="Misto" value="MF"></v-radio>
+       </v-radio-group>
+     </v-flex>
+   </v-layout>
    <v-snackbar
      :timeout="8000"
      :error="snackError"
@@ -112,6 +121,7 @@
           block: '',
           building: '',
           capacity: '',
+          vacancy_type: 'MF',
         }
       }
     },
@@ -150,6 +160,7 @@
           block: null,
           building: null,
           vacancy: null,
+          vacancy_type: null,
           capacity: null
         }
       },

@@ -18,13 +18,15 @@ class ApartamentController extends Controller
             'number' => 'required|unique:apartaments',
             'capacity' => 'required',
             'block' => 'required',
-            'building' => 'required'
+            'building' => 'required',
+            'vacancy_type' => 'required'
         ], [
             'number.required' => 'O Apartamento não foi informado.',
             'number.unique' => 'Este Apartamento já existe.',
             'capacity.required' => 'A capacidade do apartamento não foi informada.',
             'block.required' => 'O Bloco não foi informado',
             'building.required' => 'O Prédio não foi informado',
+            'vacancy_type.required' => 'Você deve informar o tipo de vaga do apartamento',
         ]);
 
         $apto = New Apartament([
@@ -32,7 +34,8 @@ class ApartamentController extends Controller
             'capacity' => (int)$request->input('capacity'),
             'vacancy' => (int)$request->input('capacity'),
             'block' => $request->input('block'),
-            'building' => $request->input('building')
+            'building' => $request->input('building'),
+            'vacancy_type' => $request->input('vacancy_type')
         ]);
 
         if( $apto->save() ) {
@@ -49,7 +52,8 @@ class ApartamentController extends Controller
             'capacity' => 'required',
             'vacancy' => 'required',
             'block' => 'required',
-            'building' => 'required'
+            'building' => 'required',
+            'vacancy_type' => 'required'
         ],
             [
                 'number.required' => 'O Apartamento não foi informado.',
@@ -57,6 +61,7 @@ class ApartamentController extends Controller
                 'vacancy.required' => 'A quantidade de vagas não foi informada.',
                 'block.required' => 'O Bloco não foi informado',
                 'building.required' => 'O Prédio não foi informado',
+                'vacancy_type.required' => 'Você deve informar o tipo de vaga do apartamento',
             ]);
 
         $apto = New Apartament([
@@ -64,7 +69,8 @@ class ApartamentController extends Controller
             'capacity' => $request->input('capacity'),
             'vacancy' => $request->input('vacancy'),
             'block' => $request->input('block'),
-            'building' => $request->input('building')
+            'building' => $request->input('building'),
+            'vacancy_type' => $request->input('vacancy_type')
         ]);
 
         if( $apto->save() ) {
@@ -127,13 +133,15 @@ class ApartamentController extends Controller
             'capacity' => 'required',
             'vacancy' => 'required',
             'block' => 'required',
-            'building' => 'required'
+            'building' => 'required',
+            'vacancy_type' => 'required'
         ], [
             'number.required' => 'O Apartamento não foi informado.',
             'capacity.required' => 'A capacidade do apartamento não foi informada.',
             'vacancy.required' => 'A quantidade de vagas não foi informada.',
             'block.required' => 'O Bloco não foi informado',
             'building.required' => 'O Prédio não foi informado',
+            'vacancy_type.required' => 'Você deve informar o tipo de vaga do apartamento',
         ]);
 
         $apto = Apartament::where('id', $request->input('id'))->first();
@@ -158,6 +166,7 @@ class ApartamentController extends Controller
 
         $apto->number = $request->input('number');
         $apto->block = $request->input('block');
+        $apto->vacancy_type = $request->input('vacancy_type');
         $apto->building = $request->input('building');
 
         if($oldCapacity < $newCapacity){

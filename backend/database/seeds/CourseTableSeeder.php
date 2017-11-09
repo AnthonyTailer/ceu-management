@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class AptoTableSeeder extends Seeder
+class CourseTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -11,6 +11,6 @@ class AptoTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(App\Apartament::class, 50)->create();
+        factory(App\Course::class, 40)->create();
     }
 }
