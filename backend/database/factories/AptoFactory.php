@@ -1,12 +1,17 @@
 <?php
 
-use Faker\Generator as Faker;
+$faker = \Faker\Factory::create('pt_BR');
 
-$factory->define(App\Apartament::class, function (Faker $faker) {
+$factory->define(App\Apartament::class, function () use ($faker) {
+
+    $capacity = $faker->randomElement([2, 6, 12]);
+    $number = strval($faker->unique()->numberBetween(1001,5010));
     return [
-        'number'=> $faker->unique()->numberBetween(1001,5010),
-        'capacity' => $faker->randomElement([2, 6]),
-        'vacancy' => $faker->numberBetween(0,1),
-        'id_block' => random_int(\DB::table('blocks')->min('id'), \DB::table('blocks')->max('id'))
+        'number'=> $number,
+        'capacity' => $capacity,
+        'vacancy' => $capacity,
+        'block' => $number[0] . $number[1],
+        'building' => $number[0],
+        'vacancy_type' => $faker->randomElement(['M', 'F', 'MF'])
     ];
 });

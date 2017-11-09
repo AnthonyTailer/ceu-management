@@ -54,7 +54,10 @@
               </v-btn>
             </v-fab-transition>
           </v-toolbar>
-          <p class="mt-2 text-"><v-icon>info</v-icon> Para remover um aluno deste apto. basta clicar na lixeira correspondente.</p>
+          <p v-if="students.length > 0" class="mt-3 ml-2"><v-icon>info</v-icon> Para <b>remover</b> um aluno deste apartamento basta clicar no icone <v-icon>delete</v-icon></p>
+          <p v-if="students.length > 0" class="mt-3 ml-2"><v-icon>info</v-icon> Para <b>trocar</b> um aluno de apartamento basta clicar na no ícone <v-icon>compare_arrows</v-icon></p>
+          <p v-if="students.length > 0" class="mt-3 ml-2"><v-icon>info</v-icon> Para <b>adicionar</b> um aluno ao apartamento basta clicar na no ícone <v-icon>add</v-icon></p>
+          <p v-if="students.length === 0" class="mt-3 ml-2"> Nenhum Morador no apartamento <v-icon>thumb_down</v-icon></p>
           <v-list three-line>
             <template v-for="student in students">
               <v-subheader v-text="student.fullName"></v-subheader>
