@@ -15,6 +15,7 @@ class CreateLaundryMachinesTable extends Migration
     {
         Schema::create('laundry_machines', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('capacity');
             $table->timestamps();
         });
     }

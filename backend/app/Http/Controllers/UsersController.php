@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Mail\Mailer;
 use Illuminate\Support\Facades\DB;
 use Gate;
+use App\Notifications\NotificationAlert;
 
 
 class UsersController extends Controller {
@@ -452,6 +453,31 @@ class UsersController extends Controller {
     }
 
 
+    public function createAlert(Request $request){
+        if($request->text){
+            if($request->input('to.type') == "user"){
+                $user = User::find($request->input('to.id'));
+                $user->notify(new NotificationAlert($request->text));
+            }elseif($request->input('to.type') == "apto"){
+                $users = User::where('id_apto' , $request->input('to.id'))->get();
+                foreach ($users as $user){
+                    $user->notify(new NotificationAlert($request->text));
+                }
+            }elseif($request->input('to.type') == "all"){
+                $users = User::all();
+                foreach ($users as $user){
+                    $user->notify(new NotificationAlert($request->text));
+                }
+            }
+        }else{
+            return response()->json([
+                "message" => "Campo de texto está faltando"
+            ],400);
+        }
+
+
+    }
+
     /*Verificar se esta é melhor forma para essa operação, quando e onde chamar esse método*/
     /*Método que realiza a busca de todas as notificações referentes ao usuário logado*/
     /*Formato do JSON de entrada
@@ -481,22 +507,17 @@ class UsersController extends Controller {
     public function getNotifications(Request $request){
         $user = JWTAuth::toUser($request->token);
 
-        $response = array();
-        $ids = array();
-        $notifications =array()
+        $notify =array()
 ;
         foreach ($user->notifications as $notification) {
             if(!$notification->read_at){
-                #array_push($response, $notification->data);
-                #array_push($response, array_merge($notification->data,  $notification->id));
-                #array_push($ids, $notification->id);
-                array_push($notifications, array_merge($notification->data, ["id" => $notification->id]));
+                array_push($notify, array_merge($notification->data, ["id" => $notification->id]));
             }
         }
 
-        if($notifications){
+        if($notify){
             return response()->json([
-                'notifications' => $notifications,
+                'notifications' => $notify,
             ]);
         }else{
             return response()->json([
@@ -525,4 +546,7 @@ class UsersController extends Controller {
         $notification->markAsRead();
 
     }
+
+
+
 }
