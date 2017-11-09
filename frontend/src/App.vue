@@ -41,11 +41,11 @@
       </v-btn>
       
       <div class="text-xs-center">
-        <v-menu open-on-hover top offset-y>
+        <v-menu open-on-hover right offset-y class="mr-0">
           <v-btn icon slot="activator">{{ user.name }} <v-icon>keyboard_arrow_down</v-icon></v-btn>
           <v-list>
-            <v-list-tile>
-              <v-list-tile-title @click="logout()">Sair</v-list-tile-title>
+            <v-list-tile style="cursor: pointer">
+              <v-icon>exit_to_app</v-icon><v-list-tile-title @click="logout()"> Sair</v-list-tile-title>
             </v-list-tile>
           </v-list>
         </v-menu>
@@ -96,7 +96,8 @@
         items: [
           { title: 'Home/Dashboard', icon: 'dashboard', route: '/dash' },
           { title: 'Alunos', icon: 'face', route: '/alunos' },
-          { title: 'Apartamentos/Blocos', icon: 'domain', route: '/aptos' }
+          { title: 'Apartamentos/Blocos', icon: 'domain', route: '/aptos' },
+          { title: 'Vagas', icon: 'domain', route: '/aptos/vacancy' }
         ],
         user: {
           name: ''
@@ -147,6 +148,11 @@
   
   .sideMenuItens {
     cursor: pointer
+  }
+
+  .sideMenuItens:hover {
+    background-color: #babaca;
+    color: #fff !important;
   }
   
   .input-group {

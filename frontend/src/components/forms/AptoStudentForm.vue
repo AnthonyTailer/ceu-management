@@ -74,7 +74,7 @@
         }
       }
     },
-    beforeCreate () {
+    updated () {
 
       eventBus.listen('addStudentToApto', () => {
         this.updateUserApto()

@@ -7,6 +7,7 @@ import VueResource from 'vue-resource'
 import VeeValidate, { Validator } from 'vee-validate'
 import pt from 'vee-validate/dist/locale/pt_BR.js'
 import Auth from './packages/auth/Auth.js'
+import Charts from './packages/charts/Charts.js'
 import {ServerTable} from 'vue-tables-2'
 import Vuetify from 'vuetify'
 import vueXlsxTable from 'vue-xlsx-table'
@@ -16,6 +17,7 @@ Vue.use(vueXlsxTable, {rABS: false})
 Vue.use(ServerTable, {}, false)
 Vue.use(VueResource)
 Vue.use(Auth)
+Vue.use(Charts)
 
 Vue.config.productionTip = false
 Vue.router = router
