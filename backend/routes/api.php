@@ -112,7 +112,14 @@ Route::group(['prefix' => 'laundry', 'middleware' => 'auth.jwt'], function(){
     Route::get('get-machine/{id}',[
         'uses' => 'LaundryMachineController@getLaundryMachine'
     ]);
-    
+
+    Route::put('update-machine/{id}',[
+        'uses' => 'LaundryMachineController@putLaundryMachine'
+    ]);
+
+    Route::post('new-booking',[
+        'uses' => 'LaundryMachineBookingController@postLMBooking'
+    ]);
 });
 
 
