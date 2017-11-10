@@ -13,15 +13,36 @@
           </v-toolbar>
           <v-divider></v-divider>
           <v-card-text>
-            <v-layout row>
-              <v-flex xs12 sm4>
+            <v-layout row fill-height class="d-flex align-center">
+              <v-flex xs12 sm3 >
                 <p><strong>Bloco</strong>: {{apartament.block}}</p>
               </v-flex>
-              <v-flex xs12 sm4>
+              <v-flex xs12 sm3 >
                 <p><strong>Pŕedio</strong>: {{apartament.building}}</p>
               </v-flex>
-              <v-flex xs12 sm4>
+              <v-flex xs12 sm3>
                 <p><strong>Capacidade</strong>: {{apartament.capacity}}</p>
+              </v-flex>
+              <v-flex x12 sm3>
+                <v-layout row>
+                  <v-flex xs6>
+                    <p><strong>Tipo de vagas</strong>:</p>
+                  </v-flex>
+                  <v-flex xs6>
+                    <div class="tooltip" v-if="apartament.vacancy_type == 'M'" >
+                      <img src="/static/mars.png">
+                      <span class="tooltiptext">Vagas Masculinas</span>
+                    </div>
+                    <div class="tooltip" v-else-if="apartament.vacancy_type == 'F'">
+                      <img src="/static/venus.png">
+                      <span class="tooltiptext">Vagas Femininas</span>
+                    </div>
+                    <div class="tooltip" v-else>
+                      <img src="/static/genders.png">
+                      <span class="tooltiptext">Vagas Mistas</span>
+                    </div>
+                  </v-flex>
+                </v-layout>
               </v-flex>
             </v-layout>
           </v-card-text>
@@ -54,10 +75,12 @@
               </v-btn>
             </v-fab-transition>
           </v-toolbar>
-          <p v-if="students.length > 0" class="mt-3 ml-2"><v-icon>info</v-icon> Para <b>remover</b> um aluno deste apartamento basta clicar no icone <v-icon>delete</v-icon></p>
-          <p v-if="students.length > 0" class="mt-3 ml-2"><v-icon>info</v-icon> Para <b>trocar</b> um aluno de apartamento basta clicar na no ícone <v-icon>compare_arrows</v-icon></p>
-          <p v-if="students.length > 0" class="mt-3 ml-2"><v-icon>info</v-icon> Para <b>adicionar</b> um aluno ao apartamento basta clicar na no ícone <v-icon>add</v-icon></p>
-          <p v-if="students.length === 0" class="mt-3 ml-2"> Nenhum Morador no apartamento <v-icon>thumb_down</v-icon></p>
+          <v-layout row justify-center>
+            <p v-if="students.length > 0" class="mt-3 ml-2"><v-icon>info</v-icon> Para <b>remover</b> um aluno deste apartamento basta clicar no icone <v-icon>delete</v-icon></p>
+          </v-layout>
+          <v-layout row justify-center><p v-if="students.length > 0" class="mt-3 ml-2"><v-icon>info</v-icon> Para <b>trocar</b> um aluno de apartamento basta clicar na no ícone <v-icon>compare_arrows</v-icon></p></v-layout>
+          <v-layout row justify-center><p v-if="students.length > 0" class="mt-3 ml-2"><v-icon>info</v-icon> Para <b>adicionar</b> um aluno ao apartamento basta clicar na no ícone <v-icon>add</v-icon></p></v-layout>
+          <v-layout row justify-center><p v-if="students.length === 0" class="mt-3 ml-2"> Nenhum Morador no apartamento <v-icon>thumb_down</v-icon></p></v-layout>
           <v-list three-line>
             <template v-for="student in students">
               <v-subheader v-text="student.fullName"></v-subheader>
