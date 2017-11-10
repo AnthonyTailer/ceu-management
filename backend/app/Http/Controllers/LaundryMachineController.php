@@ -59,10 +59,10 @@ class LaundryMachineController extends Controller
             'capacity.required' => "Deve ser fornecida a capacidade de lavagem da máquina"
         ]);
 
-        $machine = LaundryMachine::where('id', $request->input('id'))->first;
+        $machine = LaundryMachine::where('id', $request->input('id'))->first();
 
         if(!$machine){
-            return responss()->json("Não foi possível localizar esta máquina");
+            return response()->json("Não foi possível localizar esta máquina");
         }
 
         $machine->capacity = $request->input('capacity');
@@ -72,6 +72,9 @@ class LaundryMachineController extends Controller
                 'message' => 'Máquina '.$machine['id'].' alterada com sucesso'
             ], 200);
         }
+    }
 
+    public function deleteLaundryMachine(){
+        //TODO
     }
 }
