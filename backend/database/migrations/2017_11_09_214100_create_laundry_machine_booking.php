@@ -17,7 +17,7 @@ class CreateLaundryMachineBooking extends Migration
             $table->increments('id');
             $table->time('start');
             $table->time('end');
-            $table->dateTime('day');
+            $table->date('day');
 
             $table->integer('id_user')->unsigned();
             $table->integer('id_machine')->unsigned();

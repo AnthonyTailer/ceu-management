@@ -22,13 +22,11 @@ class LaundryMachineBookingController extends Controller
             'id_machine.required' => "Informe a máquina para a qual a reserva será feita"
         ]);
 
-        $startTime = strtotime($request->input('start'));
-        $endTime = strtotime($request->input('end'));
 
         $book = new LaundryMachineBooking([
-            'start' => $request->input('start'),
-            'end' => $request->input('end'),
-            'day' => $request->input('day'),
+            'start' => gmdate("H:i:s", strtotime($request->input('start'))),
+            'end' => gmdate("H:i:s", strtotime($request->input('end'))),
+            'day' => date_create_from_format('j/M/Y', $request->input('day')),
             'id_user' => $request->input('id_user'),
             'id_machine' => $request->input('id_machine'),
         ]);
