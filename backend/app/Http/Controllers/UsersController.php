@@ -537,23 +537,18 @@ class UsersController extends Controller {
     public function getNotifications(Request $request){
         $user = JWTAuth::toUser($request->token);
 
-        $notify =array()
-;
+        $notify =array();
         foreach ($user->notifications as $notification) {
             if(!$notification->read_at){
                 array_push($notify, array_merge($notification->data, ["id" => $notification->id]));
             }
         }
 
-        if($notify){
-            return response()->json([
-                'notifications' => $notify,
-            ]);
-        }else{
-            return response()->json([
-                'response' => 'Sem Notificações',
-            ]);
-        }
+        return response()->json([
+            'notifications' => $notify,
+            'count' => count($notify)
+        ]);
+
     }
 
 

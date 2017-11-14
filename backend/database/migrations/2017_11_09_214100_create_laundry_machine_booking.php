@@ -18,7 +18,7 @@ class CreateLaundryMachineBooking extends Migration
             $table->time('start');
             $table->time('end');
             $table->date('day');
-
+            $table->enum('week_day', ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom']);
             $table->integer('id_user')->unsigned();
             $table->integer('id_machine')->unsigned();
             $table->foreign('id_user')->references('id')->on('users')->onDelete("cascade");

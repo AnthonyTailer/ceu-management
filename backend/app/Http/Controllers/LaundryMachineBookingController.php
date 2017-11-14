@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\LaundryMachineBooking;
+use App\NoWorkingTime;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use DataTime;
 
 class LaundryMachineBookingController extends Controller
 {
@@ -23,18 +26,28 @@ class LaundryMachineBookingController extends Controller
         ]);
 
 
-        $book = new LaundryMachineBooking([
-            'start' => gmdate("H:i:s", strtotime($request->input('start'))),
-            'end' => gmdate("H:i:s", strtotime($request->input('end'))),
-            'day' => date_create_from_format('j/M/Y', $request->input('day')),
-            'id_user' => $request->input('id_user'),
-            'id_machine' => $request->input('id_machine'),
-        ]);
+        $isNotWorking = DB::table('no_working_times')
+            ->whereDate('day', $request->input('day'))
+            ->get();
 
-        if($book->save()){
-            return response()->json("Reserva efetuada com sucesso");
+
+        if(!$isNotWorking){
+            $book = new LaundryMachineBooking([
+                'start' => gmdate("H:i:s", strtotime($request->input('start'))),
+                'end' => gmdate("H:i:s", strtotime($request->input('end'))),
+                'day' => date_create_from_format('j/M/Y', $request->input('day')),
+                'id_user' => $request->input('id_user'),
+                'id_machine' => $request->input('id_machine'),
+            ]);
+
+            if($book->save()){
+                return response()->json("Reserva efetuada com sucesso");
+            }else{
+                return response()->json("Não foi possível efetuar a reserva");
+            }
         }else{
-            return response()->json("Não foi possível efetuar a reserva");
+            return response()->json("A lavanderia não funciona neste dia");
         }
+
     }
 }

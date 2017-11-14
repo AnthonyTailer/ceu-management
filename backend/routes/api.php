@@ -101,6 +101,8 @@ Route::group(['prefix' => 'users',  'middleware' => 'auth.jwt'], function () {
 
 
 Route::group(['prefix' => 'laundry', 'middleware' => 'auth.jwt'], function(){
+
+    /*Machines*/
     Route::post('new-machine',[
         'uses' => 'LaundryMachineController@postLaundryMachine'
     ]);
@@ -117,10 +119,28 @@ Route::group(['prefix' => 'laundry', 'middleware' => 'auth.jwt'], function(){
         'uses' => 'LaundryMachineController@putLaundryMachine'
     ]);
 
+
+    /*New booking*/
     Route::post('new-booking',[
         'uses' => 'LaundryMachineBookingController@postLMBooking'
     ]);
+
+    /*Working time*/
+    Route::post('new-working-time',[
+        'uses' => 'StandardWorkingTimeController@postStandardWorkingTime'
+    ]);
+
+    Route::get('get-working-time',[
+        'uses' => 'StandardWorkingTimeController@getWorkingTime'
+    ]);
+
+    /*No working Time*/
+    Route::post('no-working-time',[
+       'uses' => 'NoWorkingTimeController@postNoWorkingTime'
+    ]);
 });
+
+
 
 
 //apto routes
