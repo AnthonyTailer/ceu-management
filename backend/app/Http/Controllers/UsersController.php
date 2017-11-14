@@ -436,9 +436,7 @@ class UsersController extends Controller {
     public function isAdmin(Request $request){
         $user = JWTAuth::toUser($request->token);
 
-
-
-        return response()->json(['data' => base64_encode($user->is_admin)]);
+        return response()->json(['data' => $user->is_admin]);
     }
 
     public function stats(){

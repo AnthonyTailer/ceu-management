@@ -116,6 +116,8 @@
       this.user.name = localStorage.getItem('user') ? localStorage.getItem('user').split(' ')[0] + localStorage.getItem('user').split(' ')[1] : ''
       this.backgroundLogin = this.$router.currentRoute.name === 'login' ? '/static/back-login.jpg' : ''
       this.footer = this.$router.currentRoute.name !== 'login'
+      
+      this.$permissions.isAdmin();
     },
     updated () {
       console.log('updated menu')
