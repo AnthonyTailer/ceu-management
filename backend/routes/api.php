@@ -33,7 +33,7 @@ Route::post('/user/login', [
     'uses' => 'UsersController@login'
 ]);
 
-Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
+Route::group(['prefix' => 'user',  'middleware' => ['auth.jwt']], function () {
     Route::get('/', [
         'uses' => 'UsersController@getAuthUser'
     ]);
@@ -76,6 +76,10 @@ Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
 
     Route::post('create-notification',[
         'uses' => 'UsersController@createAlert'
+    ]);
+
+    Route::get('is-admin',[
+        'uses' => 'UsersController@isAdmin'
     ]);
 });
 

@@ -433,6 +433,14 @@ class UsersController extends Controller {
         return response()->json(['user' => $user]);
     }
 
+    public function isAdmin(Request $request){
+        $user = JWTAuth::toUser($request->token);
+
+
+
+        return response()->json(['data' => base64_encode($user->is_admin)]);
+    }
+
     public function stats(){
 
         /*Estatísticas sobre sexo*/
