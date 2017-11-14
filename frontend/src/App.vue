@@ -44,27 +44,28 @@
           :nudge-width="200"
           v-model="menu"
         >
-          <v-btn icon class="mr-5" slot="activator">
-            <v-icon large v-badge="{ value: user.notifications , left: true}" class="red--after">mail</v-icon>
-          </v-btn>
-          <v-card>
-            <v-list>
-              <v-list-tile avatar>
-                <v-list-tile-action>
-                  <v-icon large v-badge="{ value: user.notifications }" class="red--after"></v-icon>
-                </v-list-tile-action>
-                <v-list-tile-content>
-                  <v-list-tile-title>Notificações não lidas</v-list-tile-title>
-                </v-list-tile-content>
-              </v-list-tile>
-            </v-list>
-            <v-divider></v-divider>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn flat @click="menu = false">Fechar</v-btn>
-              <v-btn class="primary--text" flat @click="seeNotifications()">Ver Notificações</v-btn>
-            </v-card-actions>
-          </v-card>
+            <v-btn icon class="mr-5" slot="activator">
+              <v-icon v-if="user.notifications.length > 0" large v-badge="{ value: user.notifications.length , left: true}" class="red--after">mail</v-icon>
+              <v-icon v-else large >mail_outline</v-icon>
+            </v-btn>
+            <v-card>
+              <v-list>
+                <v-list-tile avatar>
+                  <v-list-tile-action>
+                    <v-icon large v-badge="{ value: user.notifications.length }" class="red--after"></v-icon>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                    <v-list-tile-title>Notificações não lidas</v-list-tile-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+              </v-list>
+              <v-divider></v-divider>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn flat @click="menu = false">Fechar</v-btn>
+                <v-btn class="primary--text" flat @click="seeNotifications()">Ver Notificações</v-btn>
+              </v-card-actions>
+            </v-card>
         </v-menu>
       </div>
       
@@ -106,19 +107,19 @@
       })
       
       eventBus.listen("getUserNotifications", (data) => {
-        this.user.notifications = data.body.notifications.length
+        this.user.notifications = data.body.notifications
       })
     },
     created: function () {
       console.log(this.$router.currentRoute.name)
       console.log('created menu')
-      this.user.name = localStorage.getItem('user') ? localStorage.getItem('user').split(' ')[0] : ''
+      this.user.name = localStorage.getItem('user') ? localStorage.getItem('user').split(' ')[0] + localStorage.getItem('user').split(' ')[1] : ''
       this.backgroundLogin = this.$router.currentRoute.name === 'login' ? '/static/back-login.jpg' : ''
       this.footer = this.$router.currentRoute.name !== 'login'
     },
     updated () {
       console.log('updated menu')
-      this.user.name = localStorage.getItem('user') ? localStorage.getItem('user').split(' ')[0] : ''
+      this.user.name = localStorage.getItem('user') ? localStorage.getItem('user').split(' ')[0] + localStorage.getItem('user').split(' ')[1]: ''
       this.backgroundLogin = this.$router.currentRoute.name === 'login' ? '/static/back-login.jpg' : ''
       this.footer = this.$router.currentRoute.name !== 'login'
       
@@ -132,7 +133,8 @@
           { title: 'Home/Dashboard', icon: 'dashboard', route: '/dash' },
           { title: 'Alunos', icon: 'face', route: '/alunos' },
           { title: 'Apartamentos/Blocos', icon: 'domain', route: '/aptos' },
-          { title: 'Vagas', icon: 'domain', route: '/aptos/vacancy' }
+          { title: 'Vagas', icon: 'domain', route: '/aptos/vacancy' },
+          { title: 'Notificações/Alertas', icon: 'mail', route: '/notifications' }
         ],
         user: {
           name: '',
