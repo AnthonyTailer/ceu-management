@@ -6,6 +6,7 @@ import Apartament from '@/components/ApartamentHome'
 import Students from '@/components/StudentManagement'
 import Dash from '@/components/Dash'
 import Login from '@/components/Login'
+import Notifications from '@/components/Notifications'
 
 Vue.use(Router)
 
@@ -49,6 +50,12 @@ export default new Router({
       path: '/aptos/:number',
       name: 'apartamento',
       component: Apartament,
+      meta: {forAuth: true}
+    },
+    {
+      path: '/notifications',
+      name: 'notificacoes',
+      component: Notifications,
       meta: {forAuth: true}
     }
   ]
