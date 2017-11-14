@@ -28,10 +28,12 @@
 </template>
 
 <script>
+  import { eventBus } from '../main'
   export default {
     name: 'dash',
     mounted () {
       this.getStats()
+      this.getNotifications()
     },
     data () {
       return {
@@ -151,6 +153,12 @@
               }
             }
 
+          })
+      },
+      getNotifications () {
+        this.$http.get('api/user/get-notifications?token='+ this.$auth.getToken())
+          .then( (response) => {
+            eventBus.fire('getUserNotifications', response)
           })
       }
     }

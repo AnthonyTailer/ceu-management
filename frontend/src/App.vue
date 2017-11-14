@@ -36,9 +36,37 @@
       <v-toolbar-title>CEU II Management</v-toolbar-title>
       <v-spacer></v-spacer>
       
-      <v-btn icon class="mr-5">
-        <v-icon large v-badge="{ value: 6 , left: true}" class="red--after">mail</v-icon>
-      </v-btn>
+      <!--NOTIFICATION MENU-->
+      <div class="text-xs-center">
+        <v-menu
+          offset-x
+          :close-on-content-click="false"
+          :nudge-width="200"
+          v-model="menu"
+        >
+          <v-btn icon class="mr-5" slot="activator">
+            <v-icon large v-badge="{ value: user.notifications , left: true}" class="red--after">mail</v-icon>
+          </v-btn>
+          <v-card>
+            <v-list>
+              <v-list-tile avatar>
+                <v-list-tile-action>
+                  <v-icon large v-badge="{ value: user.notifications }" class="red--after"></v-icon>
+                </v-list-tile-action>
+                <v-list-tile-content>
+                  <v-list-tile-title>Notificações não lidas</v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </v-list>
+            <v-divider></v-divider>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn flat @click="menu = false">Fechar</v-btn>
+              <v-btn class="primary--text" flat @click="seeNotifications()">Ver Notificações</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-menu>
+      </div>
       
       <div class="text-xs-center">
         <v-menu open-on-hover right offset-y class="mr-0">
@@ -52,6 +80,7 @@
       </div>
     
     </v-toolbar>
+    
     <main fullscreen>
       <router-view></router-view>
     </main>
@@ -64,7 +93,9 @@
 
 <script>
   import { eventBus } from './main'
+  import VIcon from "../node_modules/vuetify/src/components/VIcon/VIcon.vue";
   export default {
+    components: {VIcon},
     mounted () {
       this.$nextTick(() => {
         window.addEventListener('resize', this.getWindowWidth)
@@ -72,6 +103,10 @@
 
         this.getWindowWidth()
         this.getWindowHeight()
+      })
+      
+      eventBus.listen("getUserNotifications", (data) => {
+        this.user.notifications = data.body.notifications.length
       })
     },
     created: function () {
@@ -100,10 +135,12 @@
           { title: 'Vagas', icon: 'domain', route: '/aptos/vacancy' }
         ],
         user: {
-          name: ''
+          name: '',
+          notifications: 0
         },
         mini: false,
         right: null,
+        menu: false,
         windowWidth: 0,
         windowHeight: 0
       }
@@ -121,6 +158,10 @@
       logout: function () {
         this.$auth.destroyToken()
         this.$router.push('/')
+      },
+      seeNotifications () {
+        this.menu = false
+        this.targetRoute('/notifications')
       }
     },
     watch: {
