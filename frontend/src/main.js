@@ -8,18 +8,18 @@ import VeeValidate, { Validator } from 'vee-validate'
 import pt from 'vee-validate/dist/locale/pt_BR.js'
 import Auth from './packages/auth/Auth.js'
 import Charts from './packages/charts/Charts.js'
-import Permissions from './packages/permissions/Permissions.js'
 import {ServerTable} from 'vue-tables-2'
 import Vuetify from 'vuetify'
 import vueXlsxTable from 'vue-xlsx-table'
 import 'vue-material-design-icons/styles.css'
+
+import { store } from './store/store'
 
 Vue.use(vueXlsxTable, {rABS: false})
 Vue.use(ServerTable, {}, false)
 Vue.use(VueResource)
 Vue.use(Auth)
 Vue.use(Charts)
-Vue.use(Permissions)
 
 Vue.config.productionTip = false
 Vue.router = router
@@ -44,17 +44,32 @@ Vue.http.interceptors.push((request, next) => {
 router.beforeEach(
   (to, from, next) => {
     if (to.matched.some(record => record.meta.forVisitors)) {
-      if (Vue.auth.isAuthenticated()) {
+      if (Vue.auth.isAuthenticated() && store.state.admin ) {
         next({
           path: '/dash'
         })
-      } else next()
+      } else if (Vue.auth.isAuthenticated() && !store.state.admin) {
+        next({
+          path: '/aptos/vacancy'
+        })
+      }
+      else next()
     } else if (to.matched.some(record => record.meta.forAuth)) {
       if (!Vue.auth.isAuthenticated()) {
         next({
           path: '/login'
         })
       } else next()
+    }
+    else if (to.matched.some(record => record.meta.forAdmin)) {
+      if (!Vue.auth.isAuthenticated()) {
+        next({
+          path: '/login'
+        })
+      } else if ( store.state.admin ) next()
+      else {
+        next( {path: from.path} )
+      }
     }
   }
 )
@@ -83,10 +98,12 @@ export const eventBus = new Vue({
   }
 })
 
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
   template: '<App/>',
-  components: { App }
+  components: { App },
+  store
 })

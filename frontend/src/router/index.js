@@ -26,19 +26,19 @@ export default new Router({
       path: '/dash',
       name: 'dash',
       component: Dash,
-      meta: {forAuth: true}
+      meta: {forAdmin: true}
     },
     {
       path: '/alunos',
       name: 'alunos',
       component: Students,
-      meta: {forAuth: true}
+      meta: {forAdmin: true}
     },
     {
       path: '/aptos',
       name: 'apartamentos',
       component: Apartaments,
-      meta: {forAuth: true}
+      meta: {forAdmin: true}
     },
     {
       path: '/aptos/vacancy',
@@ -50,7 +50,7 @@ export default new Router({
       path: '/aptos/:number',
       name: 'apartamento',
       component: Apartament,
-      meta: {forAuth: true}
+      meta: { forAdmin: true}
     },
     {
       path: '/notifications',

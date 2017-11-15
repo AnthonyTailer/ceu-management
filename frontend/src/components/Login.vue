@@ -63,7 +63,9 @@
   </v-container>
 </template>
 <script>
-  import { eventBus } from '../main'
+  import { eventBus, permissions } from '../main'
+  import { mapActions } from 'vuex'
+  import { mapGetters } from 'vuex'
   
   export default {
     $validates: true,
@@ -82,6 +84,9 @@
       }
     },
     methods: {
+      ...mapActions([
+        'isAdmin'
+      ]),
       submit () {
         this.$validator.validateAll()
           .then(result => {
@@ -106,7 +111,14 @@
                   ).then((response) => {
                     console.log(response)
                     localStorage.setItem('user', response.body.user.fullName)
-                    this.$router.push('/dash')
+                    
+                    this.isAdmin()
+                    
+                    if(!response.body.user.is_admin){
+                      this.$router.push('/aptos/vacancy')
+                    }else {
+                      this.$router.push('/dash')
+                    }
                   }).catch((error) => {
                     console.log(error)
                   })

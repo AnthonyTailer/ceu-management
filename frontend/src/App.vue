@@ -20,12 +20,44 @@
       </v-toolbar>
       <v-list class="pt-0" dense>
         <v-divider></v-divider>
-        <v-list-tile class="sideMenuItens" v-for="item in items" :key="item.title" @click.native="targetRoute(item.route)">
+        <v-list-tile class="sideMenuItens" v-if="getAdminState"  @click.native="targetRoute('/dash')">
           <v-list-tile-action>
-            <v-icon>{{ item.icon }}</v-icon>
+            <v-icon>dashboard</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
-            <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+            <v-list-tile-title>Home/Dashboard</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile class="sideMenuItens" v-if="getAdminState"  @click.native="targetRoute('/alunos')">
+          <v-list-tile-action>
+            <v-icon>face</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Alunos/Moradores</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile class="sideMenuItens" v-if="getAdminState"  @click.native="targetRoute('/aptos')">
+          <v-list-tile-action>
+            <v-icon>domain</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Apartamentos/Blocos</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile class="sideMenuItens"  @click.native="targetRoute('/aptos/vacancy')">
+          <v-list-tile-action>
+            <v-icon>domain</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Vagas</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile class="sideMenuItens"  @click.native="targetRoute('/notifications')">
+          <v-list-tile-action>
+            <v-icon>mail_outline</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Notificações/Alertas</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
@@ -44,28 +76,28 @@
           :nudge-width="200"
           v-model="menu"
         >
-            <v-btn icon class="mr-5" slot="activator">
-              <v-icon v-if="user.notifications.length > 0" large v-badge="{ value: user.notifications.length , left: true}" class="red--after">mail</v-icon>
-              <v-icon v-else large >mail_outline</v-icon>
-            </v-btn>
-            <v-card>
-              <v-list>
-                <v-list-tile avatar>
-                  <v-list-tile-action>
-                    <v-icon large v-badge="{ value: user.notifications.length }" class="red--after"></v-icon>
-                  </v-list-tile-action>
-                  <v-list-tile-content>
-                    <v-list-tile-title>Notificações não lidas</v-list-tile-title>
-                  </v-list-tile-content>
-                </v-list-tile>
-              </v-list>
-              <v-divider></v-divider>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn flat @click="menu = false">Fechar</v-btn>
-                <v-btn class="primary--text" flat @click="seeNotifications()">Ver Notificações</v-btn>
-              </v-card-actions>
-            </v-card>
+          <v-btn icon class="mr-5" slot="activator">
+            <v-icon v-if="user.notifications.length > 0" large v-badge="{ value: user.notifications.length , left: true}" class="red--after">mail</v-icon>
+            <v-icon v-else large >mail_outline</v-icon>
+          </v-btn>
+          <v-card>
+            <v-list>
+              <v-list-tile avatar>
+                <v-list-tile-action>
+                  <v-icon large v-badge="{ value: user.notifications.length }" class="red--after"></v-icon>
+                </v-list-tile-action>
+                <v-list-tile-content>
+                  <v-list-tile-title>Notificações não lidas</v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </v-list>
+            <v-divider></v-divider>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn flat @click="menu = false">Fechar</v-btn>
+              <v-btn class="primary--text" flat @click="seeNotifications()">Ver Notificações</v-btn>
+            </v-card-actions>
+          </v-card>
         </v-menu>
       </div>
       
@@ -86,17 +118,18 @@
       <router-view></router-view>
     </main>
     <!--<v-footer class="pa-3"  v-if="footer">-->
-      <!--<v-spacer></v-spacer>-->
-      <!--<div>© {{ new Date().getFullYear() }}</div>-->
+    <!--<v-spacer></v-spacer>-->
+    <!--<div>© {{ new Date().getFullYear() }}</div>-->
     <!--</v-footer>-->
   </v-app>
 </template>
 
 <script>
   import { eventBus } from './main'
-  import VIcon from "../node_modules/vuetify/src/components/VIcon/VIcon.vue";
+  import { mapGetters } from 'vuex'
+  import { mapActions } from 'vuex'
+
   export default {
-    components: {VIcon},
     mounted () {
       this.$nextTick(() => {
         window.addEventListener('resize', this.getWindowWidth)
@@ -105,39 +138,34 @@
         this.getWindowWidth()
         this.getWindowHeight()
       })
-      
+
       eventBus.listen("getUserNotifications", (data) => {
         this.user.notifications = data.body.notifications
       })
+
     },
     created: function () {
       console.log(this.$router.currentRoute.name)
       console.log('created menu')
+
       this.user.name = localStorage.getItem('user') ? localStorage.getItem('user').split(' ')[0] + localStorage.getItem('user').split(' ')[1] : ''
       this.backgroundLogin = this.$router.currentRoute.name === 'login' ? '/static/back-login.jpg' : ''
       this.footer = this.$router.currentRoute.name !== 'login'
       
-      this.$permissions.isAdmin();
+      this.isAdmin()
     },
     updated () {
       console.log('updated menu')
       this.user.name = localStorage.getItem('user') ? localStorage.getItem('user').split(' ')[0] + localStorage.getItem('user').split(' ')[1]: ''
       this.backgroundLogin = this.$router.currentRoute.name === 'login' ? '/static/back-login.jpg' : ''
       this.footer = this.$router.currentRoute.name !== 'login'
-      
+
     },
     data () {
       return {
         drawer: true,
         footer: false,
         backgroundLogin: '/static/back-login.jpg',
-        items: [
-          { title: 'Home/Dashboard', icon: 'dashboard', route: '/dash' },
-          { title: 'Alunos', icon: 'face', route: '/alunos' },
-          { title: 'Apartamentos/Blocos', icon: 'domain', route: '/aptos' },
-          { title: 'Vagas', icon: 'domain', route: '/aptos/vacancy' },
-          { title: 'Notificações/Alertas', icon: 'mail', route: '/notifications' }
-        ],
         user: {
           name: '',
           notifications: 0
@@ -150,6 +178,9 @@
       }
     },
     methods: {
+      ...mapActions([
+        'isAdmin'
+      ]),
       targetRoute: function (target) {
         return this.$router.push(target)
       },
@@ -166,7 +197,15 @@
       seeNotifications () {
         this.menu = false
         this.targetRoute('/notifications')
+      },
+      makeMenu () {
+      
       }
+    },
+    computed: {
+      ...mapGetters({
+        getAdminState: 'adminState'
+      })
     },
     watch: {
       windowWidth: function () {
@@ -194,18 +233,18 @@
   .sideMenuItens {
     cursor: pointer
   }
-
+  
   .sideMenuItens:hover {
     background-color: #babaca;
     color: #fff !important;
   }
-
+  
   /* Tooltip container */
   .tooltip {
     position: relative;
     display: inline-block;
   }
-
+  
   /* Tooltip text */
   .tooltip .tooltiptext {
     visibility: hidden;
@@ -215,12 +254,12 @@
     text-align: center;
     padding: 5px 0;
     border-radius: 6px;
-  
+    
     /* Position the tooltip text - see examples below! */
     position: absolute;
     z-index: 1;
   }
-
+  
   /* Show the tooltip text when you mouse over the tooltip container */
   .tooltip:hover .tooltiptext {
     visibility: visible;
