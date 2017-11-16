@@ -85,17 +85,20 @@
         <v-select
           class="input-group"
           name="input-course"
+          clearable
+          cache-items
           :items="courses"
-          v-model="student.id_course"
           label="Selecione o Curso do aluno"
           autocomplete
           required
+          v-model="student.id_course"
         ></v-select>
       </v-flex>
       <v-flex x12 sm6 md6>
         <v-select
           class="input-group"
           name="input-apto"
+          clearable
           v-bind:items="aptos"
           v-model="student.id_apto"
           label="Apartamento"
@@ -157,25 +160,33 @@
     mounted () {
 
       eventBus.listen('getUserData', data => {
-        
-        this.student = data;
-        
-        let id_course = this.student.id_course
-        let id_apto = this.student.id_apto
-        
-        for(let i in this.courses) {
-          if(this.courses[i].id === id_course){
-            this.student.id_course = this.courses[i]
+
+        let aux = JSON.parse( JSON.stringify( data ) )
+
+        this.student = aux;
+
+        let id_course = aux.id_course
+        let id_apto = aux.id_apto
+
+        let courses = this.courses
+        let aptos = this.aptos
+
+        let i, j;
+
+        for (i= 0; i <  courses.length; i++) {
+          if(courses[i]['id'] == id_course){
+            this.student.id_course = courses[i];
+            break
           }
         }
 
-        for(let i in this.aptos) {
-          if(this.aptos[i].id === id_apto){
-            this.student.id_apto = this.aptos[i]
+        for(j = 0; j <  aptos.length; j++) {
+          if(aptos[j]['id'] == id_apto){
+            this.student.id_apto = aptos[j]
+            break
           }
         }
 
-        console.log(this.student)
       })
 
       eventBus.listen('deleteUserData', data => {
@@ -209,7 +220,7 @@
         student: {
           fullName: '',
           registration: '',
-          id_course: [],
+          id_course: null,
           id_apto: null,
           age: null,
           genre: 'M',
@@ -268,11 +279,12 @@
           if (!result) {
             console.log('User Updated -> validation failed.')
           } else {
-            console.log('User Update Submit')
             this.$validator.reset()
             let aux =  JSON.parse( JSON.stringify( this.student ) )
             aux.id_course = aux.id_course !== null ? aux.id_course.id : null
             aux.id_apto = aux.id_apto !== null ? aux.id_apto.id : null
+
+            console.log('User Update Submit', aux)
 
             this.$http.put(`api/user/${aux.id}?token=`+ this.$auth.getToken(), aux)
               .then( (response) => {
@@ -331,8 +343,8 @@
         return {
           fullName: '',
           registration: '',
-          id_course: [],
-          id_apto: null,
+          id_course: {},
+          id_apto: {},
           age: null,
           genre: 'M',
           email: '',

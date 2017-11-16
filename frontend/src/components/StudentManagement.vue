@@ -16,8 +16,9 @@
         <strong>Curso</strong>: {{this.studentData['course']['courseName']}}<br>
         <strong>CPF</strong>: {{this.studentData['cpf']}}<br>
         <strong>RG</strong>: {{this.studentData['rg']}}<br>
-        <strong>Tem Benefício</strong>: {{this.studentData['is_bse_active'] !== null && this.studentData['is_bse_active'] === 1 ? 'Sim' : 'Não' }}<br>
-        <strong>É da Diretoria</strong>: {{this.studentData['is_admin'] !== null && this.studentData['is_admin'] === 1  ? 'Sim' : 'Não' }}<br>
+        <strong>Tem Benefício </strong>? {{this.studentData['is_bse_active'] !== null && this.studentData['is_bse_active'] === 1 ? 'Sim' : 'Não' }}<br>
+        <strong>É da Diretoria </strong>? {{this.studentData['is_admin'] !== null && this.studentData['is_admin'] === 1  ? 'Sim' : 'Não' }}<br>
+        <strong>Apartamento</strong>: {{this.studentData['apto'] !== null ? this.studentData['apto']['number'] : 'Nenhum Apartamento associado'}}<br>
       </p>
     </app-modal>
     
@@ -278,8 +279,8 @@
       editUser (data) {
         this.editStudent = true
         console.log("Edit user -> ", data)
-        let aux = JSON.parse( JSON.stringify( data ) )
-        eventBus.fire('getUserData', aux)
+//        let aux = JSON.parse( JSON.stringify( data ) )
+        eventBus.fire('getUserData', data)
       },
       updateUserEvent () {
         eventBus.fire('updateUserSubmit')
