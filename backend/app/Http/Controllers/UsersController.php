@@ -26,9 +26,7 @@ use App\Notifications\NotificationAlert;
 class UsersController extends Controller {
 
     /*
-     * TODO diminuir vags conforme cadastro se for designado apartamento
-     * TODO verifcar se ainda ha vagas para cadastrar usuarios naquele apartamneto
-     * TODO Adicionar telefone
+     * TODO Adicionar telefone ao usuário
     */
     public function postUser(Request $request) {
 
@@ -109,18 +107,22 @@ class UsersController extends Controller {
         $errors = Array();
         $success = Array();
         foreach ( $request->body as $key=>$value) {
-            $db_email = DB::table('users')->where('email', $value['email'])->value('email');
-            $db_registration = DB::table('users')->where('registration', $value['registration'])->value('registration');
+            try {
+                $db_email = DB::table('users')->where('email', $value['email'])->value('email');
+                $db_registration = DB::table('users')->where('registration', $value['registration'])->value('registration');
+            } catch (\Exception $exception) {
+                $errors[$key]["email"] = "O campo email não foi informado.";
+                $errors[$key]["registration"] = "O campo matrícula não foi informado.";
+            }
 
-
+            if( $value['email'] == null){
+                $errors[$key]["email"] = "O campo email não foi informado.";
+            }
+            if( $value['registration'] == null ){
+                $errors[$key]["registration"] = "O campo matrícula não foi informado.";
+            }
             if(!empty($db_email) || !empty($db_registration)){
                 continue;
-            }
-            if(empty($value['email'])){
-                $errors[$key]["email"] = "O campo email é obrigatório e deve ser preenchido.";
-            }
-            if(empty($value['registration'])){
-                $errors[$key]["registration"] = "O campo Matrícula é obrigatório e deve ser preenchido.";
             }
             if(empty($value['cpf'])){
                 $errors[$key]["cpf"] = "O campo CPF é obrigatório e deve ser preenchido.";
@@ -128,8 +130,51 @@ class UsersController extends Controller {
             if(empty($value['rg'])){
                 $errors[$key]["rg"] = "O RG é obrigatório e deve ser preenchido.";
             }
+            if(empty($value['genre'])){
+                $errors[$key]["genre"] = "O sexo é obrigatório e deve ser preenchido.";
+            }
+            if(empty($value['is_bse_active'])){
+                $errors[$key]["is_bse_active"] = "O BSE é obrigatório e deve ser preenchido.";
+            }
+            if(empty($value['is_admin'])){
+                $errors[$key]["is_admin"] = "Você deve informar se o aluno é da Diretoria ou não.";
+            }
+            if(empty($value['id_course'])){
+                $errors[$key]['id_course'] = "Você deve informar o Curso do Aluno.";
+            }
+            if(!empty($value['id_course'])){
+                DB::enableQueryLog();
+                $course = Course::where('courseName','LIKE', "%".$value['id_course']."%")->get();
+                $query = DB::getQueryLog();
+
+                if($course && count($course) > 1){
+
+                    $errors[$key]['id_course'] = "O curso informado não existe.\n";
+                    $errors[$key]['id_course'] .= "tente as seguintes entradas: \n";
+
+                    foreach ( $course as $i=>$val){
+                        $errors[$key]['id_course'] .= $val->courseName."\n";
+                    }
+
+                }else if ($course && count($course) == 1) {
+                    $value['id_course'] = $course->id;
+                }else {
+                    $errors[$key]['id_course'] = "O curso informado não existe.";
+                }
+            }
+            if(!empty($value['id_apto'])) {
+                $apto = Apartament::where('number', $value['id_apto'])->first();
+
+                if( $apto && $apto->vacancy > 0 ){
+                    $value['id_apto'] = $apto->id;
+                } else {
+                    $errors[$key]['id_apto'] = "O Apartamento informado não existe ou não possui vagas.";
+                }
+            }
             if(empty($errors[$key])){
+
                 $randomPass = str_random(8);
+
                 $user = new User([
                     'fullName' => $value['fullName'],
                     'email' => $value['email'],
@@ -137,11 +182,11 @@ class UsersController extends Controller {
                     'password' => bcrypt($randomPass),
                     'cpf' => $value['cpf'],
                     'rg' => $value['rg'],
-//                'genre' => $i['genre'],
-//                'is_bse_active' => $i['is_bse_active'],
-                    'is_admin' => false,
-//                'id_course' => $i['id_course'],
-//                'id_apto' => $i['id_apto']
+                    'genre' => $value['genre'],
+                    'is_bse_active' => strtoupper($value['is_bse_active']) === "SIM" ? 1 : 0,
+                    'is_admin' => strtoupper($value['is_admin']) === "SIM" ? 1 : 0,
+                    'id_course' => $value['id_course'],
+                    'id_apto' => $value['id_apto']
                 ]);
 
                 if($user->save()) {
@@ -194,6 +239,7 @@ class UsersController extends Controller {
     }
 
     public function putUser(Request $request){
+
 
         $user = User::find($request['id']);
 
@@ -487,7 +533,6 @@ class UsersController extends Controller {
             ]
         ], 200);
     }
-
 
     public function createAlert(Request $request){
         if($request->text){

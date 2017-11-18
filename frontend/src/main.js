@@ -44,11 +44,14 @@ Vue.http.interceptors.push((request, next) => {
 router.beforeEach(
   (to, from, next) => {
     if (to.matched.some(record => record.meta.forVisitors)) {
-      if (Vue.auth.isAuthenticated() && store.state.admin ) {
+      setTimeout(() => {
+
+      }, 500)
+      if (Vue.auth.isAuthenticated() && store.getters.adminState) {
         next({
           path: '/dash'
         })
-      } else if (Vue.auth.isAuthenticated() && !store.state.admin) {
+      } else if (Vue.auth.isAuthenticated() && !store.getters.adminState) {
         next({
           path: '/aptos/vacancy'
         })
@@ -62,13 +65,27 @@ router.beforeEach(
       } else next()
     }
     else if (to.matched.some(record => record.meta.forAdmin)) {
+
       if (!Vue.auth.isAuthenticated()) {
         next({
           path: '/login'
         })
-      } else if ( store.state.admin ) next()
+      }
       else {
-        next( {path: from.path} )
+        Vue.http.get('api/user/is-admin?token='+Vue.auth.getToken()).then( (response) => {
+          console.log(response)
+          let value = response.body.data
+
+          store.commit('isAdmin', value)
+
+          if(value){
+            next({path: to})
+          }else {
+            next({path: from})
+          }
+
+        })
+
       }
     }
   }

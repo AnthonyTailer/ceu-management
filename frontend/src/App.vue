@@ -103,10 +103,14 @@
       
       <div class="text-xs-center">
         <v-menu open-on-hover right offset-y class="mr-0">
-          <v-btn icon slot="activator">{{ user.name }} <v-icon>keyboard_arrow_down</v-icon></v-btn>
+          <v-btn icon slot="activator"><v-icon large>account_circle</v-icon><v-icon large>keyboard_arrow_down</v-icon></v-btn>
           <v-list>
-            <v-list-tile style="cursor: pointer">
-              <v-icon>exit_to_app</v-icon><v-list-tile-title @click="logout()"> Sair</v-list-tile-title>
+            <v-list-tile>
+              <v-list-tile-title><v-icon>perm_identity</v-icon> Olá! {{ user.name }}.</v-list-tile-title>
+            </v-list-tile>
+            <v-divider></v-divider>
+            <v-list-tile style="cursor: pointer" @click="logout()">
+              <v-icon>exit_to_app</v-icon><v-list-tile-title > Sair</v-list-tile-title>
             </v-list-tile>
           </v-list>
         </v-menu>
@@ -128,8 +132,16 @@
   import { eventBus } from './main'
   import { mapGetters } from 'vuex'
   import { mapActions } from 'vuex'
+  import VListTile from "vuetify/src/components/VList/VListTile";
+  import VDivider from "../node_modules/vuetify/src/components/VDivider/VDivider.vue";
 
   export default {
+    
+    computed: {
+      ...mapGetters({
+        getAdminState: 'adminState'
+      })
+    },
     mounted () {
       this.$nextTick(() => {
         window.addEventListener('resize', this.getWindowWidth)
@@ -147,18 +159,13 @@
     created: function () {
       console.log(this.$router.currentRoute.name)
       console.log('created menu')
-
-      this.user.name = localStorage.getItem('user') ? localStorage.getItem('user').split(' ')[0] + localStorage.getItem('user').split(' ')[1] : ''
-      this.backgroundLogin = this.$router.currentRoute.name === 'login' ? '/static/back-login.jpg' : ''
-      this.footer = this.$router.currentRoute.name !== 'login'
       
-      this.isAdmin()
+      this.backgroundLogin = this.$router.currentRoute.name === 'login' ? '/static/back-login.jpg' : ''
+      this.user.name = localStorage.getItem('user') ? localStorage.getItem('user').split(' ')[0] + ' ' + localStorage.getItem('user').split(' ')[1] : ''
     },
     updated () {
       console.log('updated menu')
-      this.user.name = localStorage.getItem('user') ? localStorage.getItem('user').split(' ')[0] + localStorage.getItem('user').split(' ')[1]: ''
       this.backgroundLogin = this.$router.currentRoute.name === 'login' ? '/static/back-login.jpg' : ''
-      this.footer = this.$router.currentRoute.name !== 'login'
 
     },
     data () {
@@ -178,9 +185,7 @@
       }
     },
     methods: {
-      ...mapActions([
-        'isAdmin'
-      ]),
+      
       targetRoute: function (target) {
         return this.$router.push(target)
       },
@@ -197,16 +202,9 @@
       seeNotifications () {
         this.menu = false
         this.targetRoute('/notifications')
-      },
-      makeMenu () {
-      
       }
     },
-    computed: {
-      ...mapGetters({
-        getAdminState: 'adminState'
-      })
-    },
+    
     watch: {
       windowWidth: function () {
         if (this.windowWidth <= 991) {

@@ -9,28 +9,26 @@ Vue.use(Auth)
 
 export const store = new Vuex.Store({
   state: {
-    admin: 0
+    admin: 0,
+    modal: false
   },
   getters: {
     adminState: state => {
       return state.admin
+    },
+    modalState: state => {
+      return state.modal
     }
   },
   mutations: {
     isAdmin: (state, value) => {
       state.admin = value
-    }
-  },
-  actions: {
-    isAdmin: ({ commit }) => {
-      let value = 0;
-
-      Vue.http.get('api/user/is-admin?token='+Vue.auth.getToken()).then( (response) => {
-        console.log(response)
-        value = response.body.data
-        commit('isAdmin', value)
-      })
-
-    }
+    },
+    openModal: (state) => {
+      state.modal = true
+    },
+    closeModal: (state) => {
+      state.modal = false
+    },
   }
 })

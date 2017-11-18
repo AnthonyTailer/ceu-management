@@ -38,7 +38,9 @@
     
     <app-modal-full v-if="newManyStudents" :dialogFull="newManyStudents" :loading="loading">
       <p slot="modalTitle activator">Cadastro de Alunos de um arquivo Excel</p>
-      
+      <v-btn slot="closeModalBtn" icon dark>
+        <v-icon>close</v-icon>
+      </v-btn>
       <vue-xlsx-table slot="mainContent" class="ml-2" @on-select-file="handleSelectedFile">
         <span id="btn-import-csv" class="d-flex align-center"><i class="material-icons">attachment</i> Selecione um arquivo Excel</span>
       </vue-xlsx-table>
@@ -50,17 +52,21 @@
           <!--<v-server-table url="api/users" :columns="columns" :options="options"></v-server-table>-->
           <v-toolbar class="teal lighten-1" extended>
             <v-card-title class="white--text headline"><v-icon dark>list</v-icon>&nbsp;Lista de todos os Moradores da CEU</v-card-title>
+            <v-spacer></v-spacer>
             <v-fab-transition>
               <v-bottom-sheet v-model="sheet">
-                <v-btn slot="activator" class="teal darken-4"
-                       dark
-                       fab
-                       absolute
-                       right
-                       bottom>
+                <v-btn
+                  slot="activator"
+                  class="teal darken-4"
+                  dark
+                  fab
+                  absolute
+                  right
+                  bottom
+                  icon
+                >
                   <v-icon>add</v-icon>
                 </v-btn>
-                <br>
                 <v-list>
                   <v-subheader>Escolha uma opção abaixo</v-subheader>
                   <v-list-tile
@@ -147,8 +153,24 @@
   import ModalFull from './shared/ModalFull.vue'
   import StudentForm from './forms/StudentForm.vue'
   import { eventBus } from '../main'
+  import { store } from '../store/store'
+  import { mapMutations } from 'vuex'
+  import { mapGetters } from 'vuex'
 
   export default {
+    computed: {
+      ...mapGetters([
+        'modalState'
+      ]),
+      pages () {
+        return this.datatable.pagination.rowsPerPage ? Math.ceil(this.datatable.items.length / this.datatable.pagination.rowsPerPage) : 0
+      }
+    },
+    components: {
+      appModal: Modal,
+      appStudent: StudentForm,
+      appModalFull: ModalFull
+    },
     created () {
       this.getUsers()
       this.getCourses()
@@ -317,16 +339,23 @@
 
         convertedData.body.forEach((item, index) => {
           obj['cpf'] = item['CPF']
-          obj['corse'] = item['Curso']
+          obj['id_course'] = item['Curso']
           obj['age'] = item['Idade']
+          obj['genre'] = item['Gênero']
+          obj['email'] = item['E-mail']
           obj['registration'] = item['Matrícula']
           obj['fullName'] = item['Nome Completo']
           obj['rg'] = item['RG']
           obj['phone'] = item['Telefone']
-          obj['email'] = item['email']
+          obj['is_bse_active'] = item['BSE Ativo']
+          obj['id_apto'] = item['Apartamento']
+          obj['is_admin'] = item['Diretoria'] !== null ? item['Diretoria'] : false
           this.studentsCsv.push(obj)
           obj = {}
         })
+        
+        console.log(this.studentsCsv)
+        debugger
 
         this.$http.post('api/users/register?token='+ this.$auth.getToken(),
           {body: this.studentsCsv}
@@ -365,16 +394,7 @@
         })
       }
     },
-    computed: {
-      pages () {
-        return this.datatable.pagination.rowsPerPage ? Math.ceil(this.datatable.items.length / this.datatable.pagination.rowsPerPage) : 0
-      }
-    },
-    components: {
-      appModal: Modal,
-      appStudent: StudentForm,
-      appModalFull: ModalFull
-    }
+   
   }
 </script>
 

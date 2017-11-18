@@ -63,9 +63,10 @@
   </v-container>
 </template>
 <script>
-  import { eventBus, permissions } from '../main'
+  import { eventBus } from '../main'
   import { mapActions } from 'vuex'
   import { mapGetters } from 'vuex'
+  import { store } from '../store/store'
   
   export default {
     $validates: true,
@@ -111,14 +112,14 @@
                   ).then((response) => {
                     console.log(response)
                     localStorage.setItem('user', response.body.user.fullName)
+
+                    store.commit('isAdmin', response.body.user.is_admin)
                     
-                    this.isAdmin()
-                    
-                    if(!response.body.user.is_admin){
+                    if(!response.body.user.is_admin)
                       this.$router.push('/aptos/vacancy')
-                    }else {
+                    else
                       this.$router.push('/dash')
-                    }
+                    
                   }).catch((error) => {
                     console.log(error)
                   })
