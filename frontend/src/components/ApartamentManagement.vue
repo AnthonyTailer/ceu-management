@@ -1,36 +1,34 @@
 <template>
   <v-container fluid>
-    
-    <app-modal v-show="newOneApartament" :dialog="newOneApartament">
-      <p slot="titleModal">Cadastro de novo Apartamento</p>
-      <app-apartament slot="mainModal"></app-apartament>
-      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.stop.prevent="createApartamentEvent">Salvar</v-btn>
-    </app-modal>
-  
-  
-    <app-modal v-show="editApartament" :dialog="editApartament">
-      <p slot="titleModal">Edição de Apartamento</p>
-      <app-apartament slot="mainModal"></app-apartament>
-      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.stop.prevent="updateApartamentEvent()">Alterar</v-btn>
-    </app-modal>
-  
-    <app-modal v-show="deleteApartament" :dialog="deleteApartament">
-      <p slot="titleModal">Remover Apartamento</p>
-      <p slot="mainModal">
-        Você deseja mesmo remover este apartamento?
-      </p>
-      <v-btn class="white--text red accent-3" dark slot="footerModal" @click.native.stop="deleteApartamentEvent">Remover</v-btn>
-    </app-modal>
-    
-    <app-modal-full v-if="newManyApartaments" :dialogFull="newManyApartaments" :loading="loading">
-      <p slot="modalTitle activator">Cadastro de Apartamentos de um arquivo Excel</p>
+    <v-layout>
+      <app-modal :dialog="newApto" :type="'primary'">
+        <span slot="titleModal" icon style="color: white"><v-icon>add_circle</v-icon> Cadastro de novo Apartamento</span>
+        <app-apartament slot="mainModal"></app-apartament>
+        <!--<v-btn class="white&#45;&#45;text green accent-3" dark slot="footerModal" @click.stop.prevent="createApartamentEvent">Salvar</v-btn>-->
+      </app-modal>
       
-      <vue-xlsx-table slot="mainContent" class="ml-2" @on-select-file="handleSelectedFile">
-        <span id="btn-import-csv" class="d-flex align-center"><i class="material-icons">attachment</i> Selecione um arquivo Excel</span>
-      </vue-xlsx-table>
       
-    </app-modal-full>
-    <v-layout row wrap>
+      <app-modal :dialog="editApto" :type="'green accent-3'">
+        <span slot="titleModal" icon style="color: white"><v-icon>add_circle</v-icon> Edição de Apartamento</span>
+        <app-apartament slot="mainModal"></app-apartament>
+      </app-modal>
+      
+      <app-modal v-show="deleteApartament" :dialog="deleteApartament">
+        <p slot="titleModal">Remover Apartamento</p>
+        <p slot="mainModal">
+          Você deseja mesmo remover este apartamento?
+        </p>
+        <v-btn class="white--text red accent-3" dark slot="footerModal" @click.native.stop="deleteApartamentEvent">Remover</v-btn>
+      </app-modal>
+      
+      <app-modal-full v-if="newManyApartaments" :dialogFull="newManyApartaments" :loading="loading">
+        <p slot="modalTitle activator">Cadastro de Apartamentos de um arquivo Excel</p>
+        
+        <vue-xlsx-table slot="mainContent" class="ml-2" @on-select-file="handleSelectedFile">
+          <span id="btn-import-csv" class="d-flex align-center"><i class="material-icons">attachment</i> Selecione um arquivo Excel</span>
+        </vue-xlsx-table>
+      
+      </app-modal-full>
       <v-flex xs12>
         <v-card id="apartamentsDatatable" >
           <v-toolbar class="blue lighten-1" extended>
@@ -48,8 +46,7 @@
                 <br>
                 <v-list>
                   <v-subheader>Escolha uma opção abaixo</v-subheader>
-                  <v-list-tile
-                    class="newApartamentList"
+                  <v-list-tile class="newAptoList"
                     v-for="tile in tiles"
                     :key="tile.title"
                     @click.native.stop="componentSelector(tile.wichComponent)"
@@ -77,7 +74,7 @@
           </v-card-title>
           <v-data-table
             :headers="datatable.headers"
-            :items="datatable.items"
+            :items="allApartaments"
             :pagination.sync="datatable.pagination"
             :loading="datatable.loading"
             :no-data-text="datatable.no_data_text"
@@ -90,7 +87,10 @@
             <template slot="items" slot-scope="props">
               <td class="text-xs-left">{{ props.item.number }}</td>
               <td class="text-xs-left">{{ props.item.capacity }}</td>
-              <td class="text-xs-left">{{ props.item.vacancy }}</td>
+              <td class="text-xs-left">
+                <v-chip v-if="props.item.vacancy > 0" class="green badge-card white--text">{{props.item.vacancy}}</v-chip>
+                <v-chip v-else :class="'secondary badge-card white--text'">{{props.item.vacancy}}</v-chip>
+              </td>
               <td class="text-xs-left">
                 <div class="tooltip" v-if="props.item.vacancy_type == 'M'" >
                   <img src="/static/mars.png">
@@ -104,7 +104,7 @@
                   <img src="/static/genders.png">
                   <span class="tooltiptext">Vagas Mistas</span>
                 </div>
-                
+              
               </td>
               <td class="text-xs-left">{{ props.item.block }}</td>
               <td class="text-xs-left">
@@ -112,7 +112,7 @@
                   <v-btn class="green darken-1" fab dark small color="success" @click.stop="seeApto(props.item)">
                     <v-icon dark>zoom_in</v-icon>
                   </v-btn>
-                  <v-btn class="blue darken-1" fab dark small color="primary" @click.target.prevent.stop="editApto(props.item)">
+                  <v-btn class="blue darken-1" fab dark small color="primary" @click.target.prevent.stop="editApartament(props.item)">
                     <v-icon dark>edit</v-icon>
                   </v-btn>
                   <v-btn class="red darken-1" fab dark small color="error" @click.native.stop="deleteApto(props.item)">
@@ -128,17 +128,6 @@
         </div>
       </v-flex>
     </v-layout>
-  
-    <v-snackbar
-      :timeout="8000"
-      :error="snackError"
-      :success="snackSuccess"
-      :vertical="true"
-      v-model="snackbar"
-    >
-      <div v-html="snackMsg"></div>
-      <v-btn dark flat @click.native.stop="snackbar = false">Fechar</v-btn>
-    </v-snackbar>
   </v-container>
 </template>
 
@@ -149,63 +138,49 @@
   import { eventBus } from '../main'
 
   export default {
+    computed: {
+      allApartaments: {
+        get () {
+          return this.$store.getters.getAllAptosState
+        }
+      },
+      newApto: {
+        get () {
+          return this.$store.getters.getAptoNewState
+        },
+        set (value) {
+          this.$store.dispatch('setAptoNewState', value)
+        }
+      },
+      editApto: {
+        get () {
+          return this.$store.getters.getAptoEditState
+        },
+        set (value) {
+          this.$store.dispatch('setAptoEditState', value)
+        }
+      },
+      pages () {
+        return this.datatable.pagination.rowsPerPage ? Math.ceil(this.datatable.items.length / this.datatable.pagination.rowsPerPage) : 0
+      },
+    },
     created () {
       this.getApartaments()
-    },
-    mounted () {
+
       eventBus.listen('closeModal', (data) => {
-        this.newOneApartament = data
+        this.newApto = data
         this.newManyApartaments = data
+        this.editApto = data
         this.deleteApartament = data
-        this.editApartament = data
         this.apartamentData = []
         this.manyResponse = []
         this.loading = false
       })
-      
-      eventBus.listen('apartamentCreated',(data) => {
-        this.snackbar = true
-        this.snackMsg = data['message']
-        this.snackSuccess = true
-        this.snackError = false
-        this.$validator.reset()
-        let result = data['aptos']
-        for (let i in result) {
-          Object.assign(result[i], {'value': false })
-        }
-        this.datatable.items = result
-      })
-
-      eventBus.listen('apartamentUpdated',(data) => {
-        this.snackbar = true
-        this.snackMsg = data['message']
-        this.snackSuccess = true
-        this.snackError = false
-        this.$validator.reset()
-        let result = data['aptos']
-        for (let i in result) {
-          Object.assign(result[i], {'value': false })
-        }
-        this.datatable.items = result
-      })
-
-      eventBus.listen('apartamentDeleted',(data) => {
-        this.snackbar = true
-        this.snackMsg = data
-        this.snackSuccess = true
-        this.snackError = false
-        this.$validator.reset()
-        this.getApartaments()
-      })
-      
     },
     data () {
       return {
         sheet: false,
         loading: false,
-        hidden: false,
-        newOneApartament: false,
-        editApartament: false,
         deleteApartament: false,
         apartamentData: '',
         aptos: [],
@@ -218,7 +193,6 @@
           {icon: 'add_box', title: 'Um Apartamento', wichComponent: 'OneApartamentFom'},
           {icon: 'attachment', title: 'Importar de arquivo Excel', wichComponent: 'ManyApartamentFom'}
         ],
-        selectedComponent: '',
         datatable: {
           tmp: '',
           search: '',
@@ -237,60 +211,48 @@
             {value: 'block', text: 'Bloco', align: 'left'},
             {value: 'actions', text: 'Ações', align: 'left'}
           ]
-        },
-        snackbar: false,
-        snackError: false,
-        snackSuccess: false,
-        snackMsg: ''
+        }
       }
     },
     methods: {
       getApartaments: function() {
-        this.$http.get('api/apto/all?token='+ this.$auth.getToken())
-          .then((response) => {
-            console.log(response)
-            this.datatable.loading = false
-            let result = response.body.aptos
-            for (let i in result) {
-              Object.assign(result[i], {'value': false })
-            }
-            this.datatable.items = result
-          })
+        this.datatable.loading = true
+        this.$store.dispatch('setAllAptos').then( () => {
+          this.datatable.loading = false
+        })
       },
-      createApartamentEvent: function() {
-        eventBus.fire('createApartamentSubmit')
-      },
-      editApto: function(data) {
-       
-        this.editApartament = true
+      editApartament: function(data) {
+
+        this.editApto = true
+        this.newApto = false
+
         console.log("Edit apartament -> ", data)
         let aux = JSON.parse( JSON.stringify( data ) )
-        eventBus.fire('getApartamentData', aux)
-      },
-      updateApartamentEvent: function() {
-        eventBus.fire('updateApartamentSubmit')
+
+        this.$store.dispatch('setEditApartament', aux)
       },
       deleteApto: function(data) {
-        this.deleteApartament = true
+
         console.log("Delete apartament -> ", data)
         let aux = JSON.parse( JSON.stringify( data ) )
-        eventBus.fire('deleteApartamentData', aux)
-      },
-      deleteApartamentEvent: function() {
-       
-        eventBus.fire('deleteApartamentSubmit')
+        //TODO delete apartament
       },
       seeApto: function(data) {
         console.log("See Apartament -> ", data)
         this.$router.push(`/aptos/${data.number}`)
       },
       componentSelector (param) {
-        this.selectedComponent = param
-        if (this.selectedComponent === 'OneApartamentFom') {
-          this.newOneApartament = true
+        if (param === 'OneApartamentFom') {
+          this.editApto = false
+          this.newApto = true
+
         }
-        if (this.selectedComponent === 'ManyApartamentFom') {
+        if (param === 'ManyApartamentFom') {
+
+          this.editApto = false
+          this.newApto = false
           this.newManyApartaments = true
+
         }
         this.sheet = false
       },
@@ -346,11 +308,6 @@
           })
           eventBus.fire('alerts', this.manyResponse)
         })
-      }
-    },
-    computed: {
-      pages () {
-        return this.datatable.pagination.rowsPerPage ? Math.ceil(this.datatable.items.length / this.datatable.pagination.rowsPerPage) : 0
       }
     },
     components: {

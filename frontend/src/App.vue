@@ -120,11 +120,9 @@
     
     <main fullscreen>
       <router-view></router-view>
+      <app-snackbar></app-snackbar>
     </main>
-    <!--<v-footer class="pa-3"  v-if="footer">-->
-    <!--<v-spacer></v-spacer>-->
-    <!--<div>© {{ new Date().getFullYear() }}</div>-->
-    <!--</v-footer>-->
+    
   </v-app>
 </template>
 
@@ -132,11 +130,12 @@
   import { eventBus } from './main'
   import { mapGetters } from 'vuex'
   import { mapActions } from 'vuex'
-  import VListTile from "vuetify/src/components/VList/VListTile";
-  import VDivider from "../node_modules/vuetify/src/components/VDivider/VDivider.vue";
+  import snackbar from './components/shared/Snackbar.vue'
 
   export default {
-    
+    components:{
+      appSnackbar: snackbar
+    },
     computed: {
       ...mapGetters({
         getAdminState: 'adminState'
