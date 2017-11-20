@@ -202,32 +202,6 @@
           })
         }
       },
-      deleteApartament () {
-        this.$http.delete(`api/apto/${this.apartament.number}?token=`+ this.$auth.getToken(), this.apartament.number)
-          .then( (response) => {
-            eventBus.closeModal(true)
-            this.snackMsg = response.body.message
-            eventBus.fire('apartamentDeleted', this.snackMsg)
-
-          }).catch( (response) =>  {
-          this.snackbar = true
-          let msg = ' '
-
-          if( response.body.errors ){
-            for( let i in response.body.errors){
-              response.body.errors[i].forEach( (item) => {
-                msg += item + '<br>'
-              })
-            }
-
-          }else {
-            msg = response.body.message
-          }
-          this.snackMsg = msg
-          this.snackSuccess = false
-          this.snackError = true
-        })
-      }
     }
   }
 

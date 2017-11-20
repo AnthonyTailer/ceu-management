@@ -10,7 +10,7 @@ Vue.use(Auth)
 const state = {
   newOneApartament: false,
   editOneApartament: false,
-  removeApartamet: false,
+  removeApartament: false,
   apartament: {
     id: '',
     number: '',
@@ -58,6 +58,9 @@ const mutations = {
     state.apartament = payload
   },
   setEditApartament: (state, payload) => {
+    state.apartament = payload
+  },
+  setRemoveApartament: (state, payload) => {
     state.apartament = payload
   }
 }
@@ -162,6 +165,48 @@ const actions = {
       commit('setSnack', snack)
     })
   },
+  removeApartament: ( {commit, dispatch}, payload) => {
+
+    let snack = {}
+
+    Vue.http.delete(`api/apto/${payload.number}?token=`+ Vue.auth.getToken(), payload.number)
+      .then( (response) => {
+
+        snack = {
+          activator: true,
+          error: false,
+          success: true,
+          msg: response.body.message
+        }
+
+        commit('newApartament', {id: '', number: '', block: '', building: '', capacity: '', vacancy_type: ''})
+        commit('setSnack', snack)
+        dispatch('setAllAptos')
+        eventBus.fire('closeModal', false)
+
+      }).catch( (response) =>  {
+        snack = {
+          activator: true,
+          error: true,
+          success: false,
+          msg: ''
+        }
+
+        let msg = ''
+
+        if (response.body.hasOwnProperty('errors')) {
+          for (let i in response.body.errors) {
+            response.body.errors[i].forEach((item) => {
+              msg += item + '<br>'
+            })
+          }
+        } else {
+          msg = response.body.message
+        }
+        snack.msg = msg
+        commit('setSnack', snack)
+    })
+  },
   setAllAptos: ({ commit }) => {
     Vue.http.get('api/apto/all?token='+ Vue.auth.getToken())
       .then((response) => {
@@ -188,12 +233,28 @@ const actions = {
 
     commit('setEditApartament', data)
   },
+  setRemoveApartament: ( {commit}, payload) => {
+
+    let data = {
+      id: payload.id,
+      number: payload.number,
+      block: payload.block,
+      building: payload.building,
+      capacity: payload.capacity,
+      vacancy_type: payload.vacancy_type
+    }
+
+    commit('setRemoveApartament', data)
+  },
   setAptoNewState: ({ commit }, payload) => {
     commit('setAptoNewState', payload)
   },
   setAptoEditState: ({ commit }, payload) => {
     commit('setAptoEditState', payload)
-  }
+  },
+  setAptoRemoveState: ({ commit }, payload) => {
+    commit('setAptoRemoveState', payload)
+  },
 }
 
 export default {

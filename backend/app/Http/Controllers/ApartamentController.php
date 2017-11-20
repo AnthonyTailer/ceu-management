@@ -167,9 +167,7 @@ class ApartamentController extends Controller
 
             $id_apto = $request->input('id');
 
-            $users = DB::table('users')
-                ->where('id_apto', $id_apto)
-                ->count();
+            $users = User::where('id_apto', $id_apto)->count();
 
             if($users <= $newCapacity){
                 $apto->capacity = $newCapacity;
@@ -193,13 +191,17 @@ class ApartamentController extends Controller
     public function deleteApto($number){
 
         $apto = Apartament::where('number',$number)->first();
+        $qtd_users = User::where('id_apto', $apto->id)->count();
+
 
         if(!$apto){
             return response()->json(['message' => "Apartamento não encontrado"], 404);
+        }else if ($qtd_users > 0) {
+            return response()->json(['message' => "Você não pode remover um apartamento com moradores, remova-os primeiro no ambiente do apartamento"], 403);
         }
 
-        if($apto->delete()){
-            return response()->json(['message' => "Apartamento deletado com sucesso"], 200);
+        if($apto->delete()) {
+            return response()->json(['message' => "Apartamento $apto->number deletado com sucesso"], 200);
         }
 
     }

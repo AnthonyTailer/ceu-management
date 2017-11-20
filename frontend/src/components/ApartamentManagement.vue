@@ -9,16 +9,25 @@
       
       
       <app-modal :dialog="editApto" :type="'green accent-3'">
-        <span slot="titleModal" icon style="color: white"><v-icon>add_circle</v-icon> Edição de Apartamento</span>
+        <span slot="titleModal" icon style="color: white"><v-icon>create</v-icon> Edição de Apartamento</span>
         <app-apartament slot="mainModal"></app-apartament>
       </app-modal>
       
-      <app-modal v-show="deleteApartament" :dialog="deleteApartament">
-        <p slot="titleModal">Remover Apartamento</p>
-        <p slot="mainModal">
-          Você deseja mesmo remover este apartamento?
-        </p>
-        <v-btn class="white--text red accent-3" dark slot="footerModal" @click.native.stop="deleteApartamentEvent">Remover</v-btn>
+      <app-modal :dialog="removeApto" :type="'red accent-3'">
+        <span icon slot="titleModal" style="color: white">
+          <v-icon>warning</v-icon> Remover Apartamento <strong>{{ this.$store.getters.getApartamentState.number }}</strong>
+        </span>
+        <div slot="mainModal">
+          <h5>Você deseja mesmo remover o apartamento {{ this.$store.getters.getApartamentState.number }} ?</h5>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+              <v-btn class="white--text red accent-3" dark
+                   @click.prevent.stop="removeAptoEvent"
+              >Remover</v-btn>
+              <v-btn class="grey lighten-1 black--text" dark @click.prevent="closeModal">Fechar</v-btn>
+            </v-card-actions>
+        </div>
       </app-modal>
       
       <app-modal-full v-if="newManyApartaments" :dialogFull="newManyApartaments" :loading="loading">
@@ -49,7 +58,7 @@
                   <v-list-tile class="newAptoList"
                     v-for="tile in tiles"
                     :key="tile.title"
-                    @click.native.stop="componentSelector(tile.wichComponent)"
+                    @click.native.stop="createApartamentSelector(tile.wichComponent)"
                   >
                     <v-list-tile-avatar>
                       <v-avatar size="35px" tile>
@@ -160,6 +169,14 @@
           this.$store.dispatch('setAptoEditState', value)
         }
       },
+      removeApto: {
+        get () {
+          return this.$store.getters.getAptoRemoveState
+        },
+        set (value) {
+          this.$store.dispatch('setAptoRemoveState', value)
+        }
+      },
       pages () {
         return this.datatable.pagination.rowsPerPage ? Math.ceil(this.datatable.items.length / this.datatable.pagination.rowsPerPage) : 0
       },
@@ -171,7 +188,7 @@
         this.newApto = data
         this.newManyApartaments = data
         this.editApto = data
-        this.deleteApartament = data
+        this.removeApto = data
         this.apartamentData = []
         this.manyResponse = []
         this.loading = false
@@ -181,7 +198,6 @@
       return {
         sheet: false,
         loading: false,
-        deleteApartament: false,
         apartamentData: '',
         aptos: [],
         apartamentsCsv: [],
@@ -190,8 +206,8 @@
           {erro: '', status: false}
         ],
         tiles: [
-          {icon: 'add_box', title: 'Um Apartamento', wichComponent: 'OneApartamentFom'},
-          {icon: 'attachment', title: 'Importar de arquivo Excel', wichComponent: 'ManyApartamentFom'}
+          {icon: 'add_box', title: 'Cadastrar 1 Apartamento novo', wichComponent: 'OneApartamentFom'},
+//          {icon: 'attachment', title: 'Importar vários apartamentos de um arquivo Excel', wichComponent: 'ManyApartamentFom'}
         ],
         datatable: {
           tmp: '',
@@ -221,9 +237,27 @@
           this.datatable.loading = false
         })
       },
+      createApartamentSelector (param) {
+        if (param === 'OneApartamentFom') {
+          this.editApto = false
+          this.removeApto = false
+          this.newApto = true
+
+        }
+        if (param === 'ManyApartamentFom') {
+
+          this.editApto = false
+          this.removeApto = false
+          this.newApto = false
+          this.newManyApartaments = true
+
+        }
+        this.sheet = false
+      },
       editApartament: function(data) {
 
         this.editApto = true
+        this.removeApto = false
         this.newApto = false
 
         console.log("Edit apartament -> ", data)
@@ -233,81 +267,77 @@
       },
       deleteApto: function(data) {
 
+        this.removeApto = true
+        this.newApto = false
+        this.editApto = false
+
         console.log("Delete apartament -> ", data)
         let aux = JSON.parse( JSON.stringify( data ) )
-        //TODO delete apartament
+
+        this.$store.dispatch('setRemoveApartament', aux)
+      },
+      removeAptoEvent () {
+        this.$store.dispatch('removeApartament', this.$store.getters.getApartamentState)
       },
       seeApto: function(data) {
         console.log("See Apartament -> ", data)
         this.$router.push(`/aptos/${data.number}`)
       },
-      componentSelector (param) {
-        if (param === 'OneApartamentFom') {
-          this.editApto = false
-          this.newApto = true
-
-        }
-        if (param === 'ManyApartamentFom') {
-
-          this.editApto = false
-          this.newApto = false
-          this.newManyApartaments = true
-
-        }
-        this.sheet = false
+      closeModal () {
+        eventBus.fire('closeModal', false)
       },
       handleSelectedFile (convertedData) {
-        this.loading = true
-        let obj = {}
-        this.apartamentsCsv = []
-        this.manyResponse = []
-        eventBus.fire('alerts', this.manyResponse)
-
-        convertedData.body.forEach((item, index) => {
-          obj['number'] = item['Apartamento']
-          obj['capacity'] = item['Capacidade']
-          obj['vacancy'] = item['Vagas']
-          obj['block'] = item['Bloco']
-          obj['building'] = item['Prédio']
-          this.apartamentsCsv.push(obj)
-          obj = {}
-        })
-
-        this.$http.post('api/apto/bulk-register?token='+ this.$auth.getToken(),
-          {body: this.apartamentsCsv}
-        ).then(response => {
-          this.loading = false
-          console.log(response)
-          if (response.body !== null) {
-            this.manyResponse.push({ // erros totais
-              total_erros_text: 'Atenção! ' + response.body.total_erros + ' registros falharam no cadastro',
-              total_erros: response.body.total_erros,
-              status: true
-            })
-
-            this.manyResponse.push({ // todos com sucessos
-              total_success_text: response.body.total_success + ' Apartamentos cadastrados com sucesso',
-              total_success: response.body.total_success,
-              status: true
-            })
-
-            for (let i in response.body.erros) {
-              this.manyResponse.push({
-                erro: response.body.erros[i],
-                status: true
-              })
-            }
-            eventBus.fire('alerts', this.manyResponse)
-          }
-        }).then(e => {
-          console.log(e)
-          this.loading = false
-          this.manyResponse.push({
-            erro: 'Erro inesperado tente novamente',
-            status: true
-          })
-          eventBus.fire('alerts', this.manyResponse)
-        })
+//        this.loading = true
+//        let obj = {}
+//        this.apartamentsCsv = []
+//        this.manyResponse = []
+//        eventBus.fire('alerts', this.manyResponse)
+//
+//        convertedData.body.forEach((item, index) => {
+//          obj['number'] = item['Apartamento']
+//          obj['capacity'] = item['Capacidade']
+//          obj['vacancy'] = item['Vagas']
+//          obj['block'] = item['Bloco']
+//          obj['building'] = item['Prédio']
+//          this.apartamentsCsv.push(obj)
+//          obj = {}
+//        })
+//
+//        this.$http.post('api/apto/bulk-register?token='+ this.$auth.getToken(),
+//          {body: this.apartamentsCsv}
+//        ).then(response => {
+//          this.loading = false
+//          console.log(response)
+//          if (response.body !== null) {
+//            this.manyResponse.push({ // erros totais
+//              total_erros_text: 'Atenção! ' + response.body.total_erros + ' registros falharam no cadastro',
+//              total_erros: response.body.total_erros,
+//              status: true
+//            })
+//
+//            this.manyResponse.push({ // todos com sucessos
+//              total_success_text: response.body.total_success + ' Apartamentos cadastrados com sucesso',
+//              total_success: response.body.total_success,
+//              status: true
+//            })
+//
+//            for (let i in response.body.erros) {
+//              this.manyResponse.push({
+//                erro: response.body.erros[i],
+//                status: true
+//              })
+//            }
+//            eventBus.fire('alerts', this.manyResponse)
+//          }
+//        }).then(e => {
+//          console.log(e)
+//          this.loading = false
+//          this.manyResponse.push({
+//            erro: 'Erro inesperado tente novamente',
+//            status: true
+//          })
+//          eventBus.fire('alerts', this.manyResponse)
+//        })
       }
     },
     components: {
