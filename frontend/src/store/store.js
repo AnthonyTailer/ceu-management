@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import Apartament from './modules/apartament'
+import Student from './modules/students'
 
 Vue.use(Vuex)
 
@@ -32,6 +33,7 @@ export const store = new Vuex.Store({
     }
   },
   modules: {
-    Apartament
+    Apartament,
+    Student
   }
 })

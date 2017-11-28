@@ -1,5 +1,5 @@
 <template>
-  <form data-vv-scope="user-form">
+  <form data-vv-scope="user-form" @submit.prevent="submitStudent()">
     <v-layout row wrap>
       <v-flex x12 sm6 md6>
         <v-text-field
@@ -138,16 +138,18 @@
         </v-radio-group>
       </v-flex>
     </v-layout>
-    <v-snackbar
-      :timeout="8000"
-      :error="snackError"
-      :success="snackSuccess"
-      :vertical="true"
-      v-model="snackbar"
-    >
-      <div v-html="snackMsg"></div>
-      <v-btn dark flat @click.native="snackbar = false">Fechar</v-btn>
-    </v-snackbar>
+    <v-divider></v-divider>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn
+        type="submit"
+        class="primary"
+        dark
+      >
+        Salvar
+      </v-btn>
+      <v-btn class="grey lighten-1 black--text" dark @click.prevent="closeModal">Fechar</v-btn>
+    </v-card-actions>
   </form>
 </template>
 <script>
@@ -156,14 +158,38 @@
   export default {
     $validate: true,
     props: ['courses', 'aptos'],
-    
+    $validate: true,
+    computed: {
+      student: {
+        get () {
+          return this.$store.getters.getStudentState
+        },
+        set (value) {
+          this.$store.dispatch('newStudent', value)
+        }
+      },
+      studentNewState: {
+        get () {
+          return this.$store.getters.getStudentNewState
+        },
+        set (value) {
+          this.$store.dispatch('setStudentNewState', value)
+        }
+      },
+      studentEditState: {
+        get () {
+          return this.$store.getters.getStudentEditState
+        },
+        set (value) {
+          this.$store.dispatch('setStudentEditState', value)
+        }
+      }
+    },
     mounted () {
 
-      eventBus.listen('getUserData', data => {
+      if ( this.studentEditState ) {
 
-        let aux = JSON.parse( JSON.stringify( data ) )
-
-        this.student = aux;
+        let aux = JSON.parse( JSON.stringify( this.student ) )
 
         let id_course = aux.id_course
         let id_apto = aux.id_apto
@@ -187,172 +213,55 @@
           }
         }
 
-      })
-
-      eventBus.listen('deleteUserData', data => {
-        this.student = data;
-      })
-
-      eventBus.listen('createUserSubmit', (data) => {
-        this.createUser(data)
-      })
-
-      eventBus.listen('updateUserSubmit', () => {
-        this.updateUser()
-      })
-
-      eventBus.listen('deleteUserSubmit', () => {
-        this.deleteUser()
-      })
-
-      eventBus.listen('closeModal', (data) => {
-        this.student = this.initialData()
-        this.$validator.reset()
-      })
+      }
 
     },
     data () {
       return {
-        snackbar: false,
-        snackError: false,
-        snackSuccess: false,
-        snackMsg: '',
-        student: {
-          fullName: '',
-          registration: '',
-          id_course: null,
-          id_apto: null,
-          age: null,
-          genre: 'M',
-          email: '',
-          rg: '',
-          cpf: '',
-          phone1: '',
-          is_bse_active: false,
-          is_admin: false
-        }
+        scopeValidation: 'apartament-form',
       }
     },
     methods: {
-      createUser (data) {
-        this.$validator.validateAll(data).then(result => {
-          if (!result) {
-            console.log('User Created-> validation failed.')
-          } else {
-            console.log('Submited User' )
-            let aux =  this.student
-            aux.id_course = this.student.id_course.id
-            aux.id_apto = this.student.id_apto.id
-            console.log(aux)
-            this.$http.post('api/user/register?token='+ this.$auth.getToken(), aux)
-              .then( (response) => {
-                this.snackMsg = response.body.message
-                eventBus.fire('userCreated', this.snackMsg)
-                eventBus.closeModal(true)
-
-              }).catch( (response) =>  {
-              this.snackbar = true
-              let msg = ' '
-
-              if( response.body.errors ){
-                for( let i in response.body.errors){
-                  response.body.errors[i].forEach( (item) => {
-                    msg += item + '<br>'
-                  })
-                }
-
-              }else {
-                msg = response.body.message
-              }
-              this.snackMsg = msg
-              this.snackSuccess = false
-              this.snackError = true
-            })
-          }
-          // success stuff.
-        }).catch(() => {
-          console.log('something went wrong (non-validation related')
-        })
+      closeModal() {
+        this.$validator.reset()
+        this.$store.commit('setInitialData')
+        eventBus.fire('closeModal', false)
       },
-      updateUser () {
-        this.$validator.validateAll().then(result => {
-          if (!result) {
-            console.log('User Updated -> validation failed.')
-          } else {
-            this.$validator.reset()
-            let aux =  JSON.parse( JSON.stringify( this.student ) )
-            aux.id_course = aux.id_course !== null ? aux.id_course.id : null
-            aux.id_apto = aux.id_apto !== null ? aux.id_apto.id : null
+      submitStudent () {
+        if ( this.studentNewState ){
+          this.$validator.validateAll(this.scopeValidation).then(result => {
+            if (!result) {
+              console.log('Student Created-> validation failed.')
+            } else {
 
-            console.log('User Update Submit', aux)
+              let aux =  this.student
+              aux.id_course = this.student.id_course.id
+              aux.id_apto = this.student.id_apto.id
+              console.log('Submited User', aux )
 
-            this.$http.put(`api/user/${aux.id}?token=`+ this.$auth.getToken(), aux)
-              .then( (response) => {
-                this.snackMsg = response.body.message
-                eventBus.fire('userUpdated', this.snackMsg)
-                eventBus.closeModal(true)
-              }).catch( (response) =>  {
-              this.snackbar = true
-              let msg = ' '
-
-              if( response.body.errors ){
-                for( let i in response.body.errors){
-                  response.body.errors[i].forEach( (item) => {
-                    msg += item + '<br>'
-                  })
-                }
-              }else {
-                msg = response.body.message
-              }
-              this.snackMsg = msg
-              this.snackSuccess = false
-              this.snackError = true
-            })
-          }
-        }).catch( () => {
-          console.log('something went wrong (non-validation related')
-        })
-      },
-      deleteUser () {
-        this.$http.delete(`api/user/${this.student.id}?token=`+ this.$auth.getToken(), this.student.id)
-          .then( (response) => {
-            eventBus.closeModal(true)
-            this.snackMsg = response.body.message
-            eventBus.fire('userDeleted', this.snackMsg)
-
-          }).catch( (response) =>  {
-          this.snackbar = true
-          let msg = ' '
-
-          if( response.body.errors ){
-            for( let i in response.body.errors){
-              response.body.errors[i].forEach( (item) => {
-                msg += item + '<br>'
-              })
+              this.$store.dispatch('newStudent', aux)
             }
+            // success stuff.
+          }).catch(() => {
+            console.log('something went wrong (non-validation related')
+          })
+        }
+        else if ( this.studentEditState ) {
+          this.$validator.validateAll(this.scopeValidation).then(result => {
+            if (!result) {
+              console.log('Student Edit -> validation failed.', result)
+            } else {
 
-          }else {
-            msg = response.body.message
-          }
-          this.snackMsg = msg
-          this.snackSuccess = false
-          this.snackError = true
-        })
-      },
-      initialData () {
-        return {
-          fullName: '',
-          registration: '',
-          id_course: {},
-          id_apto: {},
-          age: null,
-          genre: 'M',
-          email: '',
-          rg: '',
-          cpf: '',
-          phone1: '',
-          is_bse_active: false,
-          is_admin: false
+              let aux =  JSON.parse( JSON.stringify( this.student ) )
+              aux.id_course = aux.id_course !== null ? aux.id_course.id : null
+              aux.id_apto = aux.id_apto !== null ? aux.id_apto.id : null
+              
+              console.log('Submited Student', aux )
+              this.$store.dispatch('editStudent', aux )
+            }
+          }).catch(() => {
+            console.log('something went wrong (non-validation related')
+          })
         }
       }
     }
