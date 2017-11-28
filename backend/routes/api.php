@@ -33,7 +33,15 @@ Route::post('/user/login', [
     'uses' => 'UsersController@login'
 ]);
 
-Route::group(['prefix' => 'user',  'middleware' => ['auth.jwt']], function () {
+#Route:group(['prefix' =>'user-admin','middleware' => ['auth.jwt', 'is-admin']], function(){
+
+#});
+
+
+
+#This routes are only accessible for admins
+
+Route::group(['prefix' => 'user',  'middleware' => ['auth.jwt', 'is-admin']], function () {
     Route::get('/', [
         'uses' => 'UsersController@getAuthUser'
     ]);
@@ -62,6 +70,17 @@ Route::group(['prefix' => 'user',  'middleware' => ['auth.jwt']], function () {
         'uses' => 'UsersController@changeUserApto'
     ]);
 
+    Route::post('create-notification',[
+        'uses' => 'UsersController@createAlert'
+    ]);
+
+    Route::get('is-admin',[
+        'uses' => 'UsersController@isAdmin'
+    ]);
+});
+
+
+Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
     Route::get('get-notifications',[
         'uses' => 'UsersController@getNotifications'
     ]);
@@ -73,18 +92,10 @@ Route::group(['prefix' => 'user',  'middleware' => ['auth.jwt']], function () {
     Route::get('stats', [
         'uses' => 'UsersController@stats'
     ]);
-
-    Route::post('create-notification',[
-        'uses' => 'UsersController@createAlert'
-    ]);
-
-    Route::get('is-admin',[
-        'uses' => 'UsersController@isAdmin'
-    ]);
 });
 
-
-Route::group(['prefix' => 'users',  'middleware' => 'auth.jwt'], function () {
+#This routes are only accessible for admins
+Route::group(['prefix' => 'users',  'middleware' => ['auth.jwt', 'is-admin']], function () {
     Route::post('register', [
         'uses' => 'UsersController@postUsers'
     ]);
@@ -103,8 +114,8 @@ Route::group(['prefix' => 'users',  'middleware' => 'auth.jwt'], function () {
 
 });
 
-
-Route::group(['prefix' => 'laundry', 'middleware' => 'auth.jwt'], function(){
+#This routes are only accessible for admins
+Route::group(['prefix' => 'laundry', 'middleware' => ['auth.jwt', 'is-admin']], function(){
 
     /*Machines*/
     Route::post('new-machine',[
@@ -124,18 +135,9 @@ Route::group(['prefix' => 'laundry', 'middleware' => 'auth.jwt'], function(){
     ]);
 
 
-    /*New booking*/
-    Route::post('new-booking',[
-        'uses' => 'LaundryMachineBookingController@postLMBooking'
-    ]);
-
     /*Working time*/
     Route::post('new-working-time',[
         'uses' => 'StandardWorkingTimeController@postStandardWorkingTime'
-    ]);
-
-    Route::get('get-working-time',[
-        'uses' => 'StandardWorkingTimeController@getWorkingTime'
     ]);
 
     /*No working Time*/
@@ -145,10 +147,19 @@ Route::group(['prefix' => 'laundry', 'middleware' => 'auth.jwt'], function(){
 });
 
 
+Route::group(['prefix' => 'laundry', 'middleware' => 'auth.jwt'], function() {
+    /*New booking*/
+    Route::post('new-booking',[
+        'uses' => 'LaundryMachineBookingController@postLMBooking'
+    ]);
 
+    Route::get('get-working-time',[
+        'uses' => 'StandardWorkingTimeController@getWorkingTime'
+    ]);
+});
 
 //apto routes
-Route::group(['prefix' => 'apto',  'middleware' => 'auth.jwt'], function () {
+Route::group(['prefix' => 'apto',  'middleware' => ['auth.jwt', 'is-admin']], function () {
 
     Route::post('/register', [
         'uses' => 'ApartamentController@postApto'
@@ -194,34 +205,27 @@ Route::group(['prefix' => 'apto',  'middleware' => 'auth.jwt'], function () {
 
 //course routes
 
-Route::post('/course/register', [
-    'uses' => 'CourseController@postCourse'
-]);
+Route::group(['prefix' => 'apto',  'middleware' => ['auth.jwt'. 'is-admin']], function () {
+    Route::post('/course/register', [
+        'uses' => 'CourseController@postCourse'
+    ]);
 
-Route::post('/courses/register',[
-    'uses' => 'CourseController@postCourses'
-]);
+    Route::post('/courses/register', [
+        'uses' => 'CourseController@postCourses'
+    ]);
 
-Route::get('/courses', [
-    'uses' => 'CourseController@getCourses'
-]);
+    Route::get('/courses', [
+        'uses' => 'CourseController@getCourses'
+    ]);
 
-Route::put('/course/{id}', [
-    'uses' => 'CourseController@putCourse'
-]);
+    Route::put('/course/{id}', [
+        'uses' => 'CourseController@putCourse'
+    ]);
 
-Route::delete('course/{id}', [
-    'uses' => 'CourseController@deleteCourse'
-]);
-
+    Route::delete('course/{id}', [
+        'uses' => 'CourseController@deleteCourse'
+    ]);
+});
 
 //course routes
 
-//WAIT LIST
-
-Route::group(['prefix' => 'waitList',  'middleware' => 'auth.jwt'], function () {
-
-    Route::post('/register', [
-        'uses' => 'WaitListController@postWaitList'
-    ]);
-});
