@@ -92,7 +92,6 @@
       eventBus.$off('userCreated')
       eventBus.$off('updateUserSubmit')
       eventBus.$off('userUpdated')
-      eventBus.$off('getUserData')
       eventBus.$off('closeModal')
     },
     data () {

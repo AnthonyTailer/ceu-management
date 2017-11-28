@@ -3,16 +3,14 @@
     <v-dialog v-model="dialogFull" fullscreen transition="dialog-bottom-transition" :overlay=false  >
       <v-card>
         <v-toolbar dark class="primary">
-          <v-btn icon @click.native="closeModalFull" dark>
-            <v-icon>close</v-icon>
-          </v-btn>
+          <slot name="closeModalBtn" :disabled="loading" @click.native="closeModalFull"></slot>
           <v-toolbar-title>
             <slot name="modalTitle"></slot>
           </v-toolbar-title>
         </v-toolbar>
         <v-divider></v-divider>
         <br>
-        <slot name="mainContent"></slot>
+        <slot name="mainContent" v-show="!loading"></slot>
         <br>
         <br>
         <v-divider></v-divider>
@@ -32,12 +30,17 @@
           </v-alert>
           
           <v-alert v-if="err.erro" error dismissible transition="scale-transition" v-model="err.status">
-            <strong> A linha {{ key+1 }} do arquivo upado possui erro nos campos: </strong>
+            <strong> A linha {{ key }} do arquivo upado possui erro nos campos: </strong>
             <br>
             {{ err.erro.email }}
             {{ err.erro.registration }}
             {{ err.erro.cpf }}
             {{ err.erro.rg }}
+            {{ err.erro.genre }}
+            {{ err.erro.id_course }}
+            {{ err.erro.id_apto }}
+            {{ err.erro.is_admin }}
+            {{ err.erro.is_bse_active }}
           </v-alert>
         </div>
       </v-card>

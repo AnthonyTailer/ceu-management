@@ -21,9 +21,9 @@ Route::get('/test', function () {
 //    return $request->user();
 //});
 
-Route::post('registers', [
-    'uses' => 'UsersController@postUser'
-]);
+//Route::post('registers', [
+//    'uses' => 'UsersController@postUser'
+//]);
 
 //user routes
 //Route::post('/user/register', [
