@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use JWTAuth;
 
 class CheckAdmin
 {
@@ -15,8 +16,9 @@ class CheckAdmin
      */
     public function handle($request, Closure $next)
     {
-        if ($request->is_admin == 1) {
-            return redirect('home');
+        $user = JWTAuth::toUser($request->token);
+        if ($user->is_admin == 0) {
+            return response()->json(['error'=>'Is not ADMIN']);
         }
 
         return $next($request);
