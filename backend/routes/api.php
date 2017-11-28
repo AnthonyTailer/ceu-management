@@ -50,7 +50,7 @@ Route::group(['prefix' => 'user',  'middleware' => ['auth.jwt', 'is-admin']], fu
         'uses' => 'UsersController@postUser'
     ]);
 
-    Route::put('{id}', [
+    Route::put('edit', [
         'uses' => 'UsersController@putUser'
     ]);
 
@@ -205,27 +205,29 @@ Route::group(['prefix' => 'apto',  'middleware' => ['auth.jwt', 'is-admin']], fu
 
 //course routes
 
-Route::group(['prefix' => 'apto',  'middleware' => ['auth.jwt'. 'is-admin']], function () {
-    Route::post('/course/register', [
+Route::group(['prefix' => 'course',  'middleware' => ['auth.jwt', 'is-admin']], function () {
+    Route::post('/register', [
         'uses' => 'CourseController@postCourse'
     ]);
 
-    Route::post('/courses/register', [
+    Route::post('/bulk-register', [
         'uses' => 'CourseController@postCourses'
     ]);
 
-    Route::get('/courses', [
+    Route::get('/all', [
         'uses' => 'CourseController@getCourses'
     ]);
 
-    Route::put('/course/{id}', [
+    Route::put('/{id}', [
         'uses' => 'CourseController@putCourse'
     ]);
 
-    Route::delete('course/{id}', [
+    Route::delete('/{id}', [
         'uses' => 'CourseController@deleteCourse'
     ]);
 });
+
+
 
 //course routes
 

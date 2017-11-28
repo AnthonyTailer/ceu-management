@@ -1,5 +1,5 @@
 <template>
-  <form data-vv-scope="user-form" @submit.prevent="submitStudent()">
+  <form @submit.prevent="submitStudent()">
     <v-layout row wrap>
       <v-flex x12 sm6 md6>
         <v-text-field
@@ -158,7 +158,6 @@
   export default {
     $validate: true,
     props: ['courses', 'aptos'],
-    $validate: true,
     computed: {
       student: {
         get () {
@@ -185,7 +184,12 @@
         }
       }
     },
-    mounted () {
+    data () {
+      return {
+        scopeValidation: 'user-form',
+      }
+    },
+    updated () {
 
       if ( this.studentEditState ) {
 
@@ -216,11 +220,6 @@
       }
 
     },
-    data () {
-      return {
-        scopeValidation: 'apartament-form',
-      }
-    },
     methods: {
       closeModal() {
         this.$validator.reset()
@@ -229,7 +228,7 @@
       },
       submitStudent () {
         if ( this.studentNewState ){
-          this.$validator.validateAll(this.scopeValidation).then(result => {
+          this.$validator.validateAll('user-form').then(result => {
             if (!result) {
               console.log('Student Created-> validation failed.')
             } else {
@@ -246,7 +245,7 @@
             console.log('something went wrong (non-validation related')
           })
         }
-        else if ( this.studentEditState ) {
+        else if ( 'user-form' ) {
           this.$validator.validateAll(this.scopeValidation).then(result => {
             if (!result) {
               console.log('Student Edit -> validation failed.', result)

@@ -241,7 +241,7 @@ class UsersController extends Controller {
     public function putUser(Request $request){
 
 
-        $user = User::find($request['id']);
+        $user = User::find($request->input('id'));
 
         if(!$user){
             return response()->json(['message' => "Usuário não encontrado"], 404);
@@ -255,10 +255,7 @@ class UsersController extends Controller {
 
                     $newApto = Apartament::find($request->input('id_apto'));
 
-
-                    if ($userApto->id == $newApto->id){ //mesmo apartamento selecionado = não troca de apartamento
-                        ;
-                    } else { //apartamento diferente
+                    if ($userApto->number != $newApto->number) { //apartamento diferente
 
                         if( $newApto->vacancy == 0 ) { //verifica se possui vaga
                             return response()->json([
@@ -270,10 +267,10 @@ class UsersController extends Controller {
                             DB::table('apartaments')->where('id', $newApto->id)->decrement('vacancy', 1); //apartamento que entrou
                         }
                     }
-                } else { //novo apartamento vazio
+                } else { //novo apartamento vazio, apenas sair do apartamento atual
                     DB::table('apartaments')->where('id', $userApto->id)->increment('vacancy', 1); //apartamento que saiu
                 }
-            }else if ($user->id_apto == null && $request->input('id_apto') !== null) { // não tem apartamento e quer entrar em apto
+            } else if ($user->id_apto == null && $request->input('id_apto') !== null) { // não tem apartamento e quer entrar em apto
                 $newApto = Apartament::find($request->input('id_apto'));
 
                 if( $newApto->vacancy == 0 ) { //verifica se possui vaga

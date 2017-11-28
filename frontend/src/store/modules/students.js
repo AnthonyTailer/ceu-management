@@ -12,6 +12,7 @@ const state = {
   editOneStudent: false,
   removeOneStudent: false,
   student: {
+    id: null,
     fullName: '',
     registration: '',
     id_course: null,
@@ -49,6 +50,7 @@ const getters = {
 const mutations = {
   setInitialData: (state) => {
     state.student = {
+      id: null,
       fullName: '',
       registration: '',
       id_course: null,
@@ -145,6 +147,7 @@ const actions = {
   },
   editStudent: ({ commit, dispatch },payload) => {
     let data = {
+      id: payload.id,
       fullName: payload.fullName,
       registration: payload.registration,
       id_course: payload.id_course,
@@ -161,7 +164,7 @@ const actions = {
 
     let snack = {}
 
-    Vue.http.put(`api/user/${aux.id}?token=`+ Vue.auth.getToken(), data)
+    Vue.http.put(`api/user/edit?token=`+ Vue.auth.getToken(), data)
       .then( (response) => {
         snack = {
           activator: true,
@@ -259,6 +262,7 @@ const actions = {
   setEditStudent: ( {commit}, payload) => {
 
     let data = {
+      id: payload.id,
       fullName: payload.fullName,
       registration: payload.registration,
       id_course: payload.id_course,
@@ -278,6 +282,7 @@ const actions = {
   setRemoveStudent: ( {commit}, payload) => {
 
     let data = {
+      id: payload.id,
       fullName: payload.fullName,
       registration: payload.registration,
       id_course: payload.id_course,

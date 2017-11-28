@@ -270,7 +270,7 @@
         })
       },
       getCourses: function () {
-        this.$http.get('api/courses?token='+ this.$auth.getToken()).then((response) => {
+        this.$http.get('api/course/all?token='+ this.$auth.getToken()).then((response) => {
           console.log(response)
           for (let i in response.body.courses) {
             this.courses.push({'text': response.body.courses[i]['courseName'], 'id': response.body.courses[i]['id']})
@@ -295,6 +295,8 @@
         this.editStudent = true
         this.seeStudent = false
         this.deleteStudent = false
+        this.$store.dispatch('setStudentEditState', true)
+        this.$store.dispatch('setStudentNewState', false)
 
         console.log("Edit Student -> ", data)
         let aux = JSON.parse( JSON.stringify( data ) )

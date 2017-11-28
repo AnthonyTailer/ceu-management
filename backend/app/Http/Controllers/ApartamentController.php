@@ -82,7 +82,7 @@ class ApartamentController extends Controller
     }
 
     public function getAptos(){
-        $aptos = Apartament::all();
+        $aptos = Apartament::orderBy('number', 'asc')->get();
 
         $response = [
             'aptos' => $aptos
