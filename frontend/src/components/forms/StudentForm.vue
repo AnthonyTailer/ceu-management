@@ -233,9 +233,9 @@
               console.log('Student Created-> validation failed.')
             } else {
 
-              let aux =  this.student
-              aux.id_course = this.student.id_course.id
-              aux.id_apto = this.student.id_apto.id
+              let aux =  JSON.parse( JSON.stringify( this.student ) )
+              aux.id_course = aux.id_course !== null ? aux.id_course.id : null
+              aux.id_apto = aux.id_apto !== null ? aux.id_apto.id : null
               console.log('Submited User', aux )
 
               this.$store.dispatch('newStudent', aux)
@@ -245,8 +245,8 @@
             console.log('something went wrong (non-validation related')
           })
         }
-        else if ( 'user-form' ) {
-          this.$validator.validateAll(this.scopeValidation).then(result => {
+        else if ( this.studentEditState ) {
+          this.$validator.validateAll('user-form').then(result => {
             if (!result) {
               console.log('Student Edit -> validation failed.', result)
             } else {
