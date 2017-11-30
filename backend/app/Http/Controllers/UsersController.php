@@ -58,8 +58,6 @@ class UsersController extends Controller {
             'is_bse_active.required' => "Você deve especificar se o usuário possui BSE ativo",
         ]);
 
-
-
         $randomPass = str_random(8);
 
         $user = new User([
@@ -77,29 +75,29 @@ class UsersController extends Controller {
             'id_apto' => $request->input('id_apto')
         ]);
 
-        if($user->save()) {
+        $apto = Apartament::find($request->input('id_apto'));
 
-            $apto = Apartament::find($request->input('id_apto'));
-
-            if($apto){
-                if( $apto-> vacancy == 0 ) {
-                    return response()->json([
-                        'message' => 'Usuário não pode ser alocado a um apartamento sem vaga'
-                    ],403);
-                }
-                $apto->vacancy = $apto->vacancy - 1;
-                $apto->save();
+        if($apto){
+            if( $apto-> vacancy == 0 ) {
+                return response()->json([
+                    'message' => 'Usuário não pode ser alocado a um apartamento sem vaga'
+                ],403);
             }
+            $apto->vacancy = $apto->vacancy - 1;
+            $apto->save();
+        }
 
+        if($user->save()) {
 
             $job = (new SendEmailJob($user, $randomPass))->delay(Carbon::now()->addSeconds(3));
 
             $this->dispatch($job);
+
+            return response()->json([
+                'message' => 'Usuário criado com sucesso, um e-mail foi mandado para '. $request->input('email')
+            ],201);
         }
 
-        return response()->json([
-            'message' => 'Usuário criado com sucesso, um e-mail foi mandado para '. $request->input('email')
-        ],201);
     }
 
     public function postUsers(Request $request){

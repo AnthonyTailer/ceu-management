@@ -206,8 +206,6 @@ class ApartamentController extends Controller
 
     }
 
-
-
     /*Método que realiza a criação da notificação de troca de apartamento*/
     /*Formato do JSON
         {
