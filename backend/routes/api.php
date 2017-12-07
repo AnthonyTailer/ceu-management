@@ -85,6 +85,10 @@ Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
         'uses' => 'UsersController@getNotifications'
     ]);
 
+    Route::get('get-read-notifications',[
+        'uses' => 'UsersController@getReadNotifications'
+    ]);
+
     Route::post('mark-read',[
         'uses' => 'UsersController@markAsRead'
     ]);
