@@ -76,15 +76,15 @@
           :nudge-width="200"
           v-model="menu"
         >
-          <v-btn icon class="mr-5" slot="activator">
-            <v-icon v-if="user.notifications.length > 0" large v-badge="{ value: user.notifications.length , left: true}" class="red--after">mail</v-icon>
+          <v-btn icon class="mr-5" slot="activator" id="notification-btn">
+            <v-icon v-if="user.notifications > 0" large v-badge="{ value: user.notifications , left: true}" class="red--after">mail</v-icon>
             <v-icon v-else large >mail_outline</v-icon>
           </v-btn>
           <v-card>
             <v-list>
               <v-list-tile avatar>
                 <v-list-tile-action>
-                  <v-icon large v-badge="{ value: user.notifications.length }" class="red--after"></v-icon>
+                  <v-icon large v-badge="{ value: user.notifications }" class="red--after"></v-icon>
                 </v-list-tile-action>
                 <v-list-tile-content>
                   <v-list-tile-title>Notificações não lidas</v-list-tile-title>
@@ -142,6 +142,8 @@
       })
     },
     mounted () {
+      this.user.notifications = this.$notify.getNotificationsCookie()
+      
       this.$nextTick(() => {
         window.addEventListener('resize', this.getWindowWidth)
         window.addEventListener('resize', this.getWindowHeight)
@@ -150,8 +152,8 @@
         this.getWindowHeight()
       })
 
-      eventBus.listen("getUserNotifications", (data) => {
-        this.user.notifications = data.body.notifications
+      eventBus.listen("newNotifications", (data) => {
+        this.user.notifications = data.count
       })
 
     },
