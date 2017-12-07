@@ -603,6 +603,23 @@ class UsersController extends Controller {
     }
 
 
+    public function getReadNotifications(Request $request){
+        $user = JWTAuth::toUser($request->token);
+
+        $notify =array();
+        foreach ($user->notifications as $notification) {
+            if($notification->read_at){
+                array_push($notify, array_merge($notification->data, ["id" => $notification->id]));
+            }
+        }
+
+        return response()->json([
+            'notifications' => $notify,
+            'count' => count($notify)
+        ]);
+    }
+
+
     /*Método que marca a notificão como lida*/
     /*Formato do JSON de entrada
         {
