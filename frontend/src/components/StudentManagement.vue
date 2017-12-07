@@ -1,39 +1,59 @@
 <template>
   <v-container fluid>
     
-    <app-modal v-show="newOneStudent" :dialog="newOneStudent">
-      <p slot="titleModal">Cadastro de novo Aluno</p>
+    <app-modal :dialog="newOneStudent" :type="'primary'">
+      <span slot="titleModal" icon style="color: white"><v-icon>add_circle</v-icon> Cadastro de novo Aluno</span>
       <app-student slot="mainModal" :courses="courses" :aptos="aptos"></app-student>
-      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.prevent="createUserEvent">Salvar</v-btn>
+    </app-modal>
+  
+    <app-modal  :dialog="editStudent" :type="'green accent-3'">
+      <span slot="titleModal" icon style="color: white"><v-icon>create</v-icon> Edição de Aluno</span>
+      <app-student slot="mainModal" :courses="courses" :aptos="aptos"></app-student>
     </app-modal>
     
-    <app-modal v-if="seeStudent" :dialog="seeStudent">
-      <p slot="titleModal">Mais informações do Aluno</p>
+    <app-modal v-if="seeStudent" :dialog="seeStudent" :type="'primary'">
+      <span slot="titleModal" icon style="color: white">Mais informações do Aluno</span>
       <p slot="mainModal">
-        <strong>Nome Completo</strong>: {{this.studentData['fullName']}}<br>
-        <strong>E-mail</strong>: {{this.studentData['email']}}<br>
-        <strong>Matrícula</strong>: {{this.studentData['registration']}}<br>
-        <strong>Curso</strong>: {{this.studentData['course']['courseName']}}<br>
-        <strong>CPF</strong>: {{this.studentData['cpf']}}<br>
-        <strong>RG</strong>: {{this.studentData['rg']}}<br>
-        <strong>Tem Benefício </strong>? {{this.studentData['is_bse_active'] !== null && this.studentData['is_bse_active'] === 1 ? 'Sim' : 'Não' }}<br>
-        <strong>É da Diretoria </strong>? {{this.studentData['is_admin'] !== null && this.studentData['is_admin'] === 1  ? 'Sim' : 'Não' }}<br>
-        <strong>Apartamento</strong>: {{this.studentData['apto'] !== null ? this.studentData['apto']['number'] : 'Nenhum Apartamento associado'}}<br>
+        <strong>Nome Completo</strong>: {{ studentData['fullName'] }}<br>
+        <strong>E-mail</strong>: {{ studentData['email']}}<br>
+        <strong>Matrícula</strong>: {{ studentData['registration']}}<br>
+        <strong>Curso</strong>: {{ studentData['course']['courseName']}}<br>
+        <strong>CPF</strong>: {{ studentData['cpf']}}<br>
+        <strong>RG</strong>: {{ studentData['rg']}}<br>
+        <strong>Tem Benefício </strong>? {{ studentData['is_bse_active'] !== null &&  studentData['is_bse_active'] === 1 ? 'Sim' : 'Não' }}<br>
+        <strong>É da Diretoria </strong>? {{ studentData['is_admin'] !== null &&  studentData['is_admin'] === 1  ? 'Sim' : 'Não' }}<br>
+        <strong>Apartamento</strong>: {{ studentData['apto'] !== null ?  studentData['apto']['number'] : 'Nenhum Apartamento associado'}}<br>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn class="grey lighten-1 black--text" dark @click.prevent="seeStudent = !seeStudent">Fechar</v-btn>
+        </v-card-actions>
       </p>
     </app-modal>
     
-    <app-modal v-show="editStudent" :dialog="editStudent">
-      <p slot="titleModal">Edição de Aluno</p>
-      <app-student slot="mainModal" :courses="courses" :aptos="aptos"></app-student>
-      <v-btn class="white--text green accent-3" dark slot="footerModal" @click.prevent="updateUserEvent">Alterar</v-btn>
-    </app-modal>
-    
-    <app-modal v-show="deleteStudent" :dialog="deleteStudent">
+    <app-modal :dialog="deleteStudent">
       <p slot="titleModal">Remover Aluno</p>
       <p slot="mainModal">
         Você deseja mesmo remover este usuário:?
       </p>
       <v-btn class="white--text red accent-3" dark slot="footerModal" @click.prevent="deleteUserEvent">Remover</v-btn>
+    </app-modal>
+  
+    <app-modal :dialog="deleteStudent" :type="'red accent-3'">
+        <span icon slot="titleModal" style="color: white">
+          <v-icon>warning</v-icon> Remover Aluno <strong>{{ this.$store.getters.getStudentState.fullName }}</strong>
+        </span>
+      <div slot="mainModal">
+        <h5>Você deseja mesmo remover o Aluno {{ this.$store.getters.getStudentState.fullName }} ?</h5>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn class="white--text red accent-3" dark
+                 @click.prevent.stop="removeStudentEvent"
+          >Remover</v-btn>
+          <v-btn class="grey lighten-1 black--text" dark @click.prevent="deleteStudent = !deleteStudent">Fechar</v-btn>
+        </v-card-actions>
+      </div>
     </app-modal>
     
     <app-modal-full v-if="newManyStudents" :dialogFull="newManyStudents" :loading="loading">
@@ -46,6 +66,7 @@
       </vue-xlsx-table>
     
     </app-modal-full>
+    
     <v-layout row wrap>
       <v-flex xs12>
         <v-card id="studentsDatatable" >
@@ -98,7 +119,7 @@
           </v-card-title>
           <v-data-table
             :headers="datatable.headers"
-            :items="datatable.items"
+            :items="allStudents"
             :pagination.sync="datatable.pagination"
             :loading="datatable.loading"
             :no-data-text="datatable.no_data_text"
@@ -134,17 +155,6 @@
         </div>
       </v-flex>
     </v-layout>
-    
-    <v-snackbar
-      :timeout="8000"
-      :error="snackError"
-      :success="snackSuccess"
-      :vertical="true"
-      v-model="snackbar"
-    >
-      <div v-html="snackMsg"></div>
-      <v-btn dark flat @click.native="snackbar = false">Fechar</v-btn>
-    </v-snackbar>
   </v-container>
 </template>
 
@@ -159,9 +169,27 @@
 
   export default {
     computed: {
-      ...mapGetters([
-        'modalState'
-      ]),
+      allStudents: {
+        get () {
+          return this.$store.getters.getAllStudentsState
+        }
+      },
+      newOneStudent: {
+        get () {
+          return this.$store.getters.getStudentNewState
+        },
+        set (value) {
+          this.$store.dispatch('setStudentNewState', value)
+        }
+      },
+      editStudent: {
+        get () {
+          return this.$store.getters.getStudentEditState
+        },
+        set (value) {
+          this.$store.dispatch('setStudentEditState', value)
+        }
+      },
       pages () {
         return this.datatable.pagination.rowsPerPage ? Math.ceil(this.datatable.items.length / this.datatable.pagination.rowsPerPage) : 0
       }
@@ -172,7 +200,7 @@
       appModalFull: ModalFull
     },
     created () {
-      this.getUsers()
+      this.getStudents()
       this.getCourses()
       this.getAptos()
     },
@@ -187,36 +215,7 @@
         this.manyResponse = []
         this.loading = false
       })
-
-      eventBus.listen('userCreated',(data) => {
-        this.snackbar = true
-        this.snackMsg = data
-        this.snackSuccess = true
-        this.snackError = false
-        this.$validator.reset()
-        this.getUsers()
-      })
-
-      eventBus.listen('userUpdated',(data) => {
-        this.snackbar = true
-        this.snackMsg = data
-        this.snackSuccess = true
-        this.snackError = false
-        this.$validator.reset()
-        this.getUsers()
-      })
-
-      eventBus.listen('userDeleted',(data) => {
-        this.snackbar = true
-        this.snackMsg = data
-        this.snackSuccess = true
-        this.snackError = false
-        this.$validator.reset()
-        this.getUsers()
-      })
-
-    },
-    beforeDestroy () {
+      
 
     },
     data () {
@@ -224,8 +223,6 @@
         sheet: false,
         loading: false,
         hidden: false,
-        newOneStudent: false,
-        editStudent: false,
         deleteStudent: false,
         seeStudent: false,
         studentData: '',
@@ -237,7 +234,7 @@
           {erro: '', status: false}
         ],
         tiles: [
-          {icon: 'add_box', title: 'Um Aluno', wichComponent: 'OneStudentFom'},
+          {icon: 'add_box', title: 'Cadastrar 1 Aluno', wichComponent: 'OneStudentFom'},
           {icon: 'attachment', title: 'Importar de arquivo Excel', wichComponent: 'ManyStudentFom'}
         ],
         selectedComponent: '',
@@ -266,8 +263,14 @@
       }
     },
     methods: {
+      getStudents: function() {
+        this.datatable.loading = true
+        this.$store.dispatch('setAllStudents').then( () => {
+          this.datatable.loading = false
+        })
+      },
       getCourses: function () {
-        this.$http.get('api/courses?token='+ this.$auth.getToken()).then((response) => {
+        this.$http.get('api/course/all?token='+ this.$auth.getToken()).then((response) => {
           console.log(response)
           for (let i in response.body.courses) {
             this.courses.push({'text': response.body.courses[i]['courseName'], 'id': response.body.courses[i]['id']})
@@ -282,43 +285,23 @@
           }
         })
       },
-      getUsers () {
-        this.$http.get('api/users?token='+ this.$auth.getToken())
-          .then(response => {
-            console.log(response)
-            this.datatable.loading = false
-            let result = response.body.data
-            for (let i = 0; i < result.length; i++) {
-              Object.assign(result[i], {'value': false })
-            }
-            this.datatable.items = result
-            console.log('GET Users -> ',this.datatable.items)
-          })
-      },
-      createUserEvent () {
-        eventBus.fire('createUserSubmit', 'user-form')
-      },
-      editUser (data) {
-        this.editStudent = true
-        console.log("Edit user -> ", data)
-//        let aux = JSON.parse( JSON.stringify( data ) )
-        eventBus.fire('getUserData', data)
-      },
-      updateUserEvent () {
-        eventBus.fire('updateUserSubmit')
-      },
-      deleteUser (data) {
-        this.deleteStudent = true
-        console.log("Delete user -> ", data)
-        eventBus.fire('deleteUserData', data)
-      },
-      deleteUserEvent () {
-        eventBus.fire('deleteUserSubmit')
-      },
       seeUser (data) {
         console.log("See User -> ", data)
         this.seeStudent = true
         this.studentData = data
+      },
+      editUser: function(data) {
+
+        this.editStudent = true
+        this.seeStudent = false
+        this.deleteStudent = false
+        this.$store.dispatch('setStudentEditState', true)
+        this.$store.dispatch('setStudentNewState', false)
+
+        console.log("Edit Student -> ", data)
+        let aux = JSON.parse( JSON.stringify( data ) )
+
+        this.$store.dispatch('setEditStudent', aux)
       },
       componentSelector (param) {
         this.selectedComponent = param

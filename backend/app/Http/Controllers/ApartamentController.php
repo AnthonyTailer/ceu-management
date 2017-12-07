@@ -82,7 +82,7 @@ class ApartamentController extends Controller
     }
 
     public function getAptos(){
-        $aptos = Apartament::all();
+        $aptos = Apartament::orderBy('number', 'asc')->get();
 
         $response = [
             'aptos' => $aptos
@@ -205,8 +205,6 @@ class ApartamentController extends Controller
         }
 
     }
-
-
 
     /*Método que realiza a criação da notificação de troca de apartamento*/
     /*Formato do JSON

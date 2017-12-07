@@ -58,8 +58,6 @@ class UsersController extends Controller {
             'is_bse_active.required' => "Você deve especificar se o usuário possui BSE ativo",
         ]);
 
-
-
         $randomPass = str_random(8);
 
         $user = new User([
@@ -77,29 +75,29 @@ class UsersController extends Controller {
             'id_apto' => $request->input('id_apto')
         ]);
 
-        if($user->save()) {
+        $apto = Apartament::find($request->input('id_apto'));
 
-            $apto = Apartament::find($request->input('id_apto'));
-
-            if($apto){
-                if( $apto-> vacancy == 0 ) {
-                    return response()->json([
-                        'message' => 'Usuário não pode ser alocado a um apartamento sem vaga'
-                    ],403);
-                }
-                $apto->vacancy = $apto->vacancy - 1;
-                $apto->save();
+        if($apto){
+            if( $apto-> vacancy == 0 ) {
+                return response()->json([
+                    'message' => 'Usuário não pode ser alocado a um apartamento sem vaga'
+                ],403);
             }
+            $apto->vacancy = $apto->vacancy - 1;
+            $apto->save();
+        }
 
+        if($user->save()) {
 
             $job = (new SendEmailJob($user, $randomPass))->delay(Carbon::now()->addSeconds(3));
 
             $this->dispatch($job);
+
+            return response()->json([
+                'message' => 'Usuário criado com sucesso, um e-mail foi mandado para '. $request->input('email')
+            ],201);
         }
 
-        return response()->json([
-            'message' => 'Usuário criado com sucesso, um e-mail foi mandado para '. $request->input('email')
-        ],201);
     }
 
     public function postUsers(Request $request){
@@ -241,7 +239,7 @@ class UsersController extends Controller {
     public function putUser(Request $request){
 
 
-        $user = User::find($request['id']);
+        $user = User::find($request->input('id'));
 
         if(!$user){
             return response()->json(['message' => "Usuário não encontrado"], 404);
@@ -255,10 +253,7 @@ class UsersController extends Controller {
 
                     $newApto = Apartament::find($request->input('id_apto'));
 
-
-                    if ($userApto->id == $newApto->id){ //mesmo apartamento selecionado = não troca de apartamento
-                        ;
-                    } else { //apartamento diferente
+                    if ($userApto->number != $newApto->number) { //apartamento diferente
 
                         if( $newApto->vacancy == 0 ) { //verifica se possui vaga
                             return response()->json([
@@ -270,10 +265,10 @@ class UsersController extends Controller {
                             DB::table('apartaments')->where('id', $newApto->id)->decrement('vacancy', 1); //apartamento que entrou
                         }
                     }
-                } else { //novo apartamento vazio
+                } else { //novo apartamento vazio, apenas sair do apartamento atual
                     DB::table('apartaments')->where('id', $userApto->id)->increment('vacancy', 1); //apartamento que saiu
                 }
-            }else if ($user->id_apto == null && $request->input('id_apto') !== null) { // não tem apartamento e quer entrar em apto
+            } else if ($user->id_apto == null && $request->input('id_apto') !== null) { // não tem apartamento e quer entrar em apto
                 $newApto = Apartament::find($request->input('id_apto'));
 
                 if( $newApto->vacancy == 0 ) { //verifica se possui vaga

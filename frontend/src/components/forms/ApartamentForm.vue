@@ -140,23 +140,8 @@
     data () {
       return {
         scopeValidation: 'apartament-form',
-        snackbar: false,
-        snackError: false,
-        snackSuccess: false,
-        snackMsg: '',
         editApto: false
       }
-    },
-    beforeCreate() {
-      
-      eventBus.listen('deleteApartamentData', data => {
-        this.apartament = data;
-      })
-
-      eventBus.listen('deleteApartamentSubmit', () => {
-        this.deleteApartament()
-      })
-      
     },
     methods: {
       closeModal() {
