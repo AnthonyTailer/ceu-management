@@ -582,13 +582,12 @@ class UsersController extends Controller {
 
     public function getNotifications(Request $request){
         $user = JWTAuth::toUser($request->token);
-
-
         $notify =array();
         $notifyIDs = array();
         foreach ($user->notifications as $notification) {
             if(!$notification->read_at){
-                array_push($notify, array_merge($notification->data,["date" => $notification->created_at], ["priority" => $notification->priority] ,["id" => $notification->id]));
+                $date = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $notification->created_at)->format('d-m-Y');
+                array_push($notify, array_merge($notification->data,["date" => $date], ["priority" => $notification->priority] ,["id" => $notification->id]));
                 array_push($notifyIDs,$notification->id);
             }
         }

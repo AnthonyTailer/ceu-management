@@ -67,9 +67,11 @@ class NotificationAlert extends Notification
     {
 
 
+
         return [
             'text' => $this->text,
-            'priority' => $this->priority
+            'priority' => 'medium'
+
         ];
     }
 }
