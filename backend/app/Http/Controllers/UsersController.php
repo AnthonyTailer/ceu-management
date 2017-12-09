@@ -530,19 +530,19 @@ class UsersController extends Controller {
     }
 
     public function createAlert(Request $request){
-        if($request->text){
+        if($request->input('text')){
             if($request->input('to.type') == "user"){
                 $user = User::find($request->input('to.id'));
-                $user->notify(new NotificationAlert($request->text));
+                $user->notify(new NotificationAlert($request->input('text'), $request->input('priority')));
             }elseif($request->input('to.type') == "apto"){
                 $users = User::where('id_apto' , $request->input('to.id'))->get();
                 foreach ($users as $user){
-                    $user->notify(new NotificationAlert($request->text));
+                    $user->notify(new NotificationAlert($request->input('text'), $request->input('priority')));
                 }
             }elseif($request->input('to.type') == "all"){
                 $users = User::all();
                 foreach ($users as $user){
-                    $user->notify(new NotificationAlert($request->text));
+                    $user->notify(new NotificationAlert($request->input('text'), $request->input('priority')));
                 }
             }
         }else{
@@ -583,16 +583,20 @@ class UsersController extends Controller {
     public function getNotifications(Request $request){
         $user = JWTAuth::toUser($request->token);
 
+
         $notify =array();
+        $notifyIDs = array();
         foreach ($user->notifications as $notification) {
             if(!$notification->read_at){
-                array_push($notify, array_merge($notification->data, ["id" => $notification->id]));
+                array_push($notify, array_merge($notification->data,["date" => $notification->created_at], ["priority" => $notification->priority] ,["id" => $notification->id]));
+                array_push($notifyIDs,$notification->id);
             }
         }
 
         return response()->json([
             'notifications' => $notify,
-            'count' => count($notify)
+            'count' => count($notify),
+            'ids' => $notifyIDs
         ]);
 
     }
