@@ -54,7 +54,7 @@
         </v-list-tile>
         <v-list-tile class="sideMenuItens"  @click.native="targetRoute('/notifications')">
           <v-list-tile-action>
-            <v-icon>mail_outline</v-icon>
+            <v-icon>notifications</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Notificações/Alertas</v-list-tile-title>
@@ -72,19 +72,20 @@
       <div class="text-xs-center">
         <v-menu
           offset-x
+          offset-y
           :close-on-content-click="false"
           :nudge-width="200"
           v-model="menu"
         >
           <v-btn icon class="mr-5" slot="activator" id="notification-btn">
-            <v-icon v-if="user.notifications > 0" large v-badge="{ value: user.notifications , left: true}" class="red--after">mail</v-icon>
-            <v-icon v-else large >mail_outline</v-icon>
+            <v-icon class="red--after flaticon-interface-1" v-if="user.notifications > 0" large v-badge="{ value: user.notifications }" ></v-icon>
+            <v-icon class="flaticon-interface-2" v-else large ></v-icon>
           </v-btn>
           <v-card>
             <v-list>
               <v-list-tile avatar>
                 <v-list-tile-action>
-                  <v-icon large v-badge="{ value: user.notifications }" class="red--after"></v-icon>
+                  <v-icon class="red--after flaticon-interface-1" large v-badge="{ value: user.notifications }" ></v-icon>
                 </v-list-tile-action>
                 <v-list-tile-content>
                   <v-list-tile-title>Notificações não lidas</v-list-tile-title>

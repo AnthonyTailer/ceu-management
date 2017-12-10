@@ -1,21 +1,23 @@
 <template>
-  <v-tabs fixed centered>
+  <div>
+    <v-tabs fixed centered icons>
     <v-toolbar class="teal darken-2" dark>
-      <v-toolbar-side-icon></v-toolbar-side-icon>
-      <v-toolbar-title class="display text-xs-center">Notificações</v-toolbar-title>
+      <i class="flaticon-mail"></i>
+      <v-toolbar-title class="display text-xs-center">Mensagens</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon v-if="this.$store.getters.adminState">
-        <v-icon>add</v-icon>
+      <v-btn icon v-if="this.$store.getters.adminState" @click="newMessageModal = true">
+        <v-icon class="flaticon-multimedia"></v-icon>
       </v-btn>
     </v-toolbar>
     <v-tabs-bar class="teal darken-4" dark>
-      <v-tabs-slider ></v-tabs-slider>
+      <v-tabs-slider></v-tabs-slider>
       <v-tabs-item
         v-for="(i, key) in tabs"
         :key="key"
         :href="'#tab-' + key"
         @click.native="getTabNotifications(i)"
       >
+        <v-icon>{{i.icon}}</v-icon>
         {{ i.name }}
       </v-tabs-item>
     </v-tabs-bar>
@@ -27,15 +29,22 @@
       >
         <v-card flat>
           <v-card-text v-if="i.content.length > 0">
+            <v-btn  v-if="i.slug === 'unread' && selectedMsg.length > 0"  @click="markAsRead(selectedMsg, i)">Marcar '{{selectedMsg.length}}' como Lida </v-btn>
             <v-alert
               v-for="noty in i.content"
               :key="noty.id"
               :value="true"
-              class="info"
-              icon="info"
+              class="info ma-1 pa-1"
+              transition="scale-transition"
             >
-              {{ noty.text }}
-              <v-btn flat dark absolute right @click="markAsRead(noty.id, i)">Marcar Como Lida</v-btn>
+              <v-layout row wrap>
+                <v-flex xs1>
+                  <v-checkbox v-if="i.slug === 'unread'" dark v-model="selectedMsg" :value="noty.id"></v-checkbox>
+                </v-flex>
+                <v-flex xs11>
+                  <div>{{ noty.text }}</div>
+                </v-flex>
+              </v-layout>
             </v-alert>
           </v-card-text>
           <v-card-text class="text-xs-center" v-else >Nenhuma Notificação para ser exibida</v-card-text>
@@ -43,19 +52,39 @@
       </v-tabs-content>
     </v-tabs-items>
   </v-tabs>
+  
+    <app-modal :dialog="newMessageModal" :type="'primary'">
+      <span slot="titleModal" icon style="color: white"><i class="flaticon-multimedia"></i> Nova Mensagem</span>
+      <div slot="mainModal">
+        <app-message-form></app-message-form>
+      </div>
+    </app-modal>
+  </div>
 </template>
 <script>
   import { eventBus } from '../main'
   import VueNotifications from 'vue-notifications'
+  import Message from './forms/NewMessageForm.vue'
+  import Modal from './shared/Modal.vue'
   export default {
+    components: {
+      appModal: Modal,
+      appMessageForm: Message,
+    },
     mounted () {
       this.getTabNotifications(this.tabs[0])
+      
+      eventBus.listen('closeModal', (data) => {
+        this.newMessageModal  = data
+      })
     },
     data () {
       return {
+        selectedMsg: [],
+        newMessageModal: false,
         tabs: [
-          {name: 'Não Lidas', slug: 'unread', route: 'api/user/get-notifications', content: ''},
-          {name: 'Lidas', slug: 'read', route: 'api/user/get-read-notifications', content: ''},
+          {name: 'Não Lidas', icon:'email', slug: 'unread', route: 'api/user/get-notifications', content: ''},
+          {name: 'Lidas', icon: 'mail_outline', slug: 'read', route: 'api/user/get-read-notifications', content: ''},
         ],
       }
     },
@@ -77,16 +106,18 @@
            }else {
              eventBus.fire('newNotifications', response.body)
            }
-         }else if (noti === null || noti === undefined) {
+         } else if (noti === null || noti === undefined) {
            localStorage.setItem(notifications, 0)
          }
        })
       },
-      markAsRead (id, tab) {
-        this.$http.post("api/user/mark-read?token="+this.$auth.getToken(), { id_notification : id}).then( (response) => {
-          console.log(response)
-          this.getTabNotifications(tab)
-        })
+      markAsRead (idArray, tab) {
+        if (idArray.length > 0){
+          this.$http.post("api/user/mark-read?token="+this.$auth.getToken(), { id_notification : idArray}).then( (response) => {
+            console.log(response)
+            this.getTabNotifications(tab)
+          })
+        }
       }
     }
   }

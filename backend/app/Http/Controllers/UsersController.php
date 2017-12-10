@@ -530,27 +530,42 @@ class UsersController extends Controller {
     }
 
     public function createAlert(Request $request){
+        $this->validate($request, [
+            'text' => 'required',
+            'to.type' => 'required',
+            'priority' => 'required',
+        ],[
+            'text.required' => 'A mensagem não pode estar vazia',
+            'to.type.required'  => 'Você deve escolher para quem deseja enviar a mensagem',
+            'priority' => "Você deve selecionar uma prioridade para a mensagem",
+        ]);
+
         if($request->input('text')){
+            $when = Carbon::now()->addSeconds(5);
+
             if($request->input('to.type') == "user"){
                 $user = User::find($request->input('to.id'));
                 $user->notify(new NotificationAlert($request->input('text'), $request->input('priority')));
+
+                return response()->json(['message' => "Mensagem enviada com sucesso à ".$user->fullName], 200);
             }elseif($request->input('to.type') == "apto"){
                 $users = User::where('id_apto' , $request->input('to.id'))->get();
+
                 foreach ($users as $user){
-                    $user->notify(new NotificationAlert($request->input('text'), $request->input('priority')));
+                    $user->notify( (new NotificationAlert($request->input('text'), $request->input('priority')) )->delay($when));
                 }
+
+                return response()->json(['message' => "Mensagem enviada com sucesso ao apartamento"], 200);
+
             }elseif($request->input('to.type') == "all"){
                 $users = User::all();
                 foreach ($users as $user){
-                    $user->notify(new NotificationAlert($request->input('text'), $request->input('priority')));
+                    $user->notify( (new NotificationAlert($request->input('text'), $request->input('priority')) )->delay($when));
                 }
-            }
-        }else{
-            return response()->json([
-                "message" => "Campo de texto está faltando"
-            ],400);
-        }
 
+                return response()->json(['message' => "Mensagem enviada com sucesso à todos moradores da CEU"], 200);
+            }
+        }
 
     }
 
@@ -604,7 +619,7 @@ class UsersController extends Controller {
     public function getReadNotifications(Request $request){
         $user = JWTAuth::toUser($request->token);
 
-        $notify =array();
+        $notify = array();
         foreach ($user->notifications as $notification) {
             if($notification->read_at){
                 array_push($notify, array_merge($notification->data, ["id" => $notification->id]));

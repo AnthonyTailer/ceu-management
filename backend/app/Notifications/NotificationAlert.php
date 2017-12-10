@@ -7,7 +7,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class NotificationAlert extends Notification
+class NotificationAlert extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -21,7 +21,7 @@ class NotificationAlert extends Notification
      */
     public function __construct($text, $priority)
     {
-        $this->text = $text; #quem deseja trocar
+        $this->text = $text;
         $this->priority = $priority;
     }
 
@@ -65,13 +65,9 @@ class NotificationAlert extends Notification
 
     public function toDatabase($notifiable)
     {
-
-
-
         return [
             'text' => $this->text,
-            'priority' => 'medium'
-
+            'priority' => $this->priority
         ];
     }
 }

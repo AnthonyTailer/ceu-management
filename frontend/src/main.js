@@ -16,6 +16,8 @@ import 'vue-material-design-icons/styles.css'
 import VueNotifications from 'vue-notifications'
 import miniToastr from 'mini-toastr'
 
+import './assets/css/flaticon.css'
+
 import { store } from './store/store'
 
 Vue.use(vueXlsxTable, {rABS: false})
@@ -32,7 +34,11 @@ const toastTypes = {
   warn: 'warn'
 }
 
-miniToastr.init({types: toastTypes})
+miniToastr.init({
+  types: toastTypes,
+  appendTarget: document.body,
+  node: document.createElement('div')
+})
 //You can use any font icon
 miniToastr.setIcon('error', 'i', {'class': 'fa fa-warning'})
 miniToastr.setIcon('info', 'i', {'class': 'fa fa-info-circle'})
@@ -52,7 +58,7 @@ const options = {
   warn: toast
 }
 
-VueNotifications.config.timeout = 6000
+VueNotifications.config.timeout = 8000
 // Activate plugin
 Vue.use(VueNotifications, options)// VueNotifications have auto install but if we want to specify options we've got to do it manually.
 

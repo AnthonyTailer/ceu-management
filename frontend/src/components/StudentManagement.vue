@@ -13,7 +13,7 @@
     
     <app-modal v-if="seeStudent" :dialog="seeStudent" :type="'primary'">
       <span slot="titleModal" icon style="color: white">Mais informações do Aluno</span>
-      <p slot="mainModal">
+      <p slot="mainModal" class="mb-0">
         <strong>Nome Completo</strong>: {{ studentData['fullName'] }}<br>
         <strong>E-mail</strong>: {{ studentData['email']}}<br>
         <strong>Matrícula</strong>: {{ studentData['registration']}}<br>

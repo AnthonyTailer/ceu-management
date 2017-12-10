@@ -50,8 +50,6 @@
       </v-flex>
     </v-layout>
     
-    
-    
     <v-layout row fill-height>
       <v-flex xs12 sm8 offset-sm2>
         <v-card class="mt-5">
@@ -70,8 +68,7 @@
                 bottom
                 right
               >
-                <v-icon>add</v-icon>
-                <v-icon>close</v-icon>
+                <i class="flaticon-add-house"></i>
               </v-btn>
             </v-fab-transition>
           </v-toolbar>
@@ -109,10 +106,17 @@
       </v-flex>
     </v-layout>
     
-    <app-modal :dialog="addStudent" v-if="apartament.vacancy > 0">
-      <p slot="titleModal">Adicionar novo Aluno ao Apartamento {{apartament.number}}</p>
-      <app-apto-student slot="mainModal" :students="allStudents" :apto="apartament"></app-apto-student>
-      <v-btn class="white--text success accent-3" dark slot="footerModal" @click.native.stop="addStudentToApto">Adicionar</v-btn>
+    <app-modal :dialog="addStudent" :type="'success accent-3'"  v-if="apartament.vacancy > 0">
+      <p slot="titleModal" icon style="color: white"><v-icon>add</v-icon> Adicionar novo Aluno ao Apartamento {{apartament.number}}</p>
+      <p slot="mainModal">
+        <app-apto-student  :students="allStudents" :apto="apartament"></app-apto-student>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn class="grey lighten-1 black--text" dark @click.prevent="addStudent = !addStudent">Fechar</v-btn>
+          <v-btn class="white--text success accent-3" dark @click.native.stop="addStudentToApto">Adicionar</v-btn>
+        </v-card-actions>
+      </p>
     </app-modal>
   
     <app-modal :dialog="switchStudent">
@@ -121,16 +125,6 @@
       <v-btn class="white--text success accent-3" dark slot="footerModal" @click.native.stop="changeStudentApto">Trocar</v-btn>
     </app-modal>
     
-    <v-snackbar
-      :timeout="8000"
-      :error="snackError"
-      :success="snackSuccess"
-      :vertical="true"
-      v-model="snackbar"
-    >
-      <div v-html="snackMsg"></div>
-      <v-btn dark flat @click.native="snackbar = false">Fechar</v-btn>
-    </v-snackbar>
   </div>
 </template>
 <script>
@@ -153,30 +147,16 @@
       })
       
       eventBus.listen('userAddedToApto', (data) => {
-          this.snackbar = true
-          this.snackError = false
-          this.snackSuccess = true
-          this.snackMsg = data
-
         this.getApto()
       })
       
       eventBus.listen('userChangedApto', (data) => {
-        this.snackbar = true
-        this.snackError = false
-        this.snackSuccess = true
-        this.snackMsg = data
-
         this.getApto()
       })
 
     },
     data () {
       return {
-        snackbar: false,
-        snackError: false,
-        snackSuccess: false,
-        snackMsg: '',
         apartament: '',
         students: '',
         oneStudent: '',
