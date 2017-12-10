@@ -58,15 +58,14 @@
       </div>
     </app-modal>
     
-    <app-modal-full v-if="newManyStudents" :dialogFull="newManyStudents" :loading="loading">
+    <app-modal-full v-model="newManyStudents" :dialogFull="newManyStudents" :loading="loading">
       <p slot="modalTitle activator">Cadastro de Alunos de um arquivo Excel</p>
-      <v-btn slot="closeModalBtn" icon dark>
+      <v-btn slot="closeModalBtn" icon dark @click="closeModalFull()">
         <v-icon>close</v-icon>
       </v-btn>
       <vue-xlsx-table slot="mainContent" class="ml-2" @on-select-file="handleSelectedFile">
         <span id="btn-import-csv" class="d-flex align-center"><i class="material-icons">attachment</i> Selecione um arquivo Excel</span>
       </vue-xlsx-table>
-    
     </app-modal-full>
     
     <v-layout row wrap>
@@ -340,7 +339,7 @@
         let obj = {}
         this.studentsCsv = []
         this.manyResponse = []
-        eventBus.fire('alerts', this.manyResponse)
+        eventBus.fire('alerts', null)
 
         convertedData.body.forEach((item, index) => {
           obj['cpf'] = item['CPF']
@@ -360,7 +359,6 @@
         })
         
         console.log(this.studentsCsv)
-        debugger
 
         this.$http.post('api/users/register?token='+ this.$auth.getToken(),
           {body: this.studentsCsv}
@@ -397,6 +395,10 @@
           })
           eventBus.fire('alerts', this.manyResponse)
         })
+      },
+      closeModalFull () {
+        this.newManyStudents = !this.newManyStudents
+        eventBus.fire('alerts', null)
       }
     },
    

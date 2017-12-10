@@ -122,6 +122,9 @@ class UsersController extends Controller {
             if(!empty($db_email) || !empty($db_registration)){
                 continue;
             }
+            if(empty($value['age'])){
+                $errors[$key]["age"] = "O campo Idade é obrigatório e deve ser preenchido.";
+            }
             if(empty($value['cpf'])){
                 $errors[$key]["cpf"] = "O campo CPF é obrigatório e deve ser preenchido.";
             }
@@ -155,7 +158,9 @@ class UsersController extends Controller {
                     }
 
                 }else if ($course && count($course) == 1) {
-                    $value['id_course'] = $course->id;
+                    foreach ( $course as $i=>$val){
+                        $value['id_course'] = $val->id;
+                    }
                 }else {
                     $errors[$key]['id_course'] = "O curso informado não existe.";
                 }
@@ -178,6 +183,7 @@ class UsersController extends Controller {
                     'email' => $value['email'],
                     'registration' => $value['registration'],
                     'password' => bcrypt($randomPass),
+                    'age' => $value['age'],
                     'cpf' => $value['cpf'],
                     'rg' => $value['rg'],
                     'genre' => $value['genre'],
