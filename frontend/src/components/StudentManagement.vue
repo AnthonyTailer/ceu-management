@@ -31,13 +31,13 @@
       </p>
     </app-modal>
     
-    <app-modal :dialog="deleteStudent">
-      <p slot="titleModal">Remover Aluno</p>
-      <p slot="mainModal">
-        Você deseja mesmo remover este usuário:?
-      </p>
-      <v-btn class="white--text red accent-3" dark slot="footerModal" @click.prevent="deleteUserEvent">Remover</v-btn>
-    </app-modal>
+    <!--<app-modal :dialog="deleteStudent" :type="'red accent-3'">-->
+      <!--<p slot="titleModal">Remover Aluno</p>-->
+      <!--<p slot="mainModal">-->
+        <!--Você deseja mesmo remover este usuário?-->
+      <!--</p>-->
+      <!--<v-btn class="white&#45;&#45;text red accent-3" dark slot="footerModal" @click.prevent="deleteUserEvent">Remover</v-btn>-->
+    <!--</app-modal>-->
   
     <app-modal :dialog="deleteStudent" :type="'red accent-3'">
         <span icon slot="titleModal" style="color: white">
@@ -49,8 +49,10 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn class="white--text red accent-3" dark
-                 @click.prevent.stop="removeStudentEvent"
-          >Remover</v-btn>
+                 @click.prevent.stop="deleteUser"
+          >
+            Remover
+          </v-btn>
           <v-btn class="grey lighten-1 black--text" dark @click.prevent="deleteStudent = !deleteStudent">Fechar</v-btn>
         </v-card-actions>
       </div>
@@ -142,7 +144,7 @@
                   <v-btn class="blue darken-1" fab dark small color="primary" @click.stop.prevent="editUser(props.item)">
                     <v-icon dark>edit</v-icon>
                   </v-btn>
-                  <v-btn class="red darken-1" fab dark small color="error" @click.stop="deleteUser(props.item)">
+                  <v-btn class="red darken-1" fab dark small color="error" @click.stop="setDeleteUser(props.item)">
                     <v-icon dark>delete_forever</v-icon>
                   </v-btn>
                 </div>
@@ -215,8 +217,6 @@
         this.manyResponse = []
         this.loading = false
       })
-      
-
     },
     data () {
       return {
@@ -302,6 +302,28 @@
         let aux = JSON.parse( JSON.stringify( data ) )
 
         this.$store.dispatch('setEditStudent', aux)
+      },
+      setDeleteUser: function(data) {
+
+        this.editStudent = false
+        this.seeStudent = false
+        this.deleteStudent = true
+        this.$store.dispatch('setStudentRemoveState', true)
+        this.$store.dispatch('setStudentEditState', false)
+        this.$store.dispatch('setStudentNewState', false)
+
+        console.log("Remove Student -> ", data)
+        let aux = JSON.parse( JSON.stringify( data ) )
+
+        this.$store.dispatch('setRemoveStudent', aux)
+      },
+      deleteUser () {
+        if(this.$store.getters.getStudentRemoveState) {
+          let aux = this.$store.getters.getStudentState
+          console.log('Removed Student', aux )
+          this.$store.dispatch('removeStudent', aux )
+        }
+        
       },
       componentSelector (param) {
         this.selectedComponent = param

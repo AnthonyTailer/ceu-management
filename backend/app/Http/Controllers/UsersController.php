@@ -331,8 +331,11 @@ class UsersController extends Controller {
             return response()->json(['message' => "Usuário não encontrado"], 404);
         }
 
-        $user->delete();
-        return response()->json(['message' => "Usuário deletado com sucesso"], 200);
+        if($user->delete()) {
+            if ($user->id_apto !== null)
+                DB::table('apartaments')->where('id', $user->id_apto)->increment('vacancy', 1); //aumenta uma vaga
+            return response()->json(['message' => "Usuário deletado com sucesso"], 200);
+        }
     }
 
     public function addUserToApto($id, $apto){
