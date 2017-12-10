@@ -107,22 +107,15 @@
     </v-layout>
     
     <app-modal :dialog="addStudent" :type="'success accent-3'"  v-if="apartament.vacancy > 0">
-      <p slot="titleModal" icon style="color: white"><v-icon>add</v-icon> Adicionar novo Aluno ao Apartamento {{apartament.number}}</p>
-      <p slot="mainModal">
+      <span slot="titleModal" icon style="color: white"><v-icon>add</v-icon> Adicionar novo Aluno ao Apartamento {{apartament.number}}</span>
+      <div slot="mainModal">
         <app-apto-student  :students="allStudents" :apto="apartament"></app-apto-student>
-        <v-divider></v-divider>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn class="grey lighten-1 black--text" dark @click.prevent="addStudent = !addStudent">Fechar</v-btn>
-          <v-btn class="white--text success accent-3" dark @click.native.stop="addStudentToApto">Adicionar</v-btn>
-        </v-card-actions>
-      </p>
+      </div>
     </app-modal>
   
-    <app-modal :dialog="switchStudent">
-      <p slot="titleModal">Trocar Aluno de Apartamento</p>
+    <app-modal :dialog="switchStudent" :type="'info accent-3'">
+      <span slot="titleModal"  icon style="color: white"><v-icon>compare_arrows</v-icon> Trocar Aluno de Apartamento</span>
       <app-student-change-apto slot="mainModal" :student="oneStudent" :apto="apartament"></app-student-change-apto>
-      <v-btn class="white--text success accent-3" dark slot="footerModal" @click.native.stop="changeStudentApto">Trocar</v-btn>
     </app-modal>
     
   </div>
@@ -146,11 +139,11 @@
         this.allStudents = []
       })
       
-      eventBus.listen('userAddedToApto', (data) => {
+      eventBus.listen('studentAddedToApt',() => {
         this.getApto()
       })
       
-      eventBus.listen('userChangedApto', (data) => {
+      eventBus.listen('studentSwitchedApt',() => {
         this.getApto()
       })
 
@@ -214,9 +207,6 @@
           this.snackSuccess = false
           this.snackError = true
         })
-      },
-      addStudentToApto () {
-        eventBus.fire('addStudentToApto')
       },
       changeStudentApto () {
         eventBus.fire('changeStudentApto')
