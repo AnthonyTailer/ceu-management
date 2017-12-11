@@ -553,14 +553,15 @@ class UsersController extends Controller {
 
             if($request->input('to.type') == "user"){
                 $user = User::find($request->input('to.id'));
-                $user->notify(new NotificationAlert($request->input('text'), $request->input('priority')));
-
+                $user->notify(new NotificationAlert($request->input('text')));
+                $user->notifications()->get()->first()->update(['priority' => $request->input('priority')]);;
                 return response()->json(['message' => "Mensagem enviada com sucesso à ".$user->fullName], 200);
             }elseif($request->input('to.type') == "apto"){
                 $users = User::where('id_apto' , $request->input('to.id'))->get();
 
                 foreach ($users as $user){
-                    $user->notify( (new NotificationAlert($request->input('text'), $request->input('priority')) )->delay($when));
+                    $user->notify((new NotificationAlert($request->input('text')))->delay($when));
+                    $user->notifications()->get()->first()->update(['priority' => $request->input('priority')]);;
                 }
 
                 return response()->json(['message' => "Mensagem enviada com sucesso ao apartamento"], 200);
@@ -568,7 +569,8 @@ class UsersController extends Controller {
             }elseif($request->input('to.type') == "all"){
                 $users = User::all();
                 foreach ($users as $user){
-                    $user->notify( (new NotificationAlert($request->input('text'), $request->input('priority')) )->delay($when));
+                    $user->notify( (new NotificationAlert($request->input('text')))->delay($when));
+                    $user->notifications()->get()->first()->update(['priority' => $request->input('priority')]);;
                 }
 
                 return response()->json(['message' => "Mensagem enviada com sucesso à todos moradores da CEU"], 200);
