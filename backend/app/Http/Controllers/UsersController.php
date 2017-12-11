@@ -533,16 +533,18 @@ class UsersController extends Controller {
         if($request->input('text')){
             if($request->input('to.type') == "user"){
                 $user = User::find($request->input('to.id'));
-                $user->notify(new NotificationAlert($request->input('text'), $request->input('priority')));
+                $user->notify(new NotificationAlert($request->input('text')));
+
             }elseif($request->input('to.type') == "apto"){
                 $users = User::where('id_apto' , $request->input('to.id'))->get();
                 foreach ($users as $user){
-                    $user->notify(new NotificationAlert($request->input('text'), $request->input('priority')));
+                    $user->notify(new NotificationAlert($request->input('text')));
                 }
             }elseif($request->input('to.type') == "all"){
                 $users = User::all();
                 foreach ($users as $user){
-                    $user->notify(new NotificationAlert($request->input('text'), $request->input('priority')));
+                    $user->notify(new NotificationAlert($request->input('text')));
+
                 }
             }
         }else{
@@ -584,12 +586,10 @@ class UsersController extends Controller {
         $user = JWTAuth::toUser($request->token);
         $notify =array();
         $notifyIDs = array();
-        foreach ($user->notifications as $notification) {
-            if(!$notification->read_at){
-                $date = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $notification->created_at)->format('d-m-Y');
-                array_push($notify, array_merge($notification->data,["date" => $date], ["priority" => $notification->priority] ,["id" => $notification->id]));
-                array_push($notifyIDs,$notification->id);
-            }
+        foreach ($user->unreadNotifications as $notification) {
+            $date = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $notification->created_at)->format('d-m-Y');
+            array_push($notify, array_merge($notification->data,["date" => $date], ["priority" => $notification->priority] ,["id" => $notification->id]));
+            array_push($notifyIDs,$notification->id);
         }
 
         return response()->json([
@@ -599,6 +599,7 @@ class UsersController extends Controller {
         ]);
 
     }
+
 
 
     public function getReadNotifications(Request $request){
@@ -636,5 +637,15 @@ class UsersController extends Controller {
 
         $notification->markAsRead();
 
+    }
+
+
+    public function markMultipleAsRead(Request $request){
+        $user = JWTAuth::toUser($request->token);
+
+        foreach($request->input("ids") as $notificationID){
+            $notification = $user->notifications()->where('id',$notificationID)->first();
+            $notification->markAsRead();
+        }
     }
 }

@@ -93,6 +93,10 @@ Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
         'uses' => 'UsersController@markAsRead'
     ]);
 
+    Route::post('mark-multiple-read',[
+        'uses' => 'UsersController@markMultipleAsRead'
+    ]);
+
     Route::get('stats', [
         'uses' => 'UsersController@stats'
     ]);

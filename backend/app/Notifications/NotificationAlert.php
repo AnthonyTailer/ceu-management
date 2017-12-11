@@ -12,17 +12,15 @@ class NotificationAlert extends Notification
     use Queueable;
 
     public $text;
-    public $priority;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($text, $priority)
+    public function __construct($text)
     {
         $this->text = $text; #quem deseja trocar
-        $this->priority = $priority;
     }
 
     /**
@@ -65,13 +63,9 @@ class NotificationAlert extends Notification
 
     public function toDatabase($notifiable)
     {
-
-
-
+        dd("nda");
         return [
-            'text' => $this->text,
-            'priority' => 'medium'
-
+            'text' => $this->text
         ];
     }
 }
