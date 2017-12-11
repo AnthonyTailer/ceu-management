@@ -50,8 +50,6 @@
       </v-flex>
     </v-layout>
     
-    
-    
     <v-layout row fill-height>
       <v-flex xs12 sm8 offset-sm2>
         <v-card class="mt-5">
@@ -70,8 +68,7 @@
                 bottom
                 right
               >
-                <v-icon>add</v-icon>
-                <v-icon>close</v-icon>
+                <i class="flaticon-add-house"></i>
               </v-btn>
             </v-fab-transition>
           </v-toolbar>
@@ -109,28 +106,18 @@
       </v-flex>
     </v-layout>
     
-    <app-modal :dialog="addStudent" v-if="apartament.vacancy > 0">
-      <p slot="titleModal">Adicionar novo Aluno ao Apartamento {{apartament.number}}</p>
-      <app-apto-student slot="mainModal" :students="allStudents" :apto="apartament"></app-apto-student>
-      <v-btn class="white--text success accent-3" dark slot="footerModal" @click.native.stop="addStudentToApto">Adicionar</v-btn>
+    <app-modal :dialog="addStudent" :type="'success accent-3'"  v-if="apartament.vacancy > 0">
+      <span slot="titleModal" icon style="color: white"><v-icon>add</v-icon> Adicionar novo Aluno ao Apartamento {{apartament.number}}</span>
+      <div slot="mainModal">
+        <app-apto-student  :students="allStudents" :apto="apartament"></app-apto-student>
+      </div>
     </app-modal>
   
-    <app-modal :dialog="switchStudent">
-      <p slot="titleModal">Trocar Aluno de Apartamento</p>
+    <app-modal :dialog="switchStudent" :type="'info accent-3'">
+      <span slot="titleModal"  icon style="color: white"><v-icon>compare_arrows</v-icon> Trocar Aluno de Apartamento</span>
       <app-student-change-apto slot="mainModal" :student="oneStudent" :apto="apartament"></app-student-change-apto>
-      <v-btn class="white--text success accent-3" dark slot="footerModal" @click.native.stop="changeStudentApto">Trocar</v-btn>
     </app-modal>
     
-    <v-snackbar
-      :timeout="8000"
-      :error="snackError"
-      :success="snackSuccess"
-      :vertical="true"
-      v-model="snackbar"
-    >
-      <div v-html="snackMsg"></div>
-      <v-btn dark flat @click.native="snackbar = false">Fechar</v-btn>
-    </v-snackbar>
   </div>
 </template>
 <script>
@@ -152,31 +139,17 @@
         this.allStudents = []
       })
       
-      eventBus.listen('userAddedToApto', (data) => {
-          this.snackbar = true
-          this.snackError = false
-          this.snackSuccess = true
-          this.snackMsg = data
-
+      eventBus.listen('studentAddedToApt',() => {
         this.getApto()
       })
       
-      eventBus.listen('userChangedApto', (data) => {
-        this.snackbar = true
-        this.snackError = false
-        this.snackSuccess = true
-        this.snackMsg = data
-
+      eventBus.listen('studentSwitchedApt',() => {
         this.getApto()
       })
 
     },
     data () {
       return {
-        snackbar: false,
-        snackError: false,
-        snackSuccess: false,
-        snackMsg: '',
         apartament: '',
         students: '',
         oneStudent: '',
@@ -234,9 +207,6 @@
           this.snackSuccess = false
           this.snackError = true
         })
-      },
-      addStudentToApto () {
-        eventBus.fire('addStudentToApto')
       },
       changeStudentApto () {
         eventBus.fire('changeStudentApto')

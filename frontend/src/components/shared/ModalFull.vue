@@ -3,7 +3,7 @@
     <v-dialog v-model="dialogFull" fullscreen transition="dialog-bottom-transition" :overlay=false  >
       <v-card>
         <v-toolbar dark class="primary">
-          <slot name="closeModalBtn" :disabled="loading" @click.native="closeModalFull"></slot>
+          <slot name="closeModalBtn" :disabled="loading"></slot>
           <v-toolbar-title>
             <slot name="modalTitle"></slot>
           </v-toolbar-title>
@@ -72,11 +72,6 @@
     watch: {
       dialogFull (value) {
         console.log('DialogFull -> ' + value)
-      }
-    },
-    methods: {
-      closeModalFull () {
-        eventBus.fire('closeModal', !this.dialogFull)
       }
     }
   }

@@ -67,6 +67,7 @@
   import { mapActions } from 'vuex'
   import { mapGetters } from 'vuex'
   import { store } from '../store/store'
+  import VueNotifications from 'vue-notifications'
   
   export default {
     $validates: true,
@@ -114,6 +115,8 @@
                     localStorage.setItem('user', response.body.user.fullName)
 
                     store.commit('isAdmin', response.body.user.is_admin)
+                    this.$notify.getNotifications()
+                    this.$notify.getNotificationsEachMinute()
                     
                     if(!response.body.user.is_admin)
                       this.$router.push('/aptos/vacancy')
@@ -128,6 +131,7 @@
                 this.loading = false
                 this.snackbar = true
                 this.msg = response.body.message
+                VueNotifications.error({message: this.msg})
               })
             }
           // success stuff.

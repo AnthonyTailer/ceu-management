@@ -52,6 +52,8 @@
               v-model="newApto2"
               label="Apartamento"
               autocomplete
+              clearable
+              cache-items
             ></v-select>
           </v-flex>
           <v-flex x12 sm6 md6>
@@ -61,22 +63,20 @@
               v-model="newStudent"
               label="Aluno"
               autocomplete
+              clearable
+              cache-items
               :disabled="!selectedApto"
             ></v-select>
           </v-flex>
         </v-layout>
       </v-flex>
     </v-layout>
-    <v-snackbar
-      :timeout="8000"
-      :error="snackError"
-      :success="snackSuccess"
-      :vertical="true"
-      v-model="snackbar"
-    >
-      <div v-html="snackMsg"></div>
-      <v-btn dark flat @click.native="snackbar = false">Fechar</v-btn>
-    </v-snackbar>
+    <v-divider></v-divider>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn class="grey lighten-1 black--text" dark @click.prevent="closeModal()">Fechar</v-btn>
+      <v-btn class="white--text success accent-3" dark @click.prevent.stop="switchStudentsApto()">Trocar</v-btn>
+    </v-card-actions>
   </form>
 </template>
 <script>
@@ -102,21 +102,17 @@
           this.getAptos()
         }
         else{
-        
+
         }
       },
-      
+
       newApto2 (value) {
         this.selectedApto = true
         this.getStudentsFromApto(value.id)
       }
     },
-    beforeCreate () {
-
-      eventBus.listen('changeStudentApto', () => {
-        this.updateUserApto()
-      })
-
+    mounted () {
+      
       eventBus.listen('closeModal', (data) => {
         this.option = data
         this.newApto = ''
@@ -133,10 +129,6 @@
     },
     data () {
       return {
-        snackbar: false,
-        snackError: false,
-        snackSuccess: false,
-        snackMsg: '',
         option: '',
         selectedStudent: {},
         selectedApto: false,
@@ -149,16 +141,16 @@
       }
     },
     methods: {
-      updateUserApto () {
+      switchStudentsApto () {
         this.$validator.validateAll().then(result => {
           if (!result) {
-            console.log('User Apto Updated -> validation failed.')
+            console.log('Switch Students Apto -> validation failed.')
           } else {
-            console.log('User Apto Update Submit')
+            console.log('Switch Students Apto Submit')
             this.$validator.reset()
-            
+
             let data = {}
-            
+
             if(this.option === 'option-1'){
               data = {
                 option: 'option-1',
@@ -181,30 +173,45 @@
                 id_apto: this.aptoProp.id
               }
             }
-            
+
             this.$http.put(`api/user/apto/change?token=`+ this.$auth.getToken(), data)
               .then( (response) => {
-                this.snackMsg = response.body.message
-                eventBus.fire('userChangedApto', this.snackMsg)
+
+                let snack = {
+                  activator: true,
+                  error: false,
+                  success: true,
+                  msg: response.body.message
+                }
+
+                this.$store.commit('setSnack', snack)
+
                 eventBus.closeModal(true)
+                eventBus.fire('studentSwitchedApt')
 
               }).catch( (response) =>  {
-                this.snackbar = true
-                let msg = ' '
 
-                if( response.body.errors ){
-                  for( let i in response.body.errors){
-                    response.body.errors[i].forEach( (item) => {
-                      msg += item + '<br>'
-                    })
-                  }
-  
-                }else {
-                  msg = response.body.message
+              let msg = ' '
+
+              if( response.body.errors ){
+                for( let i in response.body.errors){
+                  response.body.errors[i].forEach( (item) => {
+                    msg += item + '<br>'
+                  })
                 }
-                this.snackMsg = msg
-                this.snackSuccess = false
-                this.snackError = true
+
+              }else {
+                msg = response.body.message
+              }
+
+              let snack = {
+                activator: true,
+                error: true,
+                success: false,
+                msg: response.body.message
+              }
+
+              this.$store.commit('setSnack', snack)
             })
           }
         }).catch( () => {
@@ -241,6 +248,9 @@
             })
           }
         })
+      },
+      closeModal(){
+        eventBus.closeModal(true)
       }
     }
   }

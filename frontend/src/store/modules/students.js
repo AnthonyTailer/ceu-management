@@ -72,7 +72,7 @@ const mutations = {
     state.editOneStudent = payload
   },
   setStudentRemoveState: (state, payload) => {
-    state.removeStudent = payload
+    state.removeOneStudent = payload
   },
   setAllStudents: (state, payload) => {
     state.allStudents = payload
@@ -242,6 +242,7 @@ const actions = {
       }
       snack.msg = msg
       commit('setSnack', snack)
+      eventBus.fire('closeModal', false)
     })
   },
   setAllStudents: ({ commit }) => {

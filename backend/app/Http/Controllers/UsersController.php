@@ -122,6 +122,9 @@ class UsersController extends Controller {
             if(!empty($db_email) || !empty($db_registration)){
                 continue;
             }
+            if(empty($value['age'])){
+                $errors[$key]["age"] = "O campo Idade é obrigatório e deve ser preenchido.";
+            }
             if(empty($value['cpf'])){
                 $errors[$key]["cpf"] = "O campo CPF é obrigatório e deve ser preenchido.";
             }
@@ -155,7 +158,9 @@ class UsersController extends Controller {
                     }
 
                 }else if ($course && count($course) == 1) {
-                    $value['id_course'] = $course->id;
+                    foreach ( $course as $i=>$val){
+                        $value['id_course'] = $val->id;
+                    }
                 }else {
                     $errors[$key]['id_course'] = "O curso informado não existe.";
                 }
@@ -331,8 +336,11 @@ class UsersController extends Controller {
             return response()->json(['message' => "Usuário não encontrado"], 404);
         }
 
-        $user->delete();
-        return response()->json(['message' => "Usuário deletado com sucesso"], 200);
+        if($user->delete()) {
+            if ($user->id_apto !== null)
+                DB::table('apartaments')->where('id', $user->id_apto)->increment('vacancy', 1); //aumenta uma vaga
+            return response()->json(['message' => "Usuário deletado com sucesso"], 200);
+        }
     }
 
     public function addUserToApto($id, $apto){
@@ -530,29 +538,42 @@ class UsersController extends Controller {
     }
 
     public function createAlert(Request $request){
+        $this->validate($request, [
+            'text' => 'required',
+            'to.type' => 'required',
+            'priority' => 'required',
+        ],[
+            'text.required' => 'A mensagem não pode estar vazia',
+            'to.type.required'  => 'Você deve escolher para quem deseja enviar a mensagem',
+            'priority' => "Você deve selecionar uma prioridade para a mensagem",
+        ]);
+
         if($request->input('text')){
+            $when = Carbon::now()->addSeconds(5);
+
             if($request->input('to.type') == "user"){
                 $user = User::find($request->input('to.id'));
-                $user->notify(new NotificationAlert($request->input('text')));
+                $user->notify(new NotificationAlert($request->input('text'), $request->input('priority')));
 
+                return response()->json(['message' => "Mensagem enviada com sucesso à ".$user->fullName], 200);
             }elseif($request->input('to.type') == "apto"){
                 $users = User::where('id_apto' , $request->input('to.id'))->get();
+
                 foreach ($users as $user){
-                    $user->notify(new NotificationAlert($request->input('text')));
+                    $user->notify( (new NotificationAlert($request->input('text'), $request->input('priority')) )->delay($when));
                 }
+
+                return response()->json(['message' => "Mensagem enviada com sucesso ao apartamento"], 200);
+
             }elseif($request->input('to.type') == "all"){
                 $users = User::all();
                 foreach ($users as $user){
-                    $user->notify(new NotificationAlert($request->input('text')));
-
+                    $user->notify( (new NotificationAlert($request->input('text'), $request->input('priority')) )->delay($when));
                 }
-            }
-        }else{
-            return response()->json([
-                "message" => "Campo de texto está faltando"
-            ],400);
-        }
 
+                return response()->json(['message' => "Mensagem enviada com sucesso à todos moradores da CEU"], 200);
+            }
+        }
 
     }
 
@@ -601,11 +622,10 @@ class UsersController extends Controller {
     }
 
 
-
     public function getReadNotifications(Request $request){
         $user = JWTAuth::toUser($request->token);
 
-        $notify =array();
+        $notify = array();
         foreach ($user->notifications as $notification) {
             if($notification->read_at){
                 array_push($notify, array_merge($notification->data, ["id" => $notification->id]));

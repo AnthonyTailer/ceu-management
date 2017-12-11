@@ -7,6 +7,7 @@ import Students from '@/components/StudentManagement'
 import Dash from '@/components/Dash'
 import Login from '@/components/Login'
 import Notifications from '@/components/Notifications'
+import Laundry from '@/components/Laundry'
 
 Vue.use(Router)
 
@@ -56,6 +57,12 @@ export default new Router({
       path: '/notifications',
       name: 'notificacoes',
       component: Notifications,
+      meta: {forAuth: true}
+    },
+    {
+      path: '/laundry',
+      name: 'lavanderia',
+      component: Laundry,
       meta: {forAuth: true}
     }
   ]

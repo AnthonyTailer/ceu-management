@@ -9,6 +9,7 @@ export default function (Vue) {
       // const base64 = base64Url.replace('-', '+').replace('_', '/')
       // const jsonBase64Token = JSON.parse(window.atob(base64))
       localStorage.setItem('token', token)
+      localStorage.setItem('notifications', 0)
       // localStorage.setItem('atobToken', jsonBase64Token)
     },
 
@@ -25,6 +26,7 @@ export default function (Vue) {
     destroyToken () {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
+      localStorage.removeItem('notifications')
       // localStorage.removeItem('atobToken')
     },
 

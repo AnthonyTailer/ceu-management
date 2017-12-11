@@ -33,7 +33,6 @@
     name: 'dash',
     mounted () {
       this.getStats()
-      this.getNotifications()
     },
     data () {
       return {
@@ -76,6 +75,7 @@
           .then( (response) => {
             console.log(response)
             let data = response.body
+            
 
             this.quickAccess[0]["badge"] = data["students"]["total"]["value"]
             this.quickAccess[1]["badge"] = data["aptos"]["total"]["value"]
@@ -153,12 +153,6 @@
               }
             }
 
-          })
-      },
-      getNotifications () {
-        this.$http.get('api/user/get-notifications?token='+ this.$auth.getToken())
-          .then( (response) => {
-            eventBus.fire('getUserNotifications', response)
           })
       }
     }

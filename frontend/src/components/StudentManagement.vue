@@ -13,7 +13,7 @@
     
     <app-modal v-if="seeStudent" :dialog="seeStudent" :type="'primary'">
       <span slot="titleModal" icon style="color: white">Mais informações do Aluno</span>
-      <p slot="mainModal">
+      <p slot="mainModal" class="mb-0">
         <strong>Nome Completo</strong>: {{ studentData['fullName'] }}<br>
         <strong>E-mail</strong>: {{ studentData['email']}}<br>
         <strong>Matrícula</strong>: {{ studentData['registration']}}<br>
@@ -31,13 +31,13 @@
       </p>
     </app-modal>
     
-    <app-modal :dialog="deleteStudent">
-      <p slot="titleModal">Remover Aluno</p>
-      <p slot="mainModal">
-        Você deseja mesmo remover este usuário:?
-      </p>
-      <v-btn class="white--text red accent-3" dark slot="footerModal" @click.prevent="deleteUserEvent">Remover</v-btn>
-    </app-modal>
+    <!--<app-modal :dialog="deleteStudent" :type="'red accent-3'">-->
+      <!--<p slot="titleModal">Remover Aluno</p>-->
+      <!--<p slot="mainModal">-->
+        <!--Você deseja mesmo remover este usuário?-->
+      <!--</p>-->
+      <!--<v-btn class="white&#45;&#45;text red accent-3" dark slot="footerModal" @click.prevent="deleteUserEvent">Remover</v-btn>-->
+    <!--</app-modal>-->
   
     <app-modal :dialog="deleteStudent" :type="'red accent-3'">
         <span icon slot="titleModal" style="color: white">
@@ -49,22 +49,23 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn class="white--text red accent-3" dark
-                 @click.prevent.stop="removeStudentEvent"
-          >Remover</v-btn>
+                 @click.prevent.stop="deleteUser"
+          >
+            Remover
+          </v-btn>
           <v-btn class="grey lighten-1 black--text" dark @click.prevent="deleteStudent = !deleteStudent">Fechar</v-btn>
         </v-card-actions>
       </div>
     </app-modal>
     
-    <app-modal-full v-if="newManyStudents" :dialogFull="newManyStudents" :loading="loading">
+    <app-modal-full v-model="newManyStudents" :dialogFull="newManyStudents" :loading="loading">
       <p slot="modalTitle activator">Cadastro de Alunos de um arquivo Excel</p>
-      <v-btn slot="closeModalBtn" icon dark>
+      <v-btn slot="closeModalBtn" icon dark @click="closeModalFull()">
         <v-icon>close</v-icon>
       </v-btn>
       <vue-xlsx-table slot="mainContent" class="ml-2" @on-select-file="handleSelectedFile">
         <span id="btn-import-csv" class="d-flex align-center"><i class="material-icons">attachment</i> Selecione um arquivo Excel</span>
       </vue-xlsx-table>
-    
     </app-modal-full>
     
     <v-layout row wrap>
@@ -142,7 +143,7 @@
                   <v-btn class="blue darken-1" fab dark small color="primary" @click.stop.prevent="editUser(props.item)">
                     <v-icon dark>edit</v-icon>
                   </v-btn>
-                  <v-btn class="red darken-1" fab dark small color="error" @click.stop="deleteUser(props.item)">
+                  <v-btn class="red darken-1" fab dark small color="error" @click.stop="setDeleteUser(props.item)">
                     <v-icon dark>delete_forever</v-icon>
                   </v-btn>
                 </div>
@@ -215,8 +216,6 @@
         this.manyResponse = []
         this.loading = false
       })
-      
-
     },
     data () {
       return {
@@ -303,6 +302,28 @@
 
         this.$store.dispatch('setEditStudent', aux)
       },
+      setDeleteUser: function(data) {
+
+        this.editStudent = false
+        this.seeStudent = false
+        this.deleteStudent = true
+        this.$store.dispatch('setStudentRemoveState', true)
+        this.$store.dispatch('setStudentEditState', false)
+        this.$store.dispatch('setStudentNewState', false)
+
+        console.log("Remove Student -> ", data)
+        let aux = JSON.parse( JSON.stringify( data ) )
+
+        this.$store.dispatch('setRemoveStudent', aux)
+      },
+      deleteUser () {
+        if(this.$store.getters.getStudentRemoveState) {
+          let aux = this.$store.getters.getStudentState
+          console.log('Removed Student', aux )
+          this.$store.dispatch('removeStudent', aux )
+        }
+        
+      },
       componentSelector (param) {
         this.selectedComponent = param
         if (this.selectedComponent === 'OneStudentFom') {
@@ -318,7 +339,7 @@
         let obj = {}
         this.studentsCsv = []
         this.manyResponse = []
-        eventBus.fire('alerts', this.manyResponse)
+        eventBus.fire('alerts', null)
 
         convertedData.body.forEach((item, index) => {
           obj['cpf'] = item['CPF']
@@ -338,7 +359,6 @@
         })
         
         console.log(this.studentsCsv)
-        debugger
 
         this.$http.post('api/users/register?token='+ this.$auth.getToken(),
           {body: this.studentsCsv}
@@ -375,6 +395,10 @@
           })
           eventBus.fire('alerts', this.manyResponse)
         })
+      },
+      closeModalFull () {
+        this.newManyStudents = !this.newManyStudents
+        eventBus.fire('alerts', null)
       }
     },
    

@@ -1,54 +1,52 @@
 <template>
-  <form data-vv-scope="apto-user-form">
-    <v-layout row wrap>
-      <v-flex xs12 sm12 md12>
-        <v-select
-          class="input-group"
-          :items="studentInput"
-          v-model="student"
-          v-validate.initial="'required'"
-          :error-messages="errors.collect('aluno')"
-          data-vv-name="aluno"
-          label="Aluno"
-          autocomplete
-          required
-        ></v-select>
-      </v-flex>
-    </v-layout>
-    <v-layout row wrap v-if="Object.keys(selectedStudent).length > 0 && selectedStudent.constructor === Object">
+    <form data-vv-scope="apto-user-form">
       <v-layout row wrap>
-        <v-flex x12 sm6 md6>
-          <b>Matrícula</b>: {{selectedStudent.registration}}
-        </v-flex>
-        <v-flex x12 sm6 md6>
-          <b>Curso</b>: {{selectedStudent.course.courseName}}
+        <v-flex xs12 sm12 md12>
+          <v-select
+            class="input-group"
+            :items="studentInput"
+            v-model="student"
+            v-validate.initial="'required'"
+            :error-messages="errors.collect('aluno')"
+            data-vv-name="aluno"
+            label="Aluno"
+            autocomplete
+            clearable
+            cache-items
+            required
+          ></v-select>
         </v-flex>
       </v-layout>
-      <v-layout row wrap>
-        <v-flex x12 sm6 md6>
-          <b>RG</b>: {{selectedStudent.rg}}
-        </v-flex>
-        <v-flex x12 sm6 md6>
-          <b>CPF</b>: {{selectedStudent.cpf}}
+      <v-layout row wrap v-if="Object.keys(selectedStudent).length > 0 && selectedStudent.constructor === Object">
+        <v-layout row wrap>
+          <v-flex x12 sm6 md6>
+            <b>Matrícula</b>: {{selectedStudent.registration}}
+          </v-flex>
+          <v-flex x12 sm6 md6>
+            <b>Curso</b>: {{selectedStudent.course.courseName}}
+          </v-flex>
+        </v-layout>
+        <v-layout row wrap>
+          <v-flex x12 sm6 md6>
+            <b>RG</b>: {{selectedStudent.rg}}
+          </v-flex>
+          <v-flex x12 sm6 md6>
+            <b>CPF</b>: {{selectedStudent.cpf}}
+          </v-flex>
+        </v-layout>
+      </v-layout>
+      <v-layout row wrap v-else>
+        <v-flex x12 sm12 md12 class="text-xs-center">
+          <h6>Selecione um Aluno acima</h6>
         </v-flex>
       </v-layout>
-    </v-layout>
-    <v-layout row wrap v-else>
-      <v-flex x12 sm12 md12 class="text-xs-center">
-        <h6>Selecione um Aluno acima</h6>
-      </v-flex>
-    </v-layout>
-    <v-snackbar
-      :timeout="8000"
-      :error="snackError"
-      :success="snackSuccess"
-      :vertical="true"
-      v-model="snackbar"
-    >
-      <div v-html="snackMsg"></div>
-      <v-btn dark flat @click.native="snackbar = false">Fechar</v-btn>
-    </v-snackbar>
-  </form>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn class="grey lighten-1 black--text" dark @click.prevent="closeModal()">Fechar</v-btn>
+        <v-btn class="white--text success accent-3" dark @click.prevent.stop="addStudentToApto(selectedStudent)">Adicionar</v-btn>
+      </v-card-actions>
+    </form>
 </template>
 <script>
   import { eventBus } from '../../main'
@@ -75,11 +73,7 @@
       }
     },
     updated () {
-
-      eventBus.listen('addStudentToApto', () => {
-        this.updateUserApto()
-      })
-
+      
       eventBus.listen('closeModal', (data) => {
         this.student = this.initialData()
         this.selectedStudent = {}
@@ -87,19 +81,8 @@
       })
 
     },
-    beforeDestroy () {
-      eventBus.$off('createUserSubmit')
-      eventBus.$off('userCreated')
-      eventBus.$off('updateUserSubmit')
-      eventBus.$off('userUpdated')
-      eventBus.$off('closeModal')
-    },
     data () {
       return {
-        snackbar: false,
-        snackError: false,
-        snackSuccess: false,
-        snackMsg: '',
         student: {
           fullName: '',
           registration: '',
@@ -118,24 +101,33 @@
       }
     },
     methods: {
-      updateUserApto () {
+      addStudentToApto (selectedStudent) {
         this.$validator.validateAll().then(result => {
           if (!result) {
-            console.log('User Updated -> validation failed.')
+            console.log('Add Student To Apto -> validation failed.')
           } else {
-            console.log('User Update Submit')
+            console.log('Add Student To Apto Submit')
             this.$validator.reset()
-            let aux =  this.selectedStudent
+            let aux =  selectedStudent
             console.log(aux)
-            
+
             this.$http.put(`api/user/${aux.id}/apto/${this.apto.number}?token=`+ this.$auth.getToken())
               .then( (response) => {
-                this.snackMsg = response.body.message
-                eventBus.fire('userAddedToApto', this.snackMsg)
+                
+                let snack = {
+                  activator: true,
+                  error: false,
+                  success: true,
+                  msg: response.body.message
+                }
+                
+                this.$store.commit('setSnack', snack)
+                
                 eventBus.closeModal(true)
+                eventBus.fire('studentAddedToApt')
 
               }).catch( (response) =>  {
-              this.snackbar = true
+              
               let msg = ' '
 
               if( response.body.errors ){
@@ -148,9 +140,15 @@
               }else {
                 msg = response.body.message
               }
-              this.snackMsg = msg
-              this.snackSuccess = false
-              this.snackError = true
+              
+              let snack = {
+                activator: true,
+                error: true,
+                success: false,
+                msg: response.body.message
+              }
+
+              this.$store.commit('setSnack', snack)
             })
           }
         }).catch( () => {
@@ -172,6 +170,9 @@
           is_bse_active: false,
           is_admin: false
         }
+      },
+      closeModal(){
+        eventBus.closeModal(true)
       }
     }
   }
