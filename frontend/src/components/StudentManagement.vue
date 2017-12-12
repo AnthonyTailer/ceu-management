@@ -87,7 +87,7 @@
                   bottom
                   icon
                 >
-                  <v-icon>add</v-icon>
+                  <v-icon class="flaticon-user"></v-icon>
                 </v-btn>
                 <v-list>
                   <v-subheader>Escolha uma opção abaixo</v-subheader>
@@ -138,13 +138,13 @@
               <td class="text-xs-left">
                 <div  class="ma-0 pa-0">
                   <v-btn class="green darken-1" fab dark small color="success" @click.stop="seeUser(props.item)">
-                    <v-icon dark>zoom_in</v-icon>
+                    <v-icon class="flaticon-profile" ></v-icon>
                   </v-btn>
                   <v-btn class="blue darken-1" fab dark small color="primary" @click.stop.prevent="editUser(props.item)">
-                    <v-icon dark>edit</v-icon>
+                    <v-icon class="flaticon-user-2"></v-icon>
                   </v-btn>
                   <v-btn class="red darken-1" fab dark small color="error" @click.stop="setDeleteUser(props.item)">
-                    <v-icon dark>delete_forever</v-icon>
+                    <v-icon class="flaticon-profile-3"></v-icon>
                   </v-btn>
                 </div>
               </td>

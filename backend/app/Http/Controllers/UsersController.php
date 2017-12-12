@@ -507,7 +507,7 @@ class UsersController extends Controller {
         /*Estatísticas alunos sem aptos*/
         $noApto = User::where('id_apto', Null)->get();
 
-        $vacancyApto = Apartament::sum('vacancy');
+        $vacancyApto = (int) Apartament::sum('vacancy');
         $totalAptos = Apartament::all()->count();
 
         /*Estatísticas sobre bse*/
@@ -631,7 +631,7 @@ class UsersController extends Controller {
         $notify =array();
         $notifyIDs = array();
         foreach ($user->unreadNotifications as $notification) {
-            $date = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $notification->created_at)->format('d-m-Y');
+            $date = date('d/m/Y H:i:s', strtotime( $notification->created_at));
             array_push($notify, array_merge($notification->data,["date" => $date], ["priority" => $notification->priority] ,["id" => $notification->id]));
             array_push($notifyIDs,$notification->id);
         }
@@ -651,7 +651,9 @@ class UsersController extends Controller {
         $notify = array();
         foreach ($user->notifications as $notification) {
             if($notification->read_at){
-                array_push($notify, array_merge($notification->data, ["id" => $notification->id]));
+                $date = date('d/m/Y H:i:s', strtotime( $notification->created_at));
+                $read_at = date('d/m/Y H:i:s', strtotime( $notification->read_at));
+                array_push($notify, array_merge($notification->data, ["id" => $notification->id], ["date" => $date], ["read_at" => $read_at], ["priority" => $notification->priority]));
             }
         }
 
@@ -685,10 +687,33 @@ class UsersController extends Controller {
 
     public function markMultipleAsRead(Request $request){
         $user = JWTAuth::toUser($request->token);
+        $read = 0;
+        foreach($request->input("ids") as $notificationID){
+            $notification = $user->notifications()->where('id',$notificationID)->first();
+
+            $notification->markAsRead();
+            $read++;
+        }
+
+
+        return response()->json([ 'count' => $read
+        ], 200);
+    }
+
+    public function markMultipleAsExcluded(Request $request){
+        $user = JWTAuth::toUser($request->token);
+        $deleted = 0;
 
         foreach($request->input("ids") as $notificationID){
             $notification = $user->notifications()->where('id',$notificationID)->first();
-            $notification->markAsRead();
+
+            if($notification->delete()){
+                $deleted++;
+            }
         }
+
+        return response()->json([ 'count' => $deleted
+        ], 200);
+
     }
 }

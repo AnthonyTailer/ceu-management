@@ -97,6 +97,10 @@ Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
         'uses' => 'UsersController@markMultipleAsRead'
     ]);
 
+    Route::post('mark-multiple-excluded',[
+        'uses' => 'UsersController@markMultipleAsExcluded'
+    ]);
+
     Route::get('stats', [
         'uses' => 'UsersController@stats'
     ]);

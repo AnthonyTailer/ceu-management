@@ -30,19 +30,22 @@
         <v-card flat>
           <v-card-text v-if="i.content.length > 0">
             <v-btn  v-if="i.slug === 'unread' && selectedMsg.length > 0"  @click="markAsRead(selectedMsg, i)">Marcar '{{selectedMsg.length}}' como Lida </v-btn>
+            <v-btn  v-if="i.slug === 'read' && selectedMsg.length > 0"  @click="markAsExcluded(selectedMsg, i)">Marcar '{{selectedMsg.length}}' como Excluída </v-btn>
             <v-alert
               v-for="noty in i.content"
               :key="noty.id"
               :value="true"
-              class="info ma-1 pa-1"
+              :class="getPriorityAlert(noty.priority) + ' ma-1 pa-1'"
               transition="scale-transition"
             >
               <v-layout row wrap>
                 <v-flex xs1>
-                  <v-checkbox v-if="i.slug === 'unread'" dark v-model="selectedMsg" :value="noty.id"></v-checkbox>
+                  <v-checkbox dark v-model="selectedMsg" :value="noty.id"></v-checkbox>
                 </v-flex>
                 <v-flex xs11>
-                  <div>{{ noty.text }}</div>
+                  <pre>{{ noty.text }}</pre>
+                  <div class="text-xs-right" >Recebida em {{ noty.date }}</div>
+                  <div class="text-xs-right" v-if="i.slug === 'read'">Lida em {{ noty.read_at }}</div>
                 </v-flex>
               </v-layout>
             </v-alert>
@@ -72,10 +75,15 @@
       appMessageForm: Message,
     },
     mounted () {
+      
       this.getTabNotifications(this.tabs[0])
       
       eventBus.listen('closeModal', (data) => {
         this.newMessageModal  = data
+      })
+      
+      eventBus.listen('notification-created', () => {
+        this.getTabNotifications(this.tabs[0])
       })
     },
     data () {
@@ -89,6 +97,14 @@
       }
     },
     methods: {
+      getPriorityAlert (priority) {
+        if ( priority === 'low')
+          return 'info'
+        else if ( priority === 'medium')
+          return 'warning'
+        else
+          return 'error'
+      },
       getTabNotifications (tab) {
        this.$http.get(tab.route+"?token="+this.$auth.getToken()).then( (response) => {
          console.log(response)
@@ -113,9 +129,21 @@
       },
       markAsRead (idArray, tab) {
         if (idArray.length > 0){
-          this.$http.post("api/user/mark-read?token="+this.$auth.getToken(), { id_notification : idArray}).then( (response) => {
+          this.$http.post("api/user/mark-multiple-read?token="+this.$auth.getToken(), { ids : idArray}).then( (response) => {
             console.log(response)
             this.getTabNotifications(tab)
+            this.selectedMsg = []
+            VueNotifications.success({message: response.body.count + ' mensagens marcadas como lida'})
+          })
+        }
+      },
+      markAsExcluded (idArray, tab) {
+        if (idArray.length > 0){
+          this.$http.post("api/user/mark-multiple-excluded?token="+this.$auth.getToken(), { ids : idArray}).then( (response) => {
+            console.log(response)
+            VueNotifications.success({message: response.body.count + ' mensagens marcadas como excluídas'})
+            this.getTabNotifications(tab)
+            this.selectedMsg = []
           })
         }
       }
