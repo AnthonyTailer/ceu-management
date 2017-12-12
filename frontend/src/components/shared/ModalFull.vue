@@ -30,7 +30,7 @@
           </v-alert>
           
           <v-alert v-if="err.erro" error dismissible transition="scale-transition" v-model="err.status">
-            <strong> A linha {{ key }} do arquivo upado possui erro nos campos: </strong>
+            <strong> A linha {{ key+1 }} do arquivo upado possui erro nos campos: </strong>
             <br>
             {{ err.erro.email }}
             {{ err.erro.registration }}
