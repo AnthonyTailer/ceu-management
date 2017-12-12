@@ -579,32 +579,6 @@ class UsersController extends Controller {
 
     }
 
-    /*Verificar se esta é melhor forma para essa operação, quando e onde chamar esse método*/
-    /*Método que realiza a busca de todas as notificações referentes ao usuário logado*/
-    /*Formato do JSON de entrada
-        {
-            "id_user" ---> id do usuário logado
-        }
-    */
-    /*Formato do JSON de saida
-        {
-            "Notifications": [
-                {
-                    Nesta seção estarão os dados referentes a notificação, podendo variar de acordo com o tipo da notificação
-                    EX:
-                    "type": "Apto Change",
-                    "from": 27,
-                    "to": 29
-                }
-            ],
-            "IDs": [
-                Nesta seção constarão os ids das notificações, estes devem ser retornado para a funcão makeAsRead, para marcar os notificações como lidas
-                "d3b1e7e4-7aa9-483e-81e2-3a1ea3a72ff7"
-            ]
-        }
-
-    */
-
     public function getNotifications(Request $request){
         $user = JWTAuth::toUser($request->token);
         $notify =array();
@@ -622,7 +596,6 @@ class UsersController extends Controller {
         ]);
 
     }
-
 
     public function getReadNotifications(Request $request){
         $user = JWTAuth::toUser($request->token);
@@ -642,17 +615,6 @@ class UsersController extends Controller {
         ]);
     }
 
-
-    /*Método que marca a notificão como lida*/
-    /*Formato do JSON de entrada
-        {
-            "id_user" ---> id do usuário logado
-            "id_notification --> id da notificação que deve ser marcada como lida
-        }
-    */
-    /*Formato do JSON de saida
-
-    */
     public function markAsRead(Request $request){
         $user = JWTAuth::toUser($request->token);
         $id_not = $request->input('id_notification');
@@ -662,7 +624,6 @@ class UsersController extends Controller {
         $notification->markAsRead();
 
     }
-
 
     public function markMultipleAsRead(Request $request){
         $user = JWTAuth::toUser($request->token);
