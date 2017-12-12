@@ -506,7 +506,7 @@ class UsersController extends Controller {
         /*Estatísticas alunos sem aptos*/
         $noApto = User::where('id_apto', Null)->get();
 
-        $vacancyApto = Apartament::sum('vacancy');
+        $vacancyApto = (int) Apartament::sum('vacancy');
         $totalAptos = Apartament::all()->count();
 
         /*Estatísticas sobre bse*/
