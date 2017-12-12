@@ -9,6 +9,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SendEmailJob;
+use App\Jobs\SendEmailNotificationJob;
 use App\User;
 use App\Course;
 use App\Apartament;
@@ -553,15 +554,29 @@ class UsersController extends Controller {
 
             if($request->input('to.type') == "user"){
                 $user = User::find($request->input('to.id'));
+
                 $user->notify(new NotificationAlert($request->input('text')));
-                $user->notifications()->get()->first()->update(['priority' => $request->input('priority')]);;
+                $notification = $user->notifications()->get()->first();
+                $notification->update(['priority' => $request->input('priority')]);
+
+
+                $job = (new SendEmailNotificationJob($user, $notification->data['text']))->delay(Carbon::now()->addSeconds(3));
+
+                $this->dispatch($job);
+
                 return response()->json(['message' => "Mensagem enviada com sucesso à ".$user->fullName], 200);
             }elseif($request->input('to.type') == "apto"){
                 $users = User::where('id_apto' , $request->input('to.id'))->get();
 
                 foreach ($users as $user){
                     $user->notify((new NotificationAlert($request->input('text')))->delay($when));
-                    $user->notifications()->get()->first()->update(['priority' => $request->input('priority')]);;
+                    $notification = $user->notifications()->get()->first();
+                    $notification->update(['priority' => $request->input('priority')]);
+
+
+                    $job = (new SendEmailNotificationJob($user, $notification->data['text']))->delay(Carbon::now()->addSeconds(3));
+
+                    $this->dispatch($job);
                 }
 
                 return response()->json(['message' => "Mensagem enviada com sucesso ao apartamento"], 200);
@@ -570,7 +585,13 @@ class UsersController extends Controller {
                 $users = User::all();
                 foreach ($users as $user){
                     $user->notify( (new NotificationAlert($request->input('text')))->delay($when));
-                    $user->notifications()->get()->first()->update(['priority' => $request->input('priority')]);;
+                    $notification = $user->notifications()->get()->first();
+                    $notification->update(['priority' => $request->input('priority')]);
+
+
+                    $job = (new SendEmailNotificationJob($user, $notification->data['text']))->delay(Carbon::now()->addSeconds(3));
+
+                    $this->dispatch($job);
                 }
 
                 return response()->json(['message' => "Mensagem enviada com sucesso à todos moradores da CEU"], 200);
