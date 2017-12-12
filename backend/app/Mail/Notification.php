@@ -7,13 +7,13 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class UserCreated extends Mailable
+class Notification extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $userName;
-    public $registration;
-    public $password;
+    public $text;
+
 
     /**
      * Create a new message instance.
@@ -22,11 +22,10 @@ class UserCreated extends Mailable
      * @param $registration
      * @param $password
      */
-    public function __construct($userName, $registration, $password)
+    public function __construct($userName, $text)
     {
         $this->userName = $userName;
-        $this->registration = $registration;
-        $this->password = $password;
+        $this->text = $text;
     }
 
     /**
@@ -36,6 +35,6 @@ class UserCreated extends Mailable
      */
     public function build()
     {
-        return $this->view('emails.registeredUser');
+        return $this->view('emails.notificationEmail');
     }
 }
