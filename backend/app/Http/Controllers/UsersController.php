@@ -200,6 +200,20 @@ class UsersController extends Controller {
 
                     $this->dispatch($job);
 
+                    if($value['id_apto']){
+
+                        $apartament = Apartament::find($value['id_apto']);
+
+                        $user->notify(new NotificationAlert("Você foi inserido no apartamento ". $apartament->number));
+                        $notification = $user->notifications()->get()->first();
+                        $notification->update(['priority' => "medium"]);
+
+
+                        $job = (new SendEmailNotificationJob($user, "Você foi inserido no apartamento ". $apartament->number))->delay(Carbon::now()->addSeconds(3));
+
+                        $this->dispatch($job);
+                    }
+
                     $success[$key]["message"] = "Usuário criado com sucesso, um e-mail foi mandado para ".$value['email'];
                 }
             }
@@ -265,7 +279,16 @@ class UsersController extends Controller {
                             return response()->json([
                                 'message' => 'Usuário não pode ser alocado a um apartamento sem vaga'
                             ],403);
-                        }else { //troca o usuário de apartamento -> TODO notificar o usuário da troca de apartamento
+                        }else { //troca o usuário de apartamento ->
+                            $notificationText = "Você foi trocado de Apartamento. Agora você está no ". $newApto->number;
+                            $user->notify(new NotificationAlert($notificationText));
+                            $notification = $user->notifications()->get()->first();
+                            $notification->update(['priority' => "high"]);
+
+
+                            $job = (new SendEmailNotificationJob($user, $notificationText))->delay(Carbon::now()->addSeconds(3));
+
+                            $this->dispatch($job);
 
                             DB::table('apartaments')->where('id', $userApto->id)->increment('vacancy', 1); //apartamento que saiu
                             DB::table('apartaments')->where('id', $newApto->id)->decrement('vacancy', 1); //apartamento que entrou
@@ -281,7 +304,16 @@ class UsersController extends Controller {
                     return response()->json([
                         'message' => 'Usuário não pode ser alocado a um apartamento sem vaga'
                     ],403);
-                }else { //troca o usuário de apartamento -> TODO notificar o usuário da troca de apartamento
+                }else {
+                    $notificationText = "Você foi inserido no Apartamento ". $newApto->number;
+                    $user->notify(new NotificationAlert($notificationText));
+                    $notification = $user->notifications()->get()->first();
+                    $notification->update(['priority' => "high"]);
+
+
+                    $job = (new SendEmailNotificationJob($user, $notificationText))->delay(Carbon::now()->addSeconds(3));
+
+                    $this->dispatch($job);
                     DB::table('apartaments')->where('id', $newApto->id)->decrement('vacancy', 1); //apartamento que entrou
                 }
 
@@ -340,6 +372,13 @@ class UsersController extends Controller {
         if($user->delete()) {
             if ($user->id_apto !== null)
                 DB::table('apartaments')->where('id', $user->id_apto)->increment('vacancy', 1); //aumenta uma vaga
+
+
+
+            $job = (new SendEmailNotificationJob($user, "Você foi removido do sistema"))->delay(Carbon::now()->addSeconds(3));
+
+            $this->dispatch($job);
+
             return response()->json(['message' => "Usuário deletado com sucesso"], 200);
         }
     }
@@ -356,7 +395,19 @@ class UsersController extends Controller {
             $user->id_apto = $apartament->id;
 
             if($user->update()){
-                DB::table('apartaments')->where('id', $apartament->id)->decrement('vacancy', 1); //diminui uma vaga
+                DB::table('apartaments')->where('id', $apartament->id)->decrement('vacancy', 1);
+
+                $notificationText = "Você foi adicionado ao Apartamento " . $apartament->number;
+
+                $user->notify(new NotificationAlert($notificationText));
+                $notification = $user->notifications()->get()->first();
+                $notification->update(['priority' => 'low']);
+
+
+                $job = (new SendEmailNotificationJob($user, $notificationText))->delay(Carbon::now()->addSeconds(3));
+
+                $this->dispatch($job);
+
                 return response()->json(['message' => "Usuário adicionado com sucesso ao apartamento ". $apartament->number], 200);
             }
         }else {
@@ -374,10 +425,23 @@ class UsersController extends Controller {
 
         $id_apto = $user->id_apto;
 
+        $apartament = Apartament::find($id_apto);
+
         $user->id_apto = null;
 
         if($user->update()){
             DB::table('apartaments')->where('id', $id_apto)->increment('vacancy', 1); //aumenta uma vaga
+
+            $notificationText = "Você foi removido do Apartamento ".$apartament->number;
+
+            $user->notify(new NotificationAlert($notificationText));
+            $notification = $user->notifications()->get()->first();
+            $notification->update(['priority' => 'high']);
+
+            $job = (new SendEmailNotificationJob($user, $notificationText))->delay(Carbon::now()->addSeconds(3));
+
+            $this->dispatch($job);
+
             return response()->json(['message' => "Usuário removido com sucesso do apartamento"], 200);
         }
     }
@@ -414,7 +478,19 @@ class UsersController extends Controller {
                 if($user->update()){
                     DB::table('apartaments')->where('id', $userApto->id)->increment('vacancy', 1); //apartamento que saiu
                     DB::table('apartaments')->where('id', $user->id_apto)->decrement('vacancy', 1); //apartamento que entrou
-                    return response()->json(['message' => "Aluno ". $user->fullName . " trocado para o apartamento ". $newApto->number], 200);
+
+
+                    $user->notify(new NotificationAlert("Você foi trocado para o apartamento ". $newApto->number));
+                    $notification = $user->notifications()->get()->first();
+                    $notification->update(['priority' => "medium"]);
+
+
+                    $job = (new SendEmailNotificationJob($user, "Você foi trocado para o apartamento ". $newApto->number))->delay(Carbon::now()->addSeconds(3));
+
+                    $this->dispatch($job);
+
+
+                    return response()->json(['message' => "Você foi trocado para o apartamento ". $newApto->number], 200);
                 }else {
                     return response()->json(['message' => "Erro ao alterar o apartamento do aluno"], 500);
                 }
@@ -439,7 +515,21 @@ class UsersController extends Controller {
                 $newUser->id_apto = $userApto->id;
 
                 if($user->update() && $newUser->update()){
-                    return response()->json(['message' => "Aluno ". $user->fullName . " trocado para o apartamento ". $newApto->number], 200);
+
+                    $user->notify(new NotificationAlert("Você foi trocado para o apartamento ". $newApto->number));
+                    $notification = $user->notifications()->get()->first();
+                    $notification->update(['priority' => "medium"]);
+
+                    $newUser->notify(new NotificationAlert("Você foi trocado para o apartamento ". $userApto->number));
+                    $notification = $newUser->notifications()->get()->first();
+                    $notification->update(['priority' => "medium"]);
+
+                    $job1 = (new SendEmailNotificationJob($user, "Você foi trocado para o apartamento ". $newApto->number))->delay(Carbon::now()->addSeconds(3));
+                    $job2 = (new SendEmailNotificationJob($newUser, "Você foi trocado para o apartamento ". $userApto->number))->delay(Carbon::now()->addSeconds(3));
+                    $this->dispatch($job1);
+                    $this->dispatch($job2);
+
+                    return response()->json(['message' => "Alunos trocados entre apartamentos "], 200);
                 }else{
                     return response()->json(['message' => "Erro ao alterar o apartamento do aluno"], 500);
                 }
