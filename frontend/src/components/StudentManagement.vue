@@ -377,6 +377,7 @@
               total_success: response.body.total_success,
               status: true
             })
+            
 
             for (let i in response.body.erros) {
               this.manyResponse.push({
@@ -384,9 +385,11 @@
                 status: true
               })
             }
+            
+            console.log(this.manyResponse)
             eventBus.fire('alerts', this.manyResponse)
           }
-        }).then(e => {
+        }).catch(e => {
           console.log(e)
           this.loading = false
           this.manyResponse.push({

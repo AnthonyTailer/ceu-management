@@ -14,6 +14,7 @@ use App\User;
 use App\Course;
 use App\Apartament;
 use Carbon\Carbon;
+use function GuzzleHttp\Psr7\str;
 use Illuminate\Support\Facades\Mail;
 use JWTAuth;
 use Validator;
@@ -105,13 +106,19 @@ class UsersController extends Controller {
 
         $errors = Array();
         $success = Array();
+        $warnings = Array();
         foreach ( $request->body as $key=>$value) {
             try {
-                $db_email = DB::table('users')->where('email', $value['email'])->value('email');
-                $db_registration = DB::table('users')->where('registration', $value['registration'])->value('registration');
+                $db_email = User::where('email', $value['email'])->first(['email']);
+                $db_registration = User::where('registration', $value['registration'])->first(['registration']);
+
             } catch (\Exception $exception) {
                 $errors[$key]["email"] = "O campo email não foi informado.";
                 $errors[$key]["registration"] = "O campo matrícula não foi informado.";
+            }
+
+            if(!empty($db_email) || !empty($db_registration)){
+                continue;
             }
 
             if( $value['email'] == null){
@@ -120,17 +127,20 @@ class UsersController extends Controller {
             if( $value['registration'] == null ){
                 $errors[$key]["registration"] = "O campo matrícula não foi informado.";
             }
-            if(!empty($db_email) || !empty($db_registration)){
-                continue;
-            }
             if(empty($value['age'])){
                 $errors[$key]["age"] = "O campo Idade é obrigatório e deve ser preenchido.";
             }
             if(empty($value['cpf'])){
                 $errors[$key]["cpf"] = "O campo CPF é obrigatório e deve ser preenchido.";
             }
+            if($value['cpf'].length >= 12 ){
+                $errors[$key]["cpf"] = "O campo CPF deve possuir 11 caracters.";
+            }
             if(empty($value['rg'])){
                 $errors[$key]["rg"] = "O RG é obrigatório e deve ser preenchido.";
+            }
+            if($value['rg'].length >= 11 ){
+                $errors[$key]["rg"] = "O campo RG deve possuir 10 caracters.";
             }
             if(empty($value['genre'])){
                 $errors[$key]["genre"] = "O sexo é obrigatório e deve ser preenchido.";
@@ -185,6 +195,7 @@ class UsersController extends Controller {
                     'registration' => $value['registration'],
                     'password' => bcrypt($randomPass),
                     'cpf' => $value['cpf'],
+                    'age' => $value['age'],
                     'rg' => $value['rg'],
                     'genre' => $value['genre'],
                     'is_bse_active' => strtoupper($value['is_bse_active']) === "SIM" ? 1 : 0,
@@ -202,7 +213,9 @@ class UsersController extends Controller {
 
                     if($value['id_apto']){
 
+
                         $apartament = Apartament::find($value['id_apto']);
+                        DB::table('apartaments')->where('id', $apartament->id)->decrement('vacancy', 1);
 
                         $user->notify(new NotificationAlert("Você foi inserido no apartamento ". $apartament->number));
                         $notification = $user->notifications()->get()->first();
@@ -258,6 +271,29 @@ class UsersController extends Controller {
 
     public function putUser(Request $request){
 
+        $this->validate($request, [
+            'fullName' => 'required',
+            'email' => 'required|email',
+            'registration' => 'required|Min:9 |Max:9',
+            'cpf' => 'required|Min:11|Max:11',
+            'rg' => 'required|Min:10|Max:10',
+            'age' => 'required|Min:2',
+            'genre' => 'required',
+            'id_course' => 'required',
+            'is_admin' => 'required',
+            'is_bse_active' => 'required'
+        ],[
+            'fullName.required' => 'Um nome completo é necessário',
+            'email.required'  => 'Preencha o campo de email',
+            'registration.required' => "Você deve fornecer o número de matrícula",
+            'cpf.required' => "Você deve fornecer o número do CPF",
+            'rg.required' => "Você deve fornecer o número do RG",
+            'age.required' => "Você deve especificar a idade do usuário",
+            'genre.required' => "Você deve fornecer o gênero do usuário",
+            'id_course.required' => "Você deve especificar o curso",
+            'is_admin.required' => "Você deve especificar se o usuário é administrador",
+            'is_bse_active.required' => "Você deve especificar se o usuário possui BSE ativo",
+        ]);
 
         $user = User::find($request->input('id'));
 
@@ -318,31 +354,6 @@ class UsersController extends Controller {
                 }
 
             }
-
-
-            $this->validate($request, [
-                'fullName' => 'required',
-                'email' => 'required|email',
-                'registration' => 'required|Min:9 |Max:9',
-                'cpf' => 'required|Min:11|Max:11',
-                'rg' => 'required|Min:10|Max:10',
-                'age' => 'required|Min:2',
-                'genre' => 'required',
-                'id_course' => 'required',
-                'is_admin' => 'required',
-                'is_bse_active' => 'required'
-            ],[
-                'fullName.required' => 'Um nome completo é necessário',
-                'email.required'  => 'Preencha o campo de email',
-                'registration.required' => "Você deve fornecer o número de matrícula",
-                'cpf.required' => "Você deve fornecer o número do CPF",
-                'rg.required' => "Você deve fornecer o número do RG",
-                'age.required' => "Você deve especificar a idade do usuário",
-                'genre.required' => "Você deve fornecer o gênero do usuário",
-                'id_course.required' => "Você deve especificar o curso",
-                'is_admin.required' => "Você deve especificar se o usuário é administrador",
-                'is_bse_active.required' => "Você deve especificar se o usuário possui BSE ativo",
-            ]);
 
             if($user->update([
                 'fullName' => $request->input('fullName'),
