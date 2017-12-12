@@ -68,16 +68,14 @@
                 bottom
                 right
               >
-                <i class="flaticon-add-house"></i>
+                <i class="flaticon-user-1"></i>
               </v-btn>
             </v-fab-transition>
           </v-toolbar>
-          <v-layout row justify-center>
-            <p v-if="students.length > 0" class="mt-3 ml-2"><v-icon>info</v-icon> Para <b>remover</b> um aluno deste apartamento basta clicar no icone <v-icon>delete</v-icon></p>
-          </v-layout>
-          <v-layout row justify-center><p v-if="students.length > 0" class="mt-3 ml-2"><v-icon>info</v-icon> Para <b>trocar</b> um aluno de apartamento basta clicar na no ícone <v-icon>compare_arrows</v-icon></p></v-layout>
-          <v-layout row justify-center><p v-if="students.length > 0" class="mt-3 ml-2"><v-icon>info</v-icon> Para <b>adicionar</b> um aluno ao apartamento basta clicar na no ícone <v-icon>add</v-icon></p></v-layout>
-          <v-layout row justify-center><p v-if="students.length === 0" class="mt-3 ml-2"> Nenhum Morador no apartamento <v-icon>thumb_down</v-icon></p></v-layout>
+          <v-layout row justify-center class="mt-1 mx-2"><p v-if="apartament.vacancy > 0"><v-icon>info</v-icon> Para <b>adicionar</b> um aluno ao apartamento basta clicar na no ícone <v-icon class="flaticon-user-1"></v-icon></p></v-layout>
+          <v-layout row justify-center class="mt-1 mx-2"><p v-if="students.length > 0" ><v-icon>info</v-icon> Para <b>remover</b> um aluno deste apartamento basta clicar no icone <v-icon class="flaticon-profile-3"></v-icon></p></v-layout>
+          <v-layout row justify-center class="mt-1 mx-2"><p v-if="students.length > 0"><v-icon>info</v-icon> Para <b>trocar</b> um aluno de apartamento basta clicar na no ícone <v-icon class="flaticon-profile-6"></v-icon></p></v-layout>
+          <v-layout row justify-center class="mt-1 mx-2"><p v-if="students.length === 0"> Nenhum Morador no apartamento <v-icon>thumb_down</v-icon></p></v-layout>
           <v-list three-line>
             <template v-for="student in students">
               <v-subheader v-text="student.fullName"></v-subheader>
@@ -91,12 +89,12 @@
                   <v-list-tile-sub-title>CPF: {{student.cpf}}</v-list-tile-sub-title>
                 </v-list-tile-content>
                 <v-list-tile-action>
-                  <v-btn class="red darken-1" fab dark small color="error" @click.native.stop="removeStudentFromApto(student.id)">
-                    <v-icon dark>delete</v-icon>
+                  <v-btn class="red darken-1" fab dark small @click.native.stop="removeStudentFromApto(student.id)">
+                    <v-icon dark class="flaticon-profile-3"></v-icon>
                   </v-btn>
                   <div class="mt-1"></div>
-                  <v-btn class="success darken-1" fab dark small color="info" @click.native.stop="switchStudentFromApto(student)">
-                    <v-icon dark>compare_arrows</v-icon>
+                  <v-btn class="success darken-1" fab dark small @click.native.stop="switchStudentFromApto(student)">
+                    <v-icon dark class="flaticon-profile-6"></v-icon>
                   </v-btn>
                 </v-list-tile-action>
               </v-list-tile>
@@ -225,3 +223,16 @@
   }
 
 </script>
+<style scoped>
+  .flaticon-profile-6:before {
+    font-size: 1.8rem !important;
+  }
+
+  .flaticon-profile-3:before {
+    font-size: 1.8rem !important;
+  }
+
+  .flaticon-user-1:before {
+    font-size: 1.8rem !important;
+  }
+</style>

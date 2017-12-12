@@ -2,20 +2,20 @@
   <v-container fluid>
     <v-layout>
       <app-modal :dialog="newApto" :type="'primary'">
-        <span slot="titleModal" icon style="color: white"><v-icon>add_circle</v-icon> Cadastro de novo Apartamento</span>
+        <span slot="titleModal" icon style="color: white"><v-icon class="flaticon-add-house"></v-icon> Cadastro de novo Apartamento</span>
         <app-apartament slot="mainModal"></app-apartament>
         <!--<v-btn class="white&#45;&#45;text green accent-3" dark slot="footerModal" @click.stop.prevent="createApartamentEvent">Salvar</v-btn>-->
       </app-modal>
       
       
       <app-modal :dialog="editApto" :type="'green accent-3'">
-        <span slot="titleModal" icon style="color: white"><v-icon>create</v-icon> Edição de Apartamento</span>
+        <span slot="titleModal" icon style="color: white"><v-icon class="flaticon-gear"></v-icon> Edição de Apartamento</span>
         <app-apartament slot="mainModal"></app-apartament>
       </app-modal>
       
       <app-modal :dialog="removeApto" :type="'red accent-3'">
         <span icon slot="titleModal" style="color: white">
-          <v-icon>warning</v-icon> Remover Apartamento <strong>{{ this.$store.getters.getApartamentState.number }}</strong>
+          <v-icon class="flaticon-delete"></v-icon> Remover Apartamento <strong>{{ this.$store.getters.getApartamentState.number }}</strong>
         </span>
         <div slot="mainModal">
           <h5>Você deseja mesmo remover o apartamento {{ this.$store.getters.getApartamentState.number }} ?</h5>
@@ -50,7 +50,7 @@
                        absolute
                        right
                        bottom>
-                  <v-icon>add</v-icon>
+                  <v-icon class="flaticon-add-house"></v-icon>
                 </v-btn>
                 <br>
                 <v-list>
@@ -119,13 +119,13 @@
               <td class="text-xs-left">
                 <div  class="ma-0 pa-0">
                   <v-btn class="green darken-1" fab dark small color="success" @click.stop="seeApto(props.item)">
-                    <v-icon dark>zoom_in</v-icon>
+                    <v-icon class="flaticon-house-search"></v-icon>
                   </v-btn>
                   <v-btn class="blue darken-1" fab dark small color="primary" @click.target.prevent.stop="editApartament(props.item)">
-                    <v-icon dark>edit</v-icon>
+                    <v-icon class="flaticon-gear"></v-icon>
                   </v-btn>
                   <v-btn class="red darken-1" fab dark small color="error" @click.native.stop="deleteApto(props.item)">
-                    <v-icon dark>delete_forever</v-icon>
+                    <v-icon class="flaticon-delete"></v-icon>
                   </v-btn>
                 </div>
               </td>

@@ -30,7 +30,7 @@
         </v-list-tile>
         <v-list-tile class="sideMenuItens" v-if="getAdminState"  @click.native="targetRoute('/alunos')">
           <v-list-tile-action>
-            <v-icon>face</v-icon>
+            <v-icon class="flaticon-profile-5"></v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Alunos/Moradores</v-list-tile-title>
@@ -38,7 +38,7 @@
         </v-list-tile>
         <v-list-tile class="sideMenuItens" v-if="getAdminState"  @click.native="targetRoute('/aptos')">
           <v-list-tile-action>
-            <v-icon>domain</v-icon>
+            <v-icon class="flaticon-home"></v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Apartamentos/Blocos</v-list-tile-title>
@@ -46,7 +46,7 @@
         </v-list-tile>
         <v-list-tile class="sideMenuItens"  @click.native="targetRoute('/aptos/vacancy')">
           <v-list-tile-action>
-            <v-icon>domain</v-icon>
+            <v-icon class="flaticon-mortgage"></v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Vagas</v-list-tile-title>
@@ -54,7 +54,7 @@
         </v-list-tile>
         <v-list-tile class="sideMenuItens"  @click.native="targetRoute('/notifications')">
           <v-list-tile-action>
-            <v-icon>notifications</v-icon>
+            <v-icon class="flaticon-interface-2" ></v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Notificações/Alertas</v-list-tile-title>
