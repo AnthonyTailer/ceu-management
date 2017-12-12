@@ -89,11 +89,16 @@
         <v-btn
           type="submit"
           class="primary"
-          dark
+          :loading="loading"
+          :disabled="loading"
         >
           Enviar
         </v-btn>
-        <v-btn class="grey lighten-1 black--text" dark @click.prevent="closeModal">Fechar</v-btn>
+        <v-btn
+          class="grey"
+          @click.prevent="closeModal"
+          :disabled="loading"
+        >Fechar</v-btn>
       </v-card-actions>
     </form>
   </div>
@@ -115,6 +120,8 @@
     },
     data () {
       return {
+        loader: null,
+        loading: false,
         snackMsg: '',
         option: 'option-3',
         message: '',
@@ -133,6 +140,8 @@
             console.log('User Apto Updated -> validation failed.')
           } else {
             console.log('User Apto Update Submit')
+            this.loader = true
+            this.loading = true
             this.$validator.reset()
 
             let data = { }
@@ -168,6 +177,8 @@
 
             this.$http.post(`api/user/create-notification?token=`+ this.$auth.getToken(), data)
               .then( (response) => {
+                this.loader = false
+                this.loading = false
                 this.snackMsg = response.body.message
                 VueNotifications.success({message: this.snackMsg})
                 
@@ -175,6 +186,8 @@
                 eventBus.fire('notification-created')
 
               }).catch( (response) =>  {
+              this.loader = false
+              this.loading = false
               this.snackbar = true
               let msg = ' '
 
@@ -195,6 +208,7 @@
           }
         }).catch( () => {
           console.log('something went wrong (non-validation related')
+          this.loading = false
         })
       },
       getAptos () {
@@ -222,7 +236,7 @@
         this.option = false
         this.aptos = []
         this.students = []
-        this.priority = []
+        this.priority = 'option-3'
         this.message = ''
         this.selectedApto = false
         this.selectedStudent = false

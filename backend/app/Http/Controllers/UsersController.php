@@ -666,10 +666,33 @@ class UsersController extends Controller {
 
     public function markMultipleAsRead(Request $request){
         $user = JWTAuth::toUser($request->token);
+        $read = 0;
+        foreach($request->input("ids") as $notificationID){
+            $notification = $user->notifications()->where('id',$notificationID)->first();
+
+            $notification->markAsRead();
+            $read++;
+        }
+
+
+        return response()->json([ 'count' => $read
+        ], 200);
+    }
+
+    public function markMultipleAsExcluded(Request $request){
+        $user = JWTAuth::toUser($request->token);
+        $deleted = 0;
 
         foreach($request->input("ids") as $notificationID){
             $notification = $user->notifications()->where('id',$notificationID)->first();
-            $notification->markAsRead();
+
+            if($notification->delete()){
+                $deleted++;
+            }
         }
+
+        return response()->json([ 'count' => $deleted
+        ], 200);
+
     }
 }
