@@ -209,6 +209,8 @@ class UsersController extends Controller {
                         $notification->update(['priority' => "medium"]);
 
 
+                        dd($apartament);
+
                         $job = (new SendEmailNotificationJob($user, "Você foi inserido no apartamento ". $apartament->number))->delay(Carbon::now()->addSeconds(3));
 
                         $this->dispatch($job);

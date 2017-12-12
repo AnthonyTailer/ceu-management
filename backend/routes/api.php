@@ -42,9 +42,7 @@ Route::post('/user/login', [
 #This routes are only accessible for admins
 
 Route::group(['prefix' => 'user',  'middleware' => ['auth.jwt', 'is-admin']], function () {
-    Route::get('/', [
-        'uses' => 'UsersController@getAuthUser'
-    ]);
+
 
     Route::post('register', [
         'uses' => 'UsersController@postUser'
@@ -81,6 +79,11 @@ Route::group(['prefix' => 'user',  'middleware' => ['auth.jwt', 'is-admin']], fu
 
 
 Route::group(['prefix' => 'user',  'middleware' => 'auth.jwt'], function () {
+    Route::get('/', [
+        'uses' => 'UsersController@getAuthUser'
+    ]);
+
+
     Route::get('get-notifications',[
         'uses' => 'UsersController@getNotifications'
     ]);
