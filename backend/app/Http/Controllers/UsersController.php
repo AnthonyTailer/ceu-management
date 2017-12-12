@@ -608,7 +608,7 @@ class UsersController extends Controller {
         $notify =array();
         $notifyIDs = array();
         foreach ($user->unreadNotifications as $notification) {
-            $date = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $notification->created_at)->format('d-m-Y');
+            $date = date('d/m/Y H:i:s', strtotime( $notification->created_at));
             array_push($notify, array_merge($notification->data,["date" => $date], ["priority" => $notification->priority] ,["id" => $notification->id]));
             array_push($notifyIDs,$notification->id);
         }
@@ -628,7 +628,9 @@ class UsersController extends Controller {
         $notify = array();
         foreach ($user->notifications as $notification) {
             if($notification->read_at){
-                array_push($notify, array_merge($notification->data, ["id" => $notification->id]));
+                $date = date('d/m/Y H:i:s', strtotime( $notification->created_at));
+                $read_at = date('d/m/Y H:i:s', strtotime( $notification->read_at));
+                array_push($notify, array_merge($notification->data, ["id" => $notification->id], ["date" => $date], ["read_at" => $read_at], ["priority" => $notification->priority]));
             }
         }
 

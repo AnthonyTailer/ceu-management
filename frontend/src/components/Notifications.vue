@@ -34,7 +34,7 @@
               v-for="noty in i.content"
               :key="noty.id"
               :value="true"
-              class="info ma-1 pa-1"
+              :class="getPriorityAlert(noty.priority) + ' ma-1 pa-1'"
               transition="scale-transition"
             >
               <v-layout row wrap>
@@ -43,6 +43,8 @@
                 </v-flex>
                 <v-flex xs11>
                   <div>{{ noty.text }}</div>
+                  <div class="text-xs-right" >Recebida em {{ noty.date }}</div>
+                  <div class="text-xs-right" v-if="i.slug === 'read'">Lida em {{ noty.read_at }}</div>
                 </v-flex>
               </v-layout>
             </v-alert>
@@ -72,10 +74,15 @@
       appMessageForm: Message,
     },
     mounted () {
+      
       this.getTabNotifications(this.tabs[0])
       
       eventBus.listen('closeModal', (data) => {
         this.newMessageModal  = data
+      })
+      
+      eventBus.listen('notification-created', () => {
+        this.getTabNotifications(this.tabs[0])
       })
     },
     data () {
@@ -89,6 +96,14 @@
       }
     },
     methods: {
+      getPriorityAlert (priority) {
+        if ( priority === 'low')
+          return 'info'
+        else if ( priority === 'medium')
+          return 'warning'
+        else
+          return 'error'
+      },
       getTabNotifications (tab) {
        this.$http.get(tab.route+"?token="+this.$auth.getToken()).then( (response) => {
          console.log(response)
@@ -113,9 +128,10 @@
       },
       markAsRead (idArray, tab) {
         if (idArray.length > 0){
-          this.$http.post("api/user/mark-read?token="+this.$auth.getToken(), { id_notification : idArray}).then( (response) => {
+          this.$http.post("api/user/mark-multiple-read?token="+this.$auth.getToken(), { ids : idArray}).then( (response) => {
             console.log(response)
             this.getTabNotifications(tab)
+            this.selectedMsg = []
           })
         }
       }

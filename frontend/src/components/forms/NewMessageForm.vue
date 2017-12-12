@@ -172,6 +172,7 @@
                 VueNotifications.success({message: this.snackMsg})
                 
                 this.closeModal()
+                eventBus.fire('notification-created')
 
               }).catch( (response) =>  {
               this.snackbar = true
